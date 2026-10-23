@@ -9,7 +9,7 @@ El sistema de reservas de espacios académicos reemplaza hoy los correos y hojas
 - Se introduce la **autenticación con JWT**: emisión de token de acceso tras validar credenciales, verificación de firma y expiración en cada petición protegida, y consulta del usuario autenticado. El token contiene únicamente el identificador del usuario, la fecha de emisión y la fecha de expiración: el rol efectivo siempre se lee de la base de datos. La vigencia del token es de **60 minutos** y se puede ajustar por configuración.
 - Se introduce el **registro y la administración de usuarios**: alta, edición de datos, asignación de rol, activación/desactivación de cuentas y restablecimiento de contraseña por parte del `admin`. Solo el `admin` crea cuentas: **no hay autoregistro**.
 - Se define el **catálogo de tres roles** (`solicitante`, `aprobador`, `admin`) con **jerarquía**: cada rol incluye los permisos del rol inferior, de modo que `admin` ⊇ `aprobador` ⊇ `solicitante`. La jerarquía se materializa en una **matriz de permisos** que determina qué puede hacer cada rol sobre los módulos de espacios, reservas, aprobaciones e historial; en esa matriz, aprobar y rechazar excluyen las solicitudes propias del usuario.
-- Se unifican las respuestas de error de la API: credenciales inválidas, token ausente/expirado/inválido, acceso sin permiso, datos inválidos, recurso inexistente y conflicto de unicidad producen respuestas **distintas, estables y verificables** (códigos HTTP 400, 401, 403, 404 y 409, con un código de error propio).
+- Se unifican las respuestas de error de la API: credenciales inválidas, token ausente/expirado/inválido, acceso sin permiso, datos inválidos, recurso inexistente y conflicto de unicidad producen respuestas **distintas, estables y verificables** (códigos HTTP 400, 401, 403, 404 y 409, con un código de error propio). El mismo formato cubre también los errores del framework: ruta inexistente, método no permitido, cuerpo JSON mal formado y error interno.
 - Se especifica la **interfaz web por comportamiento observable**: pantalla de inicio de sesión con los mensajes del servidor, ciclo de vida de la sesión, tratamiento del error de permisos insuficientes, protección de rutas y pantallas de administración de usuarios.
 - Se fija que un usuario **desactivado pierde el acceso de inmediato**, aunque su token siga sin expirar.
 - La contraseña exige un **mínimo de 8 caracteres** y **ninguna regla de composición** adicional.
@@ -18,7 +18,7 @@ El sistema de reservas de espacios académicos reemplaza hoy los correos y hojas
 
 - **Límite de duración máxima de una reserva.** No se define en esta propuesta; llegará como un cambio separado (etapa 8 del plan).
 - Notificaciones por correo, aplicación móvil, pagos e integración con sistemas académicos externos (fuera de alcance según el plan, sección 1.5).
-- Autodominio de contraseña por el usuario final y recuperación de contraseña por correo.
+- Cambio de contraseña por el propio usuario y recuperación de contraseña por correo.
 - **Autoregistro de usuarios**, **refresh token**, lista de revocación de tokens, cierre de sesión en el servidor y **tabla de auditoría de usuarios**: descartados por decisión (ver *Decisiones*).
 - Lógica de negocio de espacios, reservas, aprobaciones e historial: aquí solo se define **quién puede invocarla**.
 
@@ -39,7 +39,7 @@ _(Ninguna. El proyecto aún no tiene specs publicadas: `openspec list --specs` n
 - **Backend (Flask, nuevo):** módulos `auth` y `usuarios` siguiendo el monolito modular en capas del plan (`rutas` → `servicios` → `repositorios`), con el control de permisos en la capa de servicios para que la matriz se cambie en un solo lugar.
 - **Base de datos (PostgreSQL):** migraciones Alembic que crean las tablas `usuarios` y `roles` con la relación `usuarios.rol_id` → `roles.id`, unicidad de correo y columna de estado de la cuenta. No se toca ninguna tabla de `espacios`, `reservas` ni `historial_reservas`.
 - **Frontend (React):** pantalla de login, manejo de sesión y expiración del token, y pantallas de administración de usuarios accesibles solo para `admin`. Su comportamiento observable se especifica en la capacidad `interfaz-web`.
-- **Dependencias:** generación de hash de contraseñas con las utilidades de hash de Flask (sin dependencias nuevas de terceros), librería de JWT, SQLAlchemy/Alembic y `pytest`.
+- **Dependencias:** generación de hash de contraseñas con las utilidades de hash de Werkzeug (incluidas con Flask) y sin dependencias nuevas de terceros; además, librería de JWT, SQLAlchemy/Alembic y `pytest`.
 - **Contrato con el resto del sistema:** `espacios`, `reservas`, `aprobaciones` e `historial` consumirán la matriz de permisos definida en la capacidad `auth`; esos módulos todavía no existen, por lo que este cambio no altera su comportamiento.
 - **Datos existentes:** ninguno. Es el primer incremento del proyecto y no hay migración de datos reales.
 

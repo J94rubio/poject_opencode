@@ -48,6 +48,7 @@ Los roles forman una cadena de herencia: `admin` ⊇ `aprobador` ⊇ `solicitant
 | `espacios:crear` | No | Sí | Sí |
 | `espacios:editar` | No | Sí | Sí |
 | `espacios:desactivar` | No | Sí | Sí |
+| `espacios:activar` | No | Sí | Sí |
 | `reservas:crear` | Sí | Sí | Sí |
 | `reservas:ver_propias` | Sí | Sí | Sí |
 | `reservas:cancelar_propia` | Sí | Sí | Sí |

@@ -123,6 +123,7 @@ El sistema SHALL aplicar al usuario el conjunto de permisos de su rol. La jerarq
 | espacios:crear | no | sí | sí |
 | espacios:editar | no | sí | sí |
 | espacios:desactivar | no | sí | sí |
+| espacios:activar | no | sí | sí |
 | reservas:crear | sí | sí | sí |
 | reservas:ver_propias | sí | sí | sí |
 | reservas:cancelar_propia | sí | sí | sí |
@@ -203,7 +204,7 @@ La vigencia del token de acceso SHALL ser configurable y SHALL tener un valor po
 
 ### Requirement: Formato de las respuestas de error de la API
 
-Todas las respuestas de error de la API SHALL tener forma JSON `{"error": {"codigo": <código>, "mensaje": <mensaje>}}` y SHALL usar el código HTTP que corresponde al error: 400 para datos inválidos, 401 para credenciales o token no válidos, 403 para permisos insuficientes, 404 para un recurso inexistente y 409 para un conflicto de unicidad o de estado.
+Todas las respuestas de error de la API SHALL tener forma JSON `{"error": {"codigo": <código>, "mensaje": <mensaje>}}` y SHALL usar el código HTTP que corresponde al error: 400 para datos inválidos, 401 para credenciales o token no válidos, 403 para permisos insuficientes, 404 para un recurso inexistente, 405 para método no permitido, 409 para un conflicto de unicidad o de estado y 500 para un error interno no controlado.
 
 #### Scenario: Error de credenciales
 
@@ -229,6 +230,27 @@ Todas las respuestas de error de la API SHALL tener forma JSON `{"error": {"codi
 
 - **WHEN** se crea un recurso con un valor que ya está registrado
 - **THEN** el sistema responde 409 con el cuerpo `{"error": {"codigo": "correo_duplicado", "mensaje": <mensaje>}}`
+
+#### Scenario: Ruta inexistente
+
+- **WHEN** se solicita una ruta que no existe
+- **THEN** el sistema responde 404 con el cuerpo `{"error": {"codigo": "ruta_no_encontrada", "mensaje": <mensaje>}}`
+
+#### Scenario: Método no permitido
+
+- **WHEN** se solicita una ruta con un método HTTP no permitido
+- **THEN** el sistema responde 405 con el cuerpo `{"error": {"codigo": "metodo_no_permitido", "mensaje": <mensaje>}}`
+
+#### Scenario: Cuerpo JSON mal formado
+
+- **WHEN** se envía una petición con un cuerpo JSON mal formado
+- **THEN** el sistema responde 400 con el cuerpo `{"error": {"codigo": "datos_invalidos", "mensaje": <mensaje>}}`
+
+#### Scenario: Error interno no controlado
+
+- **WHEN** se produce un error interno no controlado
+- **THEN** el sistema responde 500 con el cuerpo `{"error": {"codigo": "error_interno", "mensaje": <mensaje>}}`
+- **AND** el mensaje es un texto fijo sin detalle técnico ni traza
 
 #### Scenario: Los mensajes de error son textos fijos
 
