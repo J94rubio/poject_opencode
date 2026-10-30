@@ -8,7 +8,7 @@ La capacidad `aprobaciones` define cómo un aprobador o un administrador decide 
 
 ### Requirement: Aprobación de solicitudes pendientes
 
-El sistema SHALL permitir a un usuario con el permiso `aprobaciones:aprobar` aprobar una solicitud en estado `pendiente`, SHALL cambiar su estado a `aprobada` y SHALL rechazar la aprobación cuando el rango se solape con una reserva aprobada del mismo espacio, cuando el espacio esté inactivo o cuando el inicio de la solicitud ya haya pasado.
+El sistema SHALL permitir a un usuario con el permiso `aprobaciones:aprobar` aprobar una solicitud en estado `pendiente`, SHALL cambiar su estado a `aprobada` y SHALL rechazar la aprobación cuando el rango se solape con una reserva aprobada del mismo espacio, cuando el espacio esté inactivo o cuando la solicitud ya haya comenzado, es decir, cuando su inicio sea anterior o igual al momento actual.
 
 #### Scenario: Aprobación por un aprobador
 
@@ -64,6 +64,12 @@ El sistema SHALL permitir a un usuario con el permiso `aprobaciones:aprobar` apr
 - **THEN** el sistema responde 409 con el código `solicitud_vencida`
 - **AND** la solicitud sigue en estado `pendiente`
 
+#### Scenario: Aprobación en el instante de inicio
+
+- **WHEN** se aprueba una solicitud `pendiente` cuyo inicio es exactamente el momento actual
+- **THEN** el sistema responde 409 con el código `solicitud_vencida`
+- **AND** la solicitud sigue en estado `pendiente`
+
 ### Requirement: Rechazo de solicitudes pendientes con motivo
 
 El sistema SHALL permitir a un usuario con el permiso `aprobaciones:rechazar` rechazar una solicitud en estado `pendiente`, SHALL exigir un motivo de texto no vacío de hasta 500 caracteres, SHALL cambiar su estado a `rechazada` y SHALL conservar el motivo en la solicitud.
@@ -96,9 +102,9 @@ El sistema SHALL permitir a un usuario con el permiso `aprobaciones:rechazar` re
 - **WHEN** se rechaza con motivo una solicitud `pendiente` que se solapa con una reserva `aprobada`
 - **THEN** el sistema responde 200 con la solicitud en estado `rechazada`
 
-#### Scenario: Rechazo sobre un espacio desactivado o de inicio pasado
+#### Scenario: Rechazo sobre un espacio desactivado o con la solicitud ya comenzada
 
-- **WHEN** se rechaza con motivo una solicitud `pendiente` cuyo espacio está inactivo o cuyo inicio ya pasó
+- **WHEN** se rechaza con motivo una solicitud `pendiente` cuyo espacio está inactivo o cuyo inicio es anterior o igual al momento actual
 - **THEN** el sistema responde 200 con la solicitud en estado `rechazada`
 
 #### Scenario: El motivo aparece en el detalle
