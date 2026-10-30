@@ -8,7 +8,7 @@ Ver proposal.md - Why. El proyecto ya cuenta con estructura modular en capas (us
 
 **Goals:**
 - Modelo de datos para reservas con estados `pendiente`, `aprobada`, `rechazada`, `cancelada` (catálogo cerrado, impuesto también con `CHECK` en la base de datos).
-- Creación de solicitudes con validaciones: fechas con zona horaria explícita, fin posterior al inicio, inicio no anterior al momento actual, espacio existente y activo.
+- Creación de solicitudes con validaciones: fechas con zona horaria explícita, fin posterior al inicio, inicio posterior al momento actual (una solicitud que empieza en el instante actual ya comenzó y se rechaza, el mismo criterio que aprobación y cancelación), espacio existente y activo.
 - Prevención de solapamientos con reservas aprobadas: validación en servicio (409 `reserva_solapada`) más restricción de exclusión en PostgreSQL sobre el rango `[inicio, fin)` por espacio, solo para estado `aprobada`.
 - Consulta de disponibilidad por espacio y rango (solo las reservas aprobadas ocupan).
 - Listado y detalle con control por rol (solicitante solo propias; aprobador y admin todas), reutilizando los permisos de usuarios-roles-auth.

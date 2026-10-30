@@ -12,7 +12,7 @@ El sistema SHALL permitir que un usuario autenticado con permiso `reservas:crear
 
 #### Scenario: Creación válida en estado pendiente
 
-- **WHEN** un usuario autenticado envía una solicitud con un espacio existente y activo, inicio y fin con zona horaria explícita, fin posterior al inicio e inicio no anterior al instante actual
+- **WHEN** un usuario autenticado envía una solicitud con un espacio existente y activo, inicio y fin con zona horaria explícita, fin posterior al inicio e inicio posterior al instante actual
 - **THEN** el sistema responde 201 y crea la solicitud en estado `pendiente` asociada al usuario autenticado como solicitante
 - **AND** la respuesta incluye identificador, espacio, solicitante, inicio, fin y estado
 
@@ -48,6 +48,12 @@ El sistema SHALL permitir que un usuario autenticado con permiso `reservas:crear
 #### Scenario: Inicio en el pasado
 
 - **WHEN** la fecha/hora de inicio es anterior al instante actual
+- **THEN** el sistema responde 400 con el código `datos_invalidos`
+- **AND** no se crea ninguna solicitud
+
+#### Scenario: Inicio en el instante actual
+
+- **WHEN** la fecha/hora de inicio es exactamente el instante actual
 - **THEN** el sistema responde 400 con el código `datos_invalidos`
 - **AND** no se crea ninguna solicitud
 
