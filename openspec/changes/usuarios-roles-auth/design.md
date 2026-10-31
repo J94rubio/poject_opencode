@@ -111,7 +111,7 @@ La política de contraseñas es: **mínimo de 8 caracteres y ninguna regla de co
 
 ### D7. Contrato de errores de la API
 
-Un único manejador de errores traduce excepciones de dominio a respuestas JSON. Formato: `{"error": {"codigo": "...", "mensaje": "..."}}`. Los códigos HTTP del contrato son 400, 401, 403, 404 y 409, y la capacidad `auth` los fija para todas las respuestas de error de la API.
+Un único manejador de errores traduce excepciones de dominio a respuestas JSON. Formato: `{"error": {"codigo": "...", "mensaje": "..."}}`. Los códigos HTTP del contrato son 400, 401, 403, 404, 405, 409 y 500, y la capacidad `auth` los fija para todas las respuestas de error de la API. Los errores del framework (`ruta_no_encontrada`, `metodo_no_permitido` y `error_interno`) responden con el mismo formato JSON.
 
 | Código | HTTP | Se produce cuando |
 |---|---|---|
@@ -127,8 +127,11 @@ Un único manejador de errores traduce excepciones de dominio a respuestas JSON.
 | `correo_duplicado` | 409 | Correo ya registrado |
 | `usuario_no_encontrado` | 404 | Identificador de usuario inexistente |
 | `operacion_no_permitida` | 409 | Autoadministración prohibida (desactivar la propia cuenta o cambiar su propio rol) |
+| `ruta_no_encontrada` | 404 | Error del framework: ruta inexistente |
+| `metodo_no_permitido` | 405 | Error del framework: método HTTP no permitido en la ruta |
+| `error_interno` | 500 | Error del framework: error interno no controlado (mensaje fijo, sin detalle técnico ni traza) |
 
-El contrato de error de la API es único para todo el sistema: la capacidad `auth` declara la forma JSON del cuerpo y los códigos HTTP 400, 401, 403, 404 y 409, y la capacidad `usuarios` concreta el código de error propio de cada caso (por ejemplo `correo_duplicado` para el 409 de correo repetido y `usuario_no_encontrado` para el 404 de identificador inexistente).
+El contrato de error de la API es único para todo el sistema: la capacidad `auth` declara la forma JSON del cuerpo y los códigos HTTP 400, 401, 403, 404, 405, 409 y 500, y la capacidad `usuarios` concreta el código de error propio de cada caso (por ejemplo `correo_duplicado` para el 409 de correo repetido y `usuario_no_encontrado` para el 404 de identificador inexistente).
 
 El login con correo inexistente y con contraseña incorrecta devuelve el mismo código y el mismo mensaje, para no revelar qué correos existen. La única excepción es `usuario_desactivado`, que sí distingue el caso porque el usuario necesita saber que su cuenta está desactivada y no que falló su contraseña; se asume el riesgo de enumeración de cuentas, tolerable en un sistema institucional con alta controlada por el administrador.
 
