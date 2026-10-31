@@ -195,6 +195,11 @@ frontend/
 
 El backend y el frontend se crean en este mismo incremento porque el plan exige incrementos verticales verificables (base de datos, API, interfaz y pruebas).
 
+Configuración y almacenamiento del frontend:
+
+- **URL del backend:** el cliente HTTP (`src/api/`) toma la URL base del backend de la variable opcional `VITE_API_URL`; si no está definida, usa rutas relativas (`/api/...`). Las variables `VITE_*` quedan incluidas en el código que se entrega al navegador, así que son públicas y nunca llevan secretos.
+- **Token de la sesión:** el token de acceso se guarda en `sessionStorage`, de modo que sobrevive a la recarga de la pestaña, con una copia en memoria por si el almacenamiento no está disponible o falla; en ese caso la sesión funciona mientras la página siga abierta, pero no se restaura al recargar.
+
 ### D11. Estrategia de pruebas
 
 Cada escenario de las specs `auth`, `usuarios` e `interfaz-web` tiene al menos una prueba, nombrada según el escenario, en `backend/tests/` con `pytest` contra la base PostgreSQL de pruebas `reservas_test` (URL en `TEST_DATABASE_URL`), siguiendo la sección 5.1 del plan. La base de desarrollo `reservas` es una base aparte, con su URL en `DATABASE_URL`, y las migraciones se ejecutan sobre ella con `alembic upgrade head`. El frontend se prueba con `Vitest` y React Testing Library para el flujo de login y para el almacenamiento y expiración del token.
@@ -202,6 +207,8 @@ Cada escenario de las specs `auth`, `usuarios` e `interfaz-web` tiene al menos u
 ### D12. La interfaz web se especifica por comportamiento observable
 
 La capacidad `interfaz-web` describe lo que el usuario percibe, no cómo se dibuja: no fija colores, tipografías ni disposición, y ningún detalle de diseño visual entra en los escenarios. Sus requisitos se apoyan en los códigos de error de la API: la pantalla de login muestra el mensaje del servidor según el código recibido (`credenciales_invalidas`, `usuario_desactivado`, `datos_invalidos`), un 403 con `permiso_insuficiente` produce un mensaje sin cerrar la sesión, y un `token_expirado` devuelve al login. El control de permisos no se reimplementa en el frontend: la interfaz usa el rol devuelto por `GET /api/auth/me` únicamente para decidir qué secciones mostrar, por comodidad de uso (la sección de administración de usuarios solo se muestra al rol `admin`), sin replicar la matriz de permisos. La autorización real sigue siendo el 403 con `permiso_insuficiente` que responde el backend, y el token decide qué puede invocarse.
+
+Cualquier 401 en una petición que lleva token (`token_expirado`, `token_invalido` o `usuario_desactivado`) significa que la sesión ya no es válida: la interfaz descarta el token guardado y vuelve a la pantalla de inicio de sesión.
 
 ## Risks / Trade-offs
 
