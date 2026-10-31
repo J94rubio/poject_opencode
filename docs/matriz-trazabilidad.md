@@ -1,14 +1,14 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/reservas-disponibilidad/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
   - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
-  - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/changes/reservas-disponibilidad/specs/{reservas,interfaz-web}/spec.md`, que se publicarán en `openspec/specs/` al archivar el change.
+  - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/specs/{reservas,interfaz-web}/spec.md` (publicadas al archivar el change).
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba. «pendiente» indica una prueba de la sección 5 de `reservas-disponibilidad` que aún no tiene commit.
+- Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo.
 - Estado: todas las pruebas citadas están en verde en la última ejecución: **775 pasadas en pytest** y **119 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
@@ -287,7 +287,7 @@ Cada escenario se cita con la prueba del servicio (`test_servicio_espacios_*.py`
 
 ## Spec `reservas`
 
-Spec delta del change `reservas-disponibilidad` (`openspec/changes/reservas-disponibilidad/specs/reservas/spec.md`). Cada escenario se cita con la prueba del servicio (`test_servicio_reservas_*.py`, sección 3) y la de integración HTTP (`test_reservas_api.py`, sección 4) cuando existen ambas. Los escenarios de la garantía de integridad se verifican a nivel de repositorio y de esquema (secciones 1 y 2). Como la aprobación llega con `aprobacion-reservas`, las reservas aprobadas se siembran directamente en el repositorio. Las validaciones de fechas usan un reloj inyectado.
+Spec delta del change `reservas-disponibilidad` (`openspec/specs/reservas/spec.md`). Cada escenario se cita con la prueba del servicio (`test_servicio_reservas_*.py`, sección 3) y la de integración HTTP (`test_reservas_api.py`, sección 4) cuando existen ambas. Los escenarios de la garantía de integridad se verifican a nivel de repositorio y de esquema (secciones 1 y 2). Como la aprobación llega con `aprobacion-reservas`, las reservas aprobadas se siembran directamente en el repositorio. Las validaciones de fechas usan un reloj inyectado.
 
 ### Requisito: Creación de solicitudes de reserva
 
@@ -442,26 +442,26 @@ Spec delta del change `reservas-disponibilidad` (`openspec/changes/reservas-disp
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Acceso al formulario de creación | `features/reservas/CreacionSolicitud.test.jsx` › Acceso al formulario de creación › «un %s abre la sección desde la navegación y ve los campos de espacio, inicio y fin» (3 roles) | pendiente |
-| Envío con zona horaria explícita | `features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «envía a POST /api/reservas el espacio y el inicio y el fin en ISO 8601 con zona horaria»; «la conversión conserva el instante del valor local y lo expresa en UTC» | pendiente |
-| Creación correcta | `features/reservas/CreacionSolicitud.test.jsx` › Creación correcta › «un %s ve la solicitud creada en estado pendiente con las fechas en UTC» (3 roles) | pendiente |
-| Mensajes de error de la creación | `features/reservas/CreacionSolicitud.test.jsx` › Mensajes de error de la creación › «con %i %s muestra el mensaje del servidor y ninguna solicitud creada» (4 códigos); «un error tras una creación correcta deja de mostrar la solicitud anterior»; › Envío con zona horaria explícita › «no valida en el navegador: con campos vacíos envía la petición y el servidor decide» | pendiente |
+| Acceso al formulario de creación | `features/reservas/CreacionSolicitud.test.jsx` › Acceso al formulario de creación › «un %s abre la sección desde la navegación y ve los campos de espacio, inicio y fin» (3 roles) | `acf861c` |
+| Envío con zona horaria explícita | `features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «envía a POST /api/reservas el espacio y el inicio y el fin en ISO 8601 con zona horaria»; «la conversión conserva el instante del valor local y lo expresa en UTC» | `acf861c` |
+| Creación correcta | `features/reservas/CreacionSolicitud.test.jsx` › Creación correcta › «un %s ve la solicitud creada en estado pendiente con las fechas en UTC» (3 roles) | `acf861c` |
+| Mensajes de error de la creación | `features/reservas/CreacionSolicitud.test.jsx` › Mensajes de error de la creación › «con %i %s muestra el mensaje del servidor y ninguna solicitud creada» (4 códigos); «un error tras una creación correcta deja de mostrar la solicitud anterior»; › Envío con zona horaria explícita › «no valida en el navegador: con campos vacíos envía la petición y el servidor decide» | `acf861c` |
 
 ### Requisito: Consulta de disponibilidad en la interfaz
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Intervalos ocupados visibles | `features/reservas/ConsultaDisponibilidad.test.jsx` › Intervalos ocupados visibles › «consulta el rango con zona horaria explícita y muestra cada intervalo en UTC tal como llega»; «también está disponible para un %s desde la navegación» (aprobador y admin) | pendiente |
-| Rango sin reservas aprobadas | `features/reservas/ConsultaDisponibilidad.test.jsx` › Rango sin reservas aprobadas › «con una lista vacía indica que no hay intervalos ocupados, sin mensaje de error» | pendiente |
-| Error en la consulta | `features/reservas/ConsultaDisponibilidad.test.jsx` › Error en la consulta › «con %i %s muestra el mensaje del servidor y ningún intervalo» (2 códigos); «un error tras una consulta correcta deja de mostrar los intervalos anteriores»; «no valida en el navegador: sin fechas envía la consulta sin el rango y muestra datos_invalidos» | pendiente |
+| Intervalos ocupados visibles | `features/reservas/ConsultaDisponibilidad.test.jsx` › Intervalos ocupados visibles › «consulta el rango con zona horaria explícita y muestra cada intervalo en UTC tal como llega»; «también está disponible para un %s desde la navegación» (aprobador y admin) | `acf861c` |
+| Rango sin reservas aprobadas | `features/reservas/ConsultaDisponibilidad.test.jsx` › Rango sin reservas aprobadas › «con una lista vacía indica que no hay intervalos ocupados, sin mensaje de error» | `acf861c` |
+| Error en la consulta | `features/reservas/ConsultaDisponibilidad.test.jsx` › Error en la consulta › «con %i %s muestra el mensaje del servidor y ningún intervalo» (2 códigos); «un error tras una consulta correcta deja de mostrar los intervalos anteriores»; «no valida en el navegador: sin fechas envía la consulta sin el rango y muestra datos_invalidos» | `acf861c` |
 
 ### Requisito: Listado de solicitudes en la interfaz
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Listado de un solicitante | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un solicitante › «muestra únicamente las solicitudes que devuelve la API, en su orden y con fechas en UTC» | pendiente |
-| Listado de un aprobador o administrador | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un aprobador o administrador › «un %s ve todas las solicitudes que devuelve la API» (aprobador y admin) | pendiente |
-| Listado vacío | `features/reservas/ListadoSolicitudes.test.jsx` › Listado vacío › «con una lista vacía muestra el listado vacío sin mensaje de error» | pendiente |
+| Listado de un solicitante | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un solicitante › «muestra únicamente las solicitudes que devuelve la API, en su orden y con fechas en UTC» | `acf861c` |
+| Listado de un aprobador o administrador | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un aprobador o administrador › «un %s ve todas las solicitudes que devuelve la API» (aprobador y admin) | `acf861c` |
+| Listado vacío | `features/reservas/ListadoSolicitudes.test.jsx` › Listado vacío › «con una lista vacía muestra el listado vacío sin mensaje de error» | `acf861c` |
 
 El requisito «Listado de solicitudes en la interfaz» exige además mostrar el mensaje del servidor cuando la consulta falla, aunque no tiene un escenario propio. Lo cubre `features/reservas/ListadoSolicitudes.test.jsx` › Error al consultar el listado › «muestra el mensaje del servidor y ningún listado».
 
@@ -495,8 +495,8 @@ Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y 
 | `backend/tests/test_servicio_reservas_disponibilidad.py::test_otro_espacio_no_aparece`, `::test_el_rango_con_zona_horaria_se_convierte_a_utc` | `reservas-disponibilidad` | 3.5 | `7519869` |
 | `backend/tests/test_reservas_api.py::test_creacion_con_cuerpo_que_no_es_un_objeto_json`, `::test_disponibilidad_con_desplazamiento_codificado_en_la_url`, `::test_las_fechas_se_serializan_en_utc_con_otra_zona_en_la_sesion` | `reservas-disponibilidad` | 4.1 | `7519869` |
 | `backend/tests/test_readme.py` (módulo `reservas`) | `reservas-disponibilidad` | 4.2 | `7519869` |
-| `frontend/src/features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «un identificador de espacio no numérico se envía tal como se escribió» | `reservas-disponibilidad` | 5.1 | pendiente |
-| `frontend/src/features/reservas/ListadoSolicitudes.test.jsx` › Navegación al listado de solicitudes | `reservas-disponibilidad` | 5.3 (enlace «Solicitudes» visible para todos los roles) | pendiente |
+| `frontend/src/features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «un identificador de espacio no numérico se envía tal como se escribió» | `reservas-disponibilidad` | 5.1 | `acf861c` |
+| `frontend/src/features/reservas/ListadoSolicitudes.test.jsx` › Navegación al listado de solicitudes | `reservas-disponibilidad` | 5.3 (enlace «Solicitudes» visible para todos los roles) | `acf861c` |
 
 Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta; en `espacios`, el límite técnico de la capacidad (2147483647), los nombres con tildes y eñe, los campos ajenos y los cuerpos que no son JSON. No figuran en las tablas anteriores porque no corresponden a un escenario.
 
