@@ -156,7 +156,13 @@ Las rutas declaran su permiso; el guard de la capa de servicios decide. Una ruta
 
 ### D9. El primer administrador se crea por consola
 
-Como solo el `admin` puede crear usuarios, hace falta un camino de arranque que no dependa de la aplicación web. Se implementa un comando de la CLI de Flask (`flask create-admin`) que crea la cuenta `admin` inicial leyendo correo y contraseña de argumentos o de variables de entorno, y que falla con mensaje explícito si ya existe un administrador activo. El comportamiento esperado está fijado en el requisito *Creación del primer administrador por línea de comandos* de la capacidad `usuarios`.
+Como solo el `admin` puede crear usuarios, hace falta un camino de arranque que no dependa de la aplicación web. Se implementa un comando de la CLI de Flask (`flask create-admin`) que crea la cuenta `admin` inicial, activa y con el nombre fijo `Administrador`:
+
+- El correo se lee de la opción `--correo` o de la variable de entorno `ADMIN_CORREO`; `--correo` tiene prioridad sobre la variable.
+- La contraseña se lee solo de la variable de entorno `ADMIN_CONTRASENA` o, si falta y hay una terminal interactiva, de un prompt oculto con confirmación. No se acepta como argumento de la línea de comandos, porque quedaría en el historial del shell y en la lista de procesos.
+- El comando falla con mensaje explícito, sin crear ninguna cuenta, si ya existe un administrador activo.
+
+El comportamiento esperado está fijado en el requisito *Creación del primer administrador por línea de comandos* de la capacidad `usuarios`.
 
 **Alternativa descartada:** variables de entorno que crean el admin en cada arranque. Se descarta porque oculta el efecto en el arranque, complica los entornos de prueba y no da control sobre el momento de la creación.
 
@@ -221,4 +227,3 @@ La capacidad `interfaz-web` describe lo que el usuario percibe, no cómo se dibu
 Diferibles sin cambiar las specs, el enfoque ni el desglose de tareas:
 
 - ¿Conviene cachear el catálogo de roles y el conjunto de permisos en memoria, invalidándolo cuando cambia un rol? Hoy no lo compensa el volumen, pero es el primer candidato si el número de peticiones crece.
-- ¿Cómo se documentará la CLI `create-admin` en el `README.md` (etapa 9 del plan) y qué variables de entorno exigirá en un despliegue real?
