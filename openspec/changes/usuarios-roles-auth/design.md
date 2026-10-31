@@ -85,7 +85,7 @@ Detalles de implementación:
 
 ### D4. Autenticación: JWT HS256 con PyJWT, emitido en el backend
 
-El backend emite el token en el login y lo verifica en cada petición protegida. Claims: **únicamente** `sub` (id de usuario), `iat` (fecha de emisión) y `exp` (fecha de expiración). El token no transporta el rol: el rol efectivo se lee siempre de la base de datos (ver D5). La clave es configuración (`JWT_SECRET_KEY`) y la vigencia (`JWT_ACCESS_TOKEN_MINUTES`) tiene un **valor por defecto de 60 minutos**; ambas se leen de variables de entorno y nunca se fijan en el código. No existe refresh token: el único token emitido es el de acceso.
+El backend emite el token en el login y lo verifica en cada petición protegida. Claims: **únicamente** `sub` (id de usuario), `iat` (fecha de emisión) y `exp` (fecha de expiración). El token no transporta el rol: el rol efectivo se lee siempre de la base de datos (ver D5). La clave es configuración (`JWT_SECRET_KEY`) y la vigencia (`JWT_ACCESS_TOKEN_MINUTES`) tiene un **valor por defecto de 60 minutos**; ambas se leen de variables de entorno. `JWT_SECRET_KEY` es **obligatoria en todos los entornos**, incluido el local: no tiene valor por defecto ni valor de desarrollo en el código, y si no está definida o está vacía la aplicación falla al arrancar con un mensaje explícito que nombra la variable. Las pruebas definen su propia clave de prueba mediante fixture o `monkeypatch`, nunca en archivos del repositorio. No existe refresh token: el único token emitido es el de acceso.
 
 **Alternativas descartadas:**
 
@@ -197,7 +197,7 @@ La capacidad `interfaz-web` describe lo que el usuario percibe, no cómo se dibu
 ## Risks / Trade-offs
 
 - **Una consulta a la base de datos por petición protegida** → Mitigación: una sola consulta que une usuario y rol por identificador, con índice en la clave primaria; el coste se revisa si el volumen real lo justifica.
-- **Clave de firma JWT en el entorno** → Mitigación: se lee de variable de entorno, con un valor de desarrollo explícito en `.env.example` fuera del control de versiones; el arranque falla si en un entorno no local la clave es el valor por defecto.
+- **Clave de firma JWT en el entorno** → Mitigación: se lee únicamente de la variable de entorno `JWT_SECRET_KEY`, obligatoria en todos los entornos y sin valor por defecto en el código; si no está definida o está vacía, el arranque falla con un mensaje explícito que nombra la variable.
 - **Sin revocación de tokens emitidos antes de un cambio de rol** → Mitigación: el rol efectivo se lee de la base de datos (D5), así que el cambio surte efecto de inmediato; solo el alcance del token queda obsoleto, sin impacto en permisos.
 - **La matriz declara permisos de módulos que todavía no existen** (`espacios`, `reservas`, `aprobaciones`, `historial`) → Mitigación: la tabla es declarativa y en este incremento solo la consumen las rutas de `usuarios`; cada módulo adopts la tabla al construirse y define en su propio change el comportamiento de sus permisos, incluida la exclusión de las solicitudes propias en `aprobaciones:aprobar` y `aprobaciones:rechazar`.
 - **La reactivación de una cuenta revive tokens emitidos antes de la desactivación** → Mitigación: es una consecuencia coherente con JWT sin estado; si se considera inaceptable, se puede activar un cambio que limite la vigencia al estado de la cuenta.
