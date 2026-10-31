@@ -24,8 +24,8 @@ La pantalla de inicio de sesión SHALL pedir el correo y la contraseña, SHALL i
 
 #### Scenario: Datos de acceso inválidos
 
-- **WHEN** el usuario envía el correo o la contraseña vacíos, o con un formato inválido
-- **THEN** la interfaz muestra el mensaje asociado al código `datos_invalidos`
+- **WHEN** el usuario envía el correo o la contraseña vacíos o ausentes, o un correo con formato inválido
+- **THEN** la interfaz envía la petición al servidor sin validar el formato del correo y muestra el mensaje del código devuelto: `datos_invalidos` cuando el correo o la contraseña están vacíos o ausentes, y `credenciales_invalidas` cuando el servidor lo devuelve, incluido el caso de un correo con formato inválido
 - **AND** no se inicia sesión
 
 #### Scenario: Credenciales válidas
