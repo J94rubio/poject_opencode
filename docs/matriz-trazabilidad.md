@@ -5,7 +5,7 @@ Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.
 - Specs: `openspec/changes/usuarios-roles-auth/specs/{auth,usuarios,interfaz-web}/spec.md`.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba. «Pendiente de commit» marca la prueba añadida durante la tarea 9.3.
+- Commit: el commit que introdujo la prueba.
 - Estado: todas las pruebas citadas están en verde en la última ejecución: **342 pasadas en pytest** y **48 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
 Las pruebas parametrizadas se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
@@ -88,7 +88,7 @@ Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cob
 | Escenario | Prueba | Commit |
 |---|---|---|
 | Vigencia por defecto | `test_tokens.py::test_vigencia_por_defecto_de_60_minutos`; `test_tokens.py::test_el_token_expira_al_cumplirse_la_vigencia`; `test_login.py::test_credenciales_validas_de_una_cuenta_activa` (`expira_en` = 3600 en el login) | `9472367` |
-| Vigencia configurada | `test_login.py::test_vigencia_configurada_en_el_login` (con `JWT_ACCESS_TOKEN_MINUTES=5`, el login responde `expira_en` = 300); `test_tokens.py::test_vigencia_configurada`; `test_config.py::test_vigencia_del_token_configurable_desde_el_entorno` | pendiente de commit, `9472367`, `3a79345` |
+| Vigencia configurada | `test_login.py::test_vigencia_configurada_en_el_login` (con `JWT_ACCESS_TOKEN_MINUTES=5`, el login responde `expira_en` = 300); `test_tokens.py::test_vigencia_configurada`; `test_config.py::test_vigencia_del_token_configurable_desde_el_entorno` | `b0c942f`, `9472367`, `3a79345` |
 
 ### Requisito: Formato de las respuestas de error de la API
 
