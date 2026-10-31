@@ -4,7 +4,7 @@ El esquema y las migraciones se gestionan con Alembic (`backend/migrations`).
 """
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, scoped_session, sessionmaker
 
 
 class BaseDeDatos:
@@ -34,3 +34,7 @@ class BaseDeDatos:
 
 
 db = BaseDeDatos()
+
+
+class Base(DeclarativeBase):
+    """Base declarativa de los modelos ORM (`app/models`)."""
