@@ -87,6 +87,35 @@ def client(app):
 
 
 @pytest.fixture
+def crear_cuenta(sesion):
+    """Crea y confirma una cuenta con el rol indicado; devuelve su id."""
+    from backend.app.auth.services import generar_hash_password
+    from backend.app.usuarios import repositories
+
+    def _crear(rol, correo=None, nombre="Persona", contrasena="contrasena-valida", activo=True):
+        usuario = repositories.crear_usuario(
+            nombre, correo or f"{rol}@example.com", generar_hash_password(contrasena),
+            repositories.obtener_rol_por_nombre(rol), activo=activo,
+        )
+        sesion.commit()
+        return usuario.id
+
+    return _crear
+
+
+@pytest.fixture
+def cabecera(app):
+    """Cabecera `Authorization` con un token vigente del usuario indicado."""
+    from backend.app.auth.tokens import emitir_token
+
+    def _cabecera(usuario_id):
+        with app.app_context():
+            return {"Authorization": f"Bearer {emitir_token(usuario_id)}"}
+
+    return _cabecera
+
+
+@pytest.fixture
 def sesion(esquema, app):
     """Sesión de base de datos sobre el esquema ya migrado.
 

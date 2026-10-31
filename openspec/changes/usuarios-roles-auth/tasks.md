@@ -34,14 +34,14 @@
 
 ## 5. Gestión de usuarios
 
-- [ ] 5.1 Implementar el servicio de alta de usuario con las validaciones de nombre, correo, contraseña (mínimo 8 caracteres, sin reglas de composición) y rol, y verificar con pruebas de alta válida, correo duplicado, correo de formato inválido, campos faltantes, rol inválido, contraseña de menos de 8 caracteres y contraseña sin mayúsculas, dígitos ni símbolos.
-- [ ] 5.2 Implementar el listado y el detalle de usuarios, y verificar con pruebas del listado con cuentas desactivadas, del detalle existente, del detalle inexistente con HTTP 404 y de la denegación por rol.
-- [ ] 5.3 Implementar la edición de nombre, correo y rol, y verificar con pruebas de cambio válido, de correo duplicado, de rol inválido, de denegación por rol y de rechazo del cambio del propio rol con el código `operacion_no_permitida`.
-- [ ] 5.4 Implementar el restablecimiento de contraseña, y verificar con pruebas de restablecimiento válido, de contraseña con menos de 8 caracteres y de denegación por rol.
-- [ ] 5.5 Implementar la desactivación y la activación de cuentas con la pérdida de acceso inmediata y la conservación de los datos de la cuenta, y verificar con pruebas de desactivación, de reactivación, de desactivación de otro administrador, de denegación por rol y de autoadministración rechazada con HTTP 409.
-- [ ] 5.6 Exponer la ruta `GET /api/roles` y verificar con pruebas del catálogo con los tres roles y de denegación por rol.
-- [ ] 5.7 Documentar en `backend/README.md` los endpoints del módulo `usuarios` y el catálogo de códigos de error, y verificar que los ejemplos del documento coinciden con las rutas y los códigos implementados.
-- [ ] 5.8 Verificar con pruebas que la matriz respeta la jerarquía de roles, que un `solicitante` y un `aprobador` reciben HTTP 403 con `permiso_insuficiente` al intentar listar, crear, editar o desactivar usuarios, y que un `admin` sí puede crear una cuenta, comprobando que los datos quedan intactos tras cada denegación.
+- [x] 5.1 Implementar el servicio de alta de usuario con las validaciones de nombre, correo, contraseña (mínimo 8 caracteres, sin reglas de composición) y rol, y verificar con pruebas de alta válida, correo duplicado, correo de formato inválido, campos faltantes, rol inválido, contraseña de menos de 8 caracteres y contraseña sin mayúsculas, dígitos ni símbolos.
+- [x] 5.2 Implementar el listado y el detalle de usuarios, y verificar con pruebas del listado con cuentas desactivadas, del detalle existente, del detalle inexistente con HTTP 404 y de la denegación por rol.
+- [x] 5.3 Implementar la edición de nombre, correo y rol, y verificar con pruebas de cambio válido, de correo duplicado, de rol inválido, de denegación por rol y de rechazo del cambio del propio rol con el código `operacion_no_permitida`.
+- [x] 5.4 Implementar el restablecimiento de contraseña, y verificar con pruebas de restablecimiento válido, de contraseña con menos de 8 caracteres y de denegación por rol.
+- [x] 5.5 Implementar la desactivación y la activación de cuentas con la pérdida de acceso inmediata y la conservación de los datos de la cuenta, y verificar con pruebas de desactivación, de reactivación, de desactivación de otro administrador, de denegación por rol y de autoadministración rechazada con HTTP 409.
+- [x] 5.6 Exponer la ruta `GET /api/roles` y verificar con pruebas del catálogo con los tres roles y de denegación por rol.
+- [x] 5.7 Documentar en `backend/README.md` los endpoints del módulo `usuarios` y el catálogo de códigos de error, y verificar que los ejemplos del documento coinciden con las rutas y los códigos implementados.
+- [x] 5.8 Verificar con pruebas que la matriz respeta la jerarquía de roles, que un `solicitante` y un `aprobador` reciben HTTP 403 con `permiso_insuficiente` al intentar listar, crear, editar o desactivar usuarios, y que un `admin` sí puede crear una cuenta, comprobando que los datos quedan intactos tras cada denegación.
 
 ## 6. Arranque con el primer administrador
 

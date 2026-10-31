@@ -4,7 +4,7 @@ No contiene reglas de negocio ni confirma transacciones: eso corresponde a la
 capa de servicios.
 """
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 
 from ..extensions import db
@@ -47,3 +47,22 @@ def obtener_usuario_por_id(usuario_id):
     return db.session.execute(
         select(Usuario).options(joinedload(Usuario.rol)).where(Usuario.id == usuario_id)
     ).scalar_one_or_none()
+
+
+def listar_usuarios():
+    """Todas las cuentas, activas e inactivas, con su rol, ordenadas por id."""
+    return db.session.execute(
+        select(Usuario).options(joinedload(Usuario.rol)).order_by(Usuario.id)
+    ).scalars().all()
+
+
+def contar_admins_activos():
+    return db.session.execute(
+        select(func.count(Usuario.id)).join(Usuario.rol).where(
+            Rol.nombre == "admin", Usuario.activo.is_(True)
+        )
+    ).scalar_one()
+
+
+def listar_roles():
+    return db.session.execute(select(Rol).order_by(Rol.id)).scalars().all()
