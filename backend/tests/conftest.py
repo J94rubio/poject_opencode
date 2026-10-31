@@ -119,11 +119,11 @@ def cabecera(app):
 def sesion(esquema, app):
     """Sesión de base de datos sobre el esquema ya migrado.
 
-    Al terminar la prueba se descartan los cambios pendientes y se vacía la
-    tabla `usuarios`; el catálogo de roles se conserva.
+    Al terminar la prueba se descartan los cambios pendientes y se vacían las
+    tablas `usuarios` y `espacios`; el catálogo de roles se conserva.
     """
     with app.app_context():
         yield db.session
         db.session.rollback()
-        db.session.execute(text("TRUNCATE usuarios RESTART IDENTITY"))
+        db.session.execute(text("TRUNCATE usuarios, espacios RESTART IDENTITY"))
         db.session.commit()
