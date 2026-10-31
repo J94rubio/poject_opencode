@@ -49,9 +49,9 @@
 
 ## 7. Frontend: autenticación y sesión
 
-- [ ] 7.1 Implementar el cliente HTTP de React con el envío del token y el tratamiento diferenciado de 401 y 403, y verificar con una prueba Vitest que un 401 con `token_expirado` vuelve a la pantalla de inicio de sesión y que un 403 con `permiso_insuficiente` muestra un mensaje sin cerrar la sesión (requisitos «Ciclo de vida de la sesión» y «Mensaje de error por permisos insuficientes» de la spec `interfaz-web`).
-- [ ] 7.2 Implementar la pantalla de login y el contexto de autenticación (guardar token, restaurar sesión, cerrar sesión), y verificar con pruebas Vitest del inicio de sesión correcto, de credenciales inválidas, de cuenta desactivada y de datos inválidos, de restauración de la sesión al recargar y de cierre de sesión (requisitos «Pantalla de inicio de sesión» y «Ciclo de vida de la sesión» de la spec `interfaz-web`).
-- [ ] 7.3 Implementar la protección de rutas por sesión y por rol en el frontend, y verificar con pruebas Vitest que sin sesión se redirige al login, que un `solicitante` no alcanza la sección de administración y que un `admin` sí la alcanza (requisito «Protección de las rutas de la aplicación» de la spec `interfaz-web`).
+- [x] 7.1 Implementar el cliente HTTP de React con el envío del token y el tratamiento diferenciado de 401 y 403, y verificar con una prueba Vitest que un 401 con `token_expirado` vuelve a la pantalla de inicio de sesión y que un 403 con `permiso_insuficiente` muestra un mensaje sin cerrar la sesión (requisitos «Ciclo de vida de la sesión» y «Mensaje de error por permisos insuficientes» de la spec `interfaz-web`).
+- [x] 7.2 Implementar la pantalla de login y el contexto de autenticación (guardar token, restaurar sesión, cerrar sesión), y verificar con pruebas Vitest del inicio de sesión correcto, de credenciales inválidas, de cuenta desactivada y de datos inválidos, de restauración de la sesión al recargar y de cierre de sesión (requisitos «Pantalla de inicio de sesión» y «Ciclo de vida de la sesión» de la spec `interfaz-web`).
+- [x] 7.3 Implementar la protección de rutas por sesión y por rol en el frontend, y verificar con pruebas Vitest que sin sesión se redirige al login, que un `solicitante` no alcanza la sección de administración y que un `admin` sí la alcanza (requisito «Protección de las rutas de la aplicación» de la spec `interfaz-web`).
 
 ## 8. Frontend: administración de usuarios
 
