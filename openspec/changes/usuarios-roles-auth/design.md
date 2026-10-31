@@ -103,7 +103,7 @@ El token de acceso no transporta el rol: sus claims son solo el identificador de
 
 ### D6. Hash de contraseñas con las utilidades de Flask
 
-`werkzeug.security.generate_password_hash` / `check_password_hash` (PBKDF2 por defecto), sin dependencias nuevas de terceros.
+`werkzeug.security.generate_password_hash` / `check_password_hash`, con el algoritmo por defecto de la versión de Werkzeug instalada (actualmente scrypt), sin indicarlo en el código; la verificación lee el algoritmo del propio hash guardado. Sin dependencias nuevas de terceros.
 
 **Alternativas descartadas:** bcrypt y argon2 requieren paquetes nativos o compilados, que complican el entorno local de demostración del plan sin aportar valor a un proyecto con contraseñas gestionadas por el administrador.
 
