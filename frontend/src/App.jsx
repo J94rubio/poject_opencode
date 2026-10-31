@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './features/auth/AuthContext.jsx'
 import { LoginPage } from './features/auth/LoginPage.jsx'
 import { RutaProtegida } from './features/auth/RutaProtegida.jsx'
+import { SeccionEspacios } from './features/espacios/SeccionEspacios.jsx'
 import { SeccionUsuarios } from './features/usuarios/SeccionUsuarios.jsx'
 import { Enlace, Redirigir, useRuta } from './navegacion.jsx'
 
@@ -21,6 +22,7 @@ function Marco({ ruta, children }) {
         <h1>Reservas de espacios académicos</h1>
         <nav>
           <Enlace a="/">Inicio</Enlace>
+          <Enlace a="/espacios">Espacios</Enlace>
           {usuario.rol === 'admin' && (
             <Enlace a="/admin/usuarios">Administración de usuarios</Enlace>
           )}
@@ -52,6 +54,15 @@ export function Aplicacion() {
       <RutaProtegida>
         <Marco ruta={ruta}>
           <Inicio />
+        </Marco>
+      </RutaProtegida>
+    )
+  }
+  if (ruta === '/espacios') {
+    return (
+      <RutaProtegida>
+        <Marco ruta={ruta}>
+          <SeccionEspacios />
         </Marco>
       </RutaProtegida>
     )

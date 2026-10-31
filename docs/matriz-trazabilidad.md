@@ -1,14 +1,16 @@
-# Matriz de trazabilidad — change `usuarios-roles-auth`
+# Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md` (tarea 9.2 de `openspec/changes/usuarios-roles-auth/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`) y `espacios` (tarea 5.2 de `openspec/changes/espacios/tasks.md`).
 
-- Specs: `openspec/changes/usuarios-roles-auth/specs/{auth,usuarios,interfaz-web}/spec.md`.
+- Specs:
+  - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
+  - `espacios` y los requisitos de espacios de `interfaz-web`: specs delta del change en `openspec/changes/espacios/specs/{espacios,interfaz-web}/spec.md`, que se publicarán en `openspec/specs/` al archivar el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba.
-- Estado: todas las pruebas citadas están en verde en la última ejecución: **342 pasadas en pytest** y **48 pasadas en Vitest**, sin fallos ni pruebas omitidas.
+- Commit: el commit que introdujo la prueba. «pendiente» indica una prueba de la sección 4 de `espacios` que aún no tiene commit.
+- Estado: todas las pruebas citadas están en verde en la última ejecución: **567 pasadas en pytest** y **88 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
-Las pruebas parametrizadas se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
+Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
 
 ## Resumen
 
@@ -16,8 +18,9 @@ Las pruebas parametrizadas se citan por su nombre base. Cada variante se ejecuta
 |---|---|---|---|
 | `auth` | 9 | 35 | 35 |
 | `usuarios` | 10 | 40 | 40 |
-| `interfaz-web` | 5 | 15 | 15 |
-| **Total** | **24** | **90** | **90** |
+| `espacios` | 7 | 36 | 36 |
+| `interfaz-web` | 8 (5 de `usuarios-roles-auth` y 3 de `espacios`) | 29 | 29 |
+| **Total** | **34** | **140** | **140** |
 
 Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cobertura están en [Observaciones](#observaciones).
 
@@ -203,6 +206,83 @@ El rechazo de cualquier otro valor de rol, que también declara este requisito, 
 
 ---
 
+## Spec `espacios`
+
+Cada escenario se cita con la prueba del servicio (`test_servicio_espacios_*.py`, sección 2) y la de integración HTTP (`test_espacios_*.py`, sección 3) cuando existen ambas.
+
+### Requisito: Registro de espacios académicos
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Alta válida de un espacio | `test_servicio_espacios_alta.py::test_alta_valida_de_un_espacio`; `test_espacios_alta.py::test_alta_valida_de_un_espacio` (aprobador y admin; comprueba que aparece en el listado y el detalle) | `08159a7`, `4ea3b2a` |
+| Alta con capacidad igual a cero | `test_servicio_espacios_alta.py::test_alta_con_capacidad_invalida[cero]`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[capacidad_cero]` | `08159a7`, `4ea3b2a` |
+| Alta con capacidad negativa | `test_servicio_espacios_alta.py::test_alta_con_capacidad_invalida[negativa, negativa_grande]`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[capacidad_negativa]` | `08159a7`, `4ea3b2a` |
+| Alta con capacidad no entera | `test_servicio_espacios_alta.py::test_alta_con_capacidad_invalida[decimal, decimal_exacto, texto_numerico, texto, nula, cadena_vacia, booleano_true, booleano_false, lista, objeto]`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[capacidad_decimal, capacidad_texto, capacidad_nula, capacidad_cadena_vacia]` | `08159a7`, `4ea3b2a` |
+| Alta con tipo fuera del catálogo | `test_servicio_espacios_alta.py::test_alta_con_tipo_fuera_del_catalogo`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[tipo_fuera_del_catalogo]` | `08159a7`, `4ea3b2a` |
+| Alta con campos obligatorios faltantes | `test_servicio_espacios_alta.py::test_alta_con_campo_obligatorio_ausente`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[sin_nombre, sin_tipo, sin_capacidad]` | `08159a7`, `4ea3b2a` |
+| Alta con nombre vacío o compuesto solo por espacios | `test_servicio_espacios_alta.py::test_alta_con_nombre_vacio_o_solo_espacios`; `test_espacios_alta.py::test_alta_propaga_los_errores_400_del_servicio[nombre_solo_espacios]` | `08159a7`, `4ea3b2a` |
+
+### Requisito: Unicidad y normalización del nombre del espacio
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Alta con nombre ya registrado | `test_servicio_espacios_alta.py::test_alta_con_nombre_ya_registrado`; `test_espacios_alta.py::test_alta_propaga_el_error_409_de_nombre_duplicado[contra_activo-Lab 1]` | `08159a7`, `4ea3b2a` |
+| Duplicado que solo difiere en mayúsculas o espacios exteriores | `test_servicio_espacios_alta.py::test_duplicado_que_solo_difiere_en_mayusculas_o_espacios_exteriores`; `test_espacios_alta.py::test_alta_propaga_el_error_409_de_nombre_duplicado` (variantes con `"  LAB 1 "`); `test_repositorio_espacios.py::test_dos_altas_con_nombres_equivalentes_violan_el_indice_unico`; `test_servicio_espacios_alta.py::test_la_violacion_del_indice_unico_se_traduce_a_espacio_duplicado` | `08159a7`, `4ea3b2a`, `9064d93` |
+| Duplicado contra un espacio inactivo | `test_servicio_espacios_alta.py::test_duplicado_contra_un_espacio_inactivo`; `test_espacios_alta.py::test_alta_propaga_el_error_409_de_nombre_duplicado` (variantes `contra_inactivo`) | `08159a7`, `4ea3b2a` |
+
+### Requisito: Consulta del catálogo de espacios
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Listado con espacios activos e inactivos | `test_servicio_espacios_consulta.py::test_listado_con_espacios_activos_e_inactivos`; `test_espacios_consulta.py::test_listado_con_espacios_activos_e_inactivos` (3 roles) | `08159a7`, `4ea3b2a` |
+| Listado sin espacios registrados | `test_servicio_espacios_consulta.py::test_listado_sin_espacios_registrados`; `test_espacios_consulta.py::test_listado_sin_espacios_registrados` | `08159a7`, `4ea3b2a` |
+| Detalle de un espacio existente | `test_servicio_espacios_consulta.py::test_detalle_de_un_espacio_existente`; `test_espacios_consulta.py::test_detalle_de_un_espacio_existente` (3 roles) | `08159a7`, `4ea3b2a` |
+| Detalle de un espacio inactivo | `test_servicio_espacios_consulta.py::test_detalle_de_un_espacio_inactivo`; `test_espacios_consulta.py::test_detalle_de_un_espacio_inactivo` | `08159a7`, `4ea3b2a` |
+| Detalle de un espacio inexistente | `test_servicio_espacios_consulta.py::test_detalle_de_un_espacio_inexistente`; `test_espacios_consulta.py::test_detalle_de_un_espacio_inexistente` (cuerpo exacto, sin datos de espacio) | `08159a7`, `4ea3b2a` |
+
+### Requisito: Edición de espacios académicos
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Edición válida de nombre, tipo y capacidad | `test_servicio_espacios_edicion.py::test_edicion_valida_de_nombre_tipo_y_capacidad`; `test_espacios_edicion.py::test_edicion_valida_de_nombre_tipo_y_capacidad` (aprobador y admin); `test_espacios_edicion.py::test_edicion_conserva_el_estado_de_un_espacio_inactivo` | `08159a7`, `4ea3b2a` |
+| Edición de un solo campo | `test_servicio_espacios_edicion.py::test_edicion_de_un_solo_campo`; `test_espacios_edicion.py::test_edicion_de_un_solo_campo` | `08159a7`, `4ea3b2a` |
+| Edición que conserva el propio nombre | `test_servicio_espacios_edicion.py::test_edicion_que_conserva_el_propio_nombre`; `test_espacios_edicion.py::test_edicion_que_conserva_el_propio_nombre` | `08159a7`, `4ea3b2a` |
+| Edición con el nombre de otro espacio | `test_servicio_espacios_edicion.py::test_edicion_con_el_nombre_de_otro_espacio`; `test_espacios_edicion.py::test_edicion_con_el_nombre_de_otro_espacio` | `08159a7`, `4ea3b2a` |
+| Edición con nombre vacío | `test_servicio_espacios_edicion.py::test_edicion_con_nombre_vacio_o_que_no_es_texto`; `test_espacios_edicion.py::test_edicion_propaga_los_errores_400_del_servicio[nombre_vacio, nombre_solo_espacios]` | `08159a7`, `4ea3b2a` |
+| Edición con tipo fuera del catálogo | `test_servicio_espacios_edicion.py::test_edicion_con_tipo_fuera_del_catalogo`; `test_espacios_edicion.py::test_edicion_propaga_los_errores_400_del_servicio[tipo_fuera_del_catalogo]` | `08159a7`, `4ea3b2a` |
+| Edición con capacidad inválida | `test_servicio_espacios_edicion.py::test_edicion_con_capacidad_invalida`; `test_espacios_edicion.py::test_edicion_propaga_los_errores_400_del_servicio[capacidad_*]` (5 variantes) | `08159a7`, `4ea3b2a` |
+| Edición que intenta cambiar el estado | `test_servicio_espacios_edicion.py::test_edicion_que_intenta_cambiar_el_estado`; `test_espacios_edicion.py::test_edicion_que_intenta_cambiar_el_estado` (2 variantes) | `08159a7`, `4ea3b2a` |
+| Edición de un espacio inexistente | `test_servicio_espacios_edicion.py::test_edicion_de_un_espacio_inexistente`; `test_espacios_edicion.py::test_edicion_de_un_espacio_inexistente` (comprueba que no se crea ningún espacio) | `08159a7`, `4ea3b2a` |
+
+### Requisito: Desactivación de espacios académicos
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Desactivación de un espacio activo | `test_servicio_espacios_estado.py::test_desactivacion_de_un_espacio_activo`; `test_espacios_desactivacion.py::test_desactivacion_de_un_espacio_activo` (aprobador y admin) | `08159a7`, `4ea3b2a` |
+| Conservación de los datos tras la desactivación | `test_servicio_espacios_estado.py::test_conservacion_de_los_datos_tras_la_desactivacion`; `test_espacios_desactivacion.py::test_conservacion_de_los_datos_tras_la_desactivacion` (listado posterior) | `08159a7`, `4ea3b2a` |
+| Desactivación de un espacio ya inactivo | `test_servicio_espacios_estado.py::test_desactivacion_de_un_espacio_ya_inactivo`; `test_espacios_desactivacion.py::test_desactivacion_de_un_espacio_ya_inactivo` | `08159a7`, `4ea3b2a` |
+| Desactivación de un espacio inexistente | `test_servicio_espacios_estado.py::test_desactivacion_de_un_espacio_inexistente`; `test_espacios_desactivacion.py::test_desactivacion_de_un_espacio_inexistente` | `08159a7`, `4ea3b2a` |
+
+### Requisito: Reactivación de espacios académicos
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Reactivación de un espacio inactivo | `test_servicio_espacios_estado.py::test_reactivacion_de_un_espacio_inactivo`; `test_servicio_espacios_estado.py::test_reactivacion_aparece_en_el_listado_como_activo`; `test_espacios_reactivacion.py::test_reactivacion_de_un_espacio_inactivo` (aprobador y admin; conserva nombre, tipo y capacidad) | `08159a7`, `4ea3b2a` |
+| Reactivación de un espacio ya activo | `test_servicio_espacios_estado.py::test_reactivacion_de_un_espacio_ya_activo`; `test_espacios_reactivacion.py::test_reactivacion_de_un_espacio_ya_activo` | `08159a7`, `4ea3b2a` |
+| Reactivación de un espacio inexistente | `test_servicio_espacios_estado.py::test_reactivacion_de_un_espacio_inexistente`; `test_espacios_reactivacion.py::test_reactivacion_de_un_espacio_inexistente` | `08159a7`, `4ea3b2a` |
+| Reactivación denegada al solicitante | `test_espacios_reactivacion.py::test_reactivacion_denegada_al_solicitante` | `4ea3b2a` |
+
+### Requisito: Control de acceso a la gestión de espacios
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Consulta permitida a todos los roles autenticados | `test_espacios_consulta.py::test_listado_con_espacios_activos_e_inactivos` y `test_espacios_consulta.py::test_detalle_de_un_espacio_existente` (variantes `solicitante`, `aprobador` y `admin`) | `4ea3b2a` |
+| Gestión permitida al aprobador y al administrador | `test_espacios_alta.py::test_alta_valida_de_un_espacio`; `test_espacios_edicion.py::test_edicion_valida_de_nombre_tipo_y_capacidad`; `test_espacios_desactivacion.py::test_desactivacion_de_un_espacio_activo`; `test_espacios_reactivacion.py::test_reactivacion_de_un_espacio_inactivo` (variantes `aprobador` y `admin`) | `4ea3b2a` |
+| Alta, edición, desactivación o reactivación denegada al solicitante | `test_espacios_alta.py::test_alta_denegada_al_solicitante`; `test_espacios_edicion.py::test_edicion_denegada_al_solicitante`; `test_espacios_desactivacion.py::test_desactivacion_denegada_al_solicitante`; `test_espacios_reactivacion.py::test_reactivacion_denegada_al_solicitante` (todas comprueban que los datos no cambian) | `4ea3b2a` |
+| Operación de gestión sin autenticación | `test_espacios_consulta.py::test_consulta_sin_autenticacion` (listado y detalle); `test_espacios_alta.py::test_alta_sin_autenticacion`; `test_espacios_edicion.py::test_edicion_sin_autenticacion`; `test_espacios_desactivacion.py::test_desactivacion_sin_autenticacion`; `test_espacios_reactivacion.py::test_reactivacion_sin_autenticacion` | `4ea3b2a` |
+
+---
+
 ## Spec `interfaz-web`
 
 ### Requisito: Pantalla de inicio de sesión
@@ -245,6 +325,35 @@ El rechazo de cualquier otro valor de rol, que también declara este requisito, 
 | Desactivación y reactivación de una cuenta | `features/usuarios/ListadoUsuarios.test.jsx` › Desactivación y reactivación de una cuenta › «Desactivar llama a POST /api/usuarios/{id}/desactivar y el listado refleja el estado inactivo»; «Reactivar llama a POST /api/usuarios/{id}/activar y el listado refleja el estado activo» | `7c561d8` |
 | Restablecimiento de la contraseña | `features/usuarios/FormularioContrasena.test.jsx` › Restablecimiento de la contraseña › «Envío correcto: envía la nueva contraseña a POST /api/usuarios/{id}/password y vuelve al listado»; «Respuesta con contrasena_invalida: muestra el mensaje del servidor y vacía el campo» | `7c561d8` |
 
+### Requisito: Consulta de espacios en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Listado con espacios activos e inactivos | `features/espacios/ConsultaEspacios.test.jsx` › Listado con espacios activos e inactivos › «muestra a un %s cada espacio con su nombre, tipo, capacidad y estado» (3 roles); «identifica los espacios inactivos como tales» | pendiente |
+| Catálogo sin espacios | `features/espacios/ConsultaEspacios.test.jsx` › Catálogo sin espacios › «muestra el catálogo vacío sin un mensaje de error» | pendiente |
+| Detalle de un espacio | `features/espacios/ConsultaEspacios.test.jsx` › Detalle de un espacio › «consulta GET /api/espacios/{id} y muestra su nombre, tipo, capacidad y estado» | pendiente |
+| Error al consultar un espacio inexistente | `features/espacios/ConsultaEspacios.test.jsx` › Error al consultar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado y ningún dato de espacio» | pendiente |
+
+### Requisito: Alta y edición de espacios en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Alta correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Alta correcta de un espacio › «un %s envía nombre, tipo y capacidad y el catálogo muestra el espacio activo» (aprobador y admin) | pendiente |
+| Edición correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Edición correcta de un espacio › «envía PATCH con nombre, tipo y capacidad y el catálogo refleja los datos sin alterar el estado» | pendiente |
+| Mensajes de error del alta y de la edición | `features/espacios/FormularioEspacio.test.jsx` › Mensajes de error del alta y de la edición › «el alta muestra el mensaje de %s y no refleja el espacio como creado»; «la edición muestra el mensaje de %s y no refleja el espacio como modificado» (4 códigos cada una); «no valida en el navegador: envía al servidor lo escrito» | pendiente |
+| Acciones de alta y edición no ofrecidas a un rol sin permiso | `features/espacios/FormularioEspacio.test.jsx` › Acciones de alta y edición no ofrecidas a un rol sin permiso › «un solicitante no ve las acciones de alta ni de edición»; `features/espacios/permisos.test.js` › puedeGestionarEspacios | pendiente |
+
+### Requisito: Activación y desactivación de espacios en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Desactivación correcta de un espacio | `features/espacios/DesactivacionEspacios.test.jsx` › Desactivación correcta de un espacio › «un %s desactiva un espacio y el catálogo lo muestra inactivo conservando sus datos» (aprobador y admin) | pendiente |
+| Reactivación correcta de un espacio | `features/espacios/ReactivacionEspacios.test.jsx` › Reactivación correcta de un espacio › «un %s reactiva un espacio y el catálogo lo muestra activo conservando sus datos» (aprobador y admin) | pendiente |
+| Error al desactivar un espacio ya inactivo | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio ya inactivo › «muestra el mensaje de espacio_ya_inactivo y el catálogo mantiene el espacio inactivo» | pendiente |
+| Error al desactivar un espacio inexistente | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado» | pendiente |
+| Acción de desactivación no ofrecida a un rol sin permiso | `features/espacios/DesactivacionEspacios.test.jsx` › Acción de desactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de desactivación» | pendiente |
+| Acción de reactivación no ofrecida a un rol sin permiso | `features/espacios/ReactivacionEspacios.test.jsx` › Acción de reactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de reactivación» | pendiente |
+
 Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backendFalso.js`) que responde con los códigos y cuerpos del contrato de errores de la API. Verifican el comportamiento de la interfaz, no el del servidor, que cubren las pruebas de `pytest`.
 
 ---
@@ -253,21 +362,26 @@ Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backe
 
 Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y documentación) que no corresponden a ningún escenario de las specs. Se listan para que la matriz recoja todas las pruebas de la suite.
 
-| Archivo | Tarea | Commit |
-|---|---|---|
-| `backend/tests/test_app_factory.py` | 1.1, 1.5, 1.6 | `3a79345` |
-| `backend/tests/test_config.py` | 1.3 (y `JWT_ACCESS_TOKEN_MINUTES`, ver observación 1) | `3a79345` |
-| `backend/tests/test_cors.py` | 1.7 | `3a79345` |
-| `backend/tests/test_modelos.py` | 2.1 | `d50687e` |
-| `backend/tests/test_migraciones.py` | 2.2 | `d50687e` |
-| `backend/tests/test_repositorio_usuarios.py` | 2.2 | `d50687e` |
-| `backend/tests/test_readme.py` | 5.7 | `150e108` |
-| `frontend/src/App.test.jsx` | 1.7 | `3a79345` |
-| `frontend/src/features/auth/almacenToken.test.jsx` | 7.2 (almacenamiento del token sin `sessionStorage`) | `005a096` |
+| Archivo | Change | Tarea | Commit |
+|---|---|---|---|
+| `backend/tests/test_app_factory.py` | `usuarios-roles-auth` | 1.1, 1.5, 1.6 | `3a79345` |
+| `backend/tests/test_config.py` | `usuarios-roles-auth` | 1.3 (y `JWT_ACCESS_TOKEN_MINUTES`, ver observación 1) | `3a79345` |
+| `backend/tests/test_cors.py` | `usuarios-roles-auth` | 1.7 | `3a79345` |
+| `backend/tests/test_modelos.py` | `usuarios-roles-auth` | 2.1 | `d50687e` |
+| `backend/tests/test_migraciones.py` | `usuarios-roles-auth` | 2.2 | `d50687e` |
+| `backend/tests/test_repositorio_usuarios.py` | `usuarios-roles-auth` | 2.2 | `d50687e` |
+| `backend/tests/test_readme.py` | `usuarios-roles-auth`; `espacios` | 5.7; 3.6 (generalizada a los módulos `usuarios` y `espacios`) | `150e108`, `4ea3b2a` |
+| `backend/tests/test_espacios_esquema.py` | `espacios` | 1.1 | `9064d93` |
+| `backend/tests/test_repositorio_espacios.py` | `espacios` | 1.2 | `9064d93` |
+| `backend/tests/test_errores_espacios.py` | `espacios` | 2.1 | `08159a7` |
+| `frontend/src/App.test.jsx` | `usuarios-roles-auth` | 1.7 | `3a79345` |
+| `frontend/src/features/auth/almacenToken.test.jsx` | `usuarios-roles-auth` | 7.2 (almacenamiento del token sin `sessionStorage`) | `005a096` |
+| `frontend/src/features/espacios/ConsultaEspacios.test.jsx` › Navegación a la sección de espacios | `espacios` | 4.1 (enlace «Espacios» visible para todos los roles) | pendiente |
 
-Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta. No figuran en las tablas anteriores porque no corresponden a un escenario.
+Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta; en `espacios`, el límite técnico de la capacidad (2147483647), los nombres con tildes y eñe, los campos ajenos y los cuerpos que no son JSON. No figuran en las tablas anteriores porque no corresponden a un escenario.
 
 ## Observaciones
 
 1. **«Vigencia configurada» (spec `auth`).** La revisión de la tarea 9.2 detectó que este escenario solo se probaba al nivel de la emisión del token. Para cubrir el recorrido completo se añadió `test_login.py::test_vigencia_configurada_en_el_login`, que ejecuta el login con `JWT_ACCESS_TOKEN_MINUTES=5` y comprueba que `expira_en` es 300.
 2. **Errores HTTP fuera del contrato.** El manejador de errores (`backend/app/auth/errors.py`) traduce al formato JSON los errores 400, 404, 405 y 500. Cualquier otro error HTTP del framework (por ejemplo, 413 o 415) conserva la respuesta por defecto de Flask, que no tiene el formato `{"error": {...}}`. Con el código actual ninguna de esas respuestas es alcanzable: las rutas leen el cuerpo con `get_json(silent=True)` y no se configura un tamaño máximo de petición. Por eso no tienen prueba.
+3. **Catálogo desactualizado en la interfaz de espacios (spec `interfaz-web`).** El escenario «Error al desactivar un espacio ya inactivo» y la prueba de `espacio_ya_activo` de la tarea 4.4 solo pueden darse cuando el catálogo mostrado está desactualizado, porque la interfaz ofrece desactivar solo los espacios activos y reactivar solo los inactivos. Para que el catálogo «mantenga» el estado real, la interfaz vuelve a pedir `GET /api/espacios` cuando la operación responde 404 o 409. Las pruebas simulan ese desfase: la primera consulta devuelve el estado anterior y la segunda el real.
