@@ -6,7 +6,7 @@ la unicidad sin distinguir mayúsculas la garantiza el índice
 `ux_espacios_nombre` sobre `lower(btrim(nombre))`.
 """
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from ..extensions import db
 from ..models import Espacio
@@ -34,6 +34,18 @@ def listar_espacios():
 
 def obtener_espacio_por_id(espacio_id):
     return db.session.get(Espacio, espacio_id)
+
+
+def obtener_espacio_por_nombre(nombre):
+    """Espacio cuyo nombre es equivalente, con la misma expresión del índice único.
+
+    Compara `lower(btrim(...))` en la base, de modo que la comprobación del
+    servicio y el índice `ux_espacios_nombre` usan exactamente la misma regla.
+    """
+    clave = func.lower(func.btrim(normalizar_nombre(nombre)))
+    return db.session.execute(
+        select(Espacio).where(func.lower(func.btrim(Espacio.nombre)) == clave)
+    ).scalar_one_or_none()
 
 
 def actualizar_espacio(espacio, *, nombre=_SIN_CAMBIO, tipo=_SIN_CAMBIO, capacidad=_SIN_CAMBIO):

@@ -94,7 +94,46 @@ class OperacionNoPermitida(ErrorDeDominio):
     mensaje = "La operación no está permitida sobre la propia cuenta."
 
 
-MENSAJE_RUTA_NO_ENCONTRADA = "La ruta solicitada no existe."
+# --- Espacios (change `espacios`, design.md D5) ------------------------------
+
+
+class TipoEspacioInvalido(ErrorDeDominio):
+    http = 400
+    codigo = "tipo_espacio_invalido"
+    mensaje = "El tipo de espacio no pertenece al catálogo de tipos."
+
+
+class CapacidadInvalida(ErrorDeDominio):
+    http = 400
+    codigo = "capacidad_invalida"
+    mensaje = "La capacidad debe ser un número entero mayor que cero."
+
+
+class EspacioDuplicado(ErrorDeDominio):
+    http = 409
+    codigo = "espacio_duplicado"
+    mensaje = "Ya existe un espacio con ese nombre."
+
+
+class EspacioNoEncontrado(ErrorDeDominio):
+    http = 404
+    codigo = "espacio_no_encontrado"
+    mensaje = "El espacio solicitado no existe."
+
+
+class EspacioYaInactivo(ErrorDeDominio):
+    http = 409
+    codigo = "espacio_ya_inactivo"
+    mensaje = "El espacio ya está inactivo."
+
+
+class EspacioYaActivo(ErrorDeDominio):
+    http = 409
+    codigo = "espacio_ya_activo"
+    mensaje = "El espacio ya está activo."
+
+
+MENSAJE_RUTA_NO_ENCONTRADA ="La ruta solicitada no existe."
 MENSAJE_METODO_NO_PERMITIDO = "El método HTTP no está permitido en esta ruta."
 MENSAJE_ERROR_INTERNO = "Se produjo un error interno."
 

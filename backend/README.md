@@ -195,6 +195,12 @@ El mensaje es un texto fijo del catálogo y nunca incluye datos de la petición 
 | `correo_duplicado` | 409 | Correo ya registrado |
 | `usuario_no_encontrado` | 404 | Identificador de usuario inexistente |
 | `operacion_no_permitida` | 409 | Desactivar la propia cuenta o cambiar el propio rol |
+| `tipo_espacio_invalido` | 400 | Tipo de espacio fuera del catálogo (`laboratorio`, `auditorio`, `sala_de_computo`) |
+| `capacidad_invalida` | 400 | Capacidad presente que no es un entero mayor que cero (máximo técnico 2147483647) |
+| `espacio_duplicado` | 409 | Nombre ya usado por otro espacio, activo o inactivo, sin distinguir mayúsculas ni espacios exteriores |
+| `espacio_no_encontrado` | 404 | Identificador de espacio inexistente |
+| `espacio_ya_inactivo` | 409 | Desactivar un espacio que ya está inactivo |
+| `espacio_ya_activo` | 409 | Reactivar un espacio que ya está activo |
 | `ruta_no_encontrada` | 404 | Ruta inexistente |
 | `metodo_no_permitido` | 405 | Método HTTP no permitido en la ruta |
 | `error_interno` | 500 | Error interno no controlado |
