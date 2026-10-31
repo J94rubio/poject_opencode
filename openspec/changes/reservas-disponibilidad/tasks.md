@@ -27,15 +27,15 @@
 
 ## 5. Interfaz web de reservas
 
-- [ ] 5.1 Implementar el formulario de creaciÃ³n de solicitud con espacio, inicio y fin, enviando las fechas con zona horaria explÃ­cita, mostrando la solicitud creada como pendiente y los mensajes de `datos_invalidos`, `espacio_no_encontrado`, `espacio_inactivo` y `reserva_solapada`; verificar con pruebas Vitest el acceso al formulario, el envÃ­o con zona horaria, la creaciÃ³n correcta y cada mensaje de error (requisito Â«CreaciÃ³n de solicitudes en la interfazÂ»).
-- [ ] 5.2 Implementar la consulta de disponibilidad por espacio y rango, mostrando los intervalos devueltos, la lista vacÃ­a sin error y los mensajes de `datos_invalidos` y `espacio_no_encontrado`; verificar con pruebas Vitest cada caso (requisito Â«Consulta de disponibilidad en la interfazÂ»).
-- [ ] 5.3 Implementar el listado de solicitudes que refleja lo devuelto por la API segÃºn el rol; verificar con pruebas Vitest el listado de un `solicitante`, de un `aprobador` o `admin` y el listado vacÃ­o (requisito Â«Listado de solicitudes en la interfazÂ»).
+- [x] 5.1 Implementar el formulario de creaciÃ³n de solicitud con espacio, inicio y fin, enviando las fechas con zona horaria explÃ­cita, mostrando la solicitud creada como pendiente y los mensajes de `datos_invalidos`, `espacio_no_encontrado`, `espacio_inactivo` y `reserva_solapada`; verificar con pruebas Vitest el acceso al formulario, el envÃ­o con zona horaria, la creaciÃ³n correcta y cada mensaje de error (requisito Â«CreaciÃ³n de solicitudes en la interfazÂ»).
+- [x] 5.2 Implementar la consulta de disponibilidad por espacio y rango, mostrando los intervalos devueltos, la lista vacÃ­a sin error y los mensajes de `datos_invalidos` y `espacio_no_encontrado`; verificar con pruebas Vitest cada caso (requisito Â«Consulta de disponibilidad en la interfazÂ»).
+- [x] 5.3 Implementar el listado de solicitudes que refleja lo devuelto por la API segÃºn el rol; verificar con pruebas Vitest el listado de un `solicitante`, de un `aprobador` o `admin` y el listado vacÃ­o (requisito Â«Listado de solicitudes en la interfazÂ»).
 
 ## 6. VerificaciÃ³n integral
 
-- [ ] 6.1 Ejecutar la suite completa de `pytest` y de Vitest contra la base `reservas_test` y verificar que todos los escenarios de las specs `reservas` e `interfaz-web` de este change quedan en verde, incluidos los casos lÃ­mite: fin igual al inicio, fin anterior al inicio, inicio en el pasado, inicio en el instante actual, fecha sin zona horaria, espacio inexistente, espacio inactivo, espacio reactivado y reserva que termina cuando otra empieza (todos los requisitos de este change).
-- [ ] 6.2 Actualizar la matriz de trazabilidad existente en `docs/matriz-trazabilidad.md` con requisito â†’ escenario â†’ prueba de las specs `reservas` e `interfaz-web`, y verificar que cada requisito de este change tiene al menos una prueba en verde, como exige la secciÃ³n 5.3 del plan (todos los requisitos de este change).
-- [ ] 6.3 Revisar el diff completo contra las specs `reservas` e `interfaz-web` y verificar que no queda funcionalidad implementada que no estÃ© especificada, conforme a la secciÃ³n 6.4 del plan (todos los requisitos de este change).
+- [x] 6.1 Ejecutar la suite completa de `pytest` y de Vitest contra la base `reservas_test` y verificar que todos los escenarios de las specs `reservas` e `interfaz-web` de este change quedan en verde, incluidos los casos lÃ­mite: fin igual al inicio, fin anterior al inicio, inicio en el pasado, inicio en el instante actual, fecha sin zona horaria, espacio inexistente, espacio inactivo, espacio reactivado y reserva que termina cuando otra empieza (todos los requisitos de este change).
+- [x] 6.2 Actualizar la matriz de trazabilidad existente en `docs/matriz-trazabilidad.md` con requisito â†’ escenario â†’ prueba de las specs `reservas` e `interfaz-web`, y verificar que cada requisito de este change tiene al menos una prueba en verde, como exige la secciÃ³n 5.3 del plan (todos los requisitos de este change).
+- [x] 6.3 Revisar el diff completo contra las specs `reservas` e `interfaz-web` y verificar que no queda funcionalidad implementada que no estÃ© especificada, conforme a la secciÃ³n 6.4 del plan (todos los requisitos de este change).
 
 ## Workflow follow-up
 

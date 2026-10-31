@@ -3,6 +3,9 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext.jsx'
 import { LoginPage } from './features/auth/LoginPage.jsx'
 import { RutaProtegida } from './features/auth/RutaProtegida.jsx'
 import { SeccionEspacios } from './features/espacios/SeccionEspacios.jsx'
+import { ConsultaDisponibilidad } from './features/reservas/ConsultaDisponibilidad.jsx'
+import { FormularioSolicitud } from './features/reservas/FormularioSolicitud.jsx'
+import { ListadoSolicitudes } from './features/reservas/ListadoSolicitudes.jsx'
 import { SeccionUsuarios } from './features/usuarios/SeccionUsuarios.jsx'
 import { Enlace, Redirigir, useRuta } from './navegacion.jsx'
 
@@ -23,6 +26,9 @@ function Marco({ ruta, children }) {
         <nav>
           <Enlace a="/">Inicio</Enlace>
           <Enlace a="/espacios">Espacios</Enlace>
+          <Enlace a="/reservas">Solicitudes</Enlace>
+          <Enlace a="/reservas/nueva">Nueva solicitud</Enlace>
+          <Enlace a="/reservas/disponibilidad">Disponibilidad</Enlace>
           {usuario.rol === 'admin' && (
             <Enlace a="/admin/usuarios">Administración de usuarios</Enlace>
           )}
@@ -45,24 +51,25 @@ function Inicio() {
   return <h2>Bienvenido, {sesion.usuario.nombre}</h2>
 }
 
+// Secciones disponibles para cualquier sesión autenticada, por ruta.
+const SECCIONES = {
+  '/': Inicio,
+  '/espacios': SeccionEspacios,
+  '/reservas': ListadoSolicitudes,
+  '/reservas/nueva': FormularioSolicitud,
+  '/reservas/disponibilidad': ConsultaDisponibilidad,
+}
+
 export function Aplicacion() {
   const ruta = useRuta()
 
   if (ruta === '/login') return <LoginPage />
-  if (ruta === '/') {
+  const Seccion = SECCIONES[ruta]
+  if (Seccion) {
     return (
       <RutaProtegida>
         <Marco ruta={ruta}>
-          <Inicio />
-        </Marco>
-      </RutaProtegida>
-    )
-  }
-  if (ruta === '/espacios') {
-    return (
-      <RutaProtegida>
-        <Marco ruta={ruta}>
-          <SeccionEspacios />
+          <Seccion />
         </Marco>
       </RutaProtegida>
     )

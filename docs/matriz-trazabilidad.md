@@ -1,14 +1,15 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`) y `espacios` (tarea 5.2 de `openspec/changes/espacios/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/reservas-disponibilidad/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
-  - `espacios` y los requisitos de espacios de `interfaz-web`: specs delta del change en `openspec/changes/espacios/specs/{espacios,interfaz-web}/spec.md`, que se publicarán en `openspec/specs/` al archivar el change.
+  - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
+  - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/changes/reservas-disponibilidad/specs/{reservas,interfaz-web}/spec.md`, que se publicarán en `openspec/specs/` al archivar el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba. «pendiente» indica una prueba de la sección 4 de `espacios` que aún no tiene commit.
-- Estado: todas las pruebas citadas están en verde en la última ejecución: **567 pasadas en pytest** y **88 pasadas en Vitest**, sin fallos ni pruebas omitidas.
+- Commit: el commit que introdujo la prueba. «pendiente» indica una prueba de la sección 5 de `reservas-disponibilidad` que aún no tiene commit.
+- Estado: todas las pruebas citadas están en verde en la última ejecución: **775 pasadas en pytest** y **119 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
 
@@ -19,8 +20,9 @@ Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por s
 | `auth` | 9 | 35 | 35 |
 | `usuarios` | 10 | 40 | 40 |
 | `espacios` | 7 | 36 | 36 |
-| `interfaz-web` | 8 (5 de `usuarios-roles-auth` y 3 de `espacios`) | 29 | 29 |
-| **Total** | **34** | **140** | **140** |
+| `reservas` | 6 | 46 | 46 |
+| `interfaz-web` | 11 (5 de `usuarios-roles-auth`, 3 de `espacios` y 3 de `reservas-disponibilidad`) | 39 | 39 |
+| **Total** | **43** | **196** | **196** |
 
 Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cobertura están en [Observaciones](#observaciones).
 
@@ -283,6 +285,88 @@ Cada escenario se cita con la prueba del servicio (`test_servicio_espacios_*.py`
 
 ---
 
+## Spec `reservas`
+
+Spec delta del change `reservas-disponibilidad` (`openspec/changes/reservas-disponibilidad/specs/reservas/spec.md`). Cada escenario se cita con la prueba del servicio (`test_servicio_reservas_*.py`, sección 3) y la de integración HTTP (`test_reservas_api.py`, sección 4) cuando existen ambas. Los escenarios de la garantía de integridad se verifican a nivel de repositorio y de esquema (secciones 1 y 2). Como la aprobación llega con `aprobacion-reservas`, las reservas aprobadas se siembran directamente en el repositorio. Las validaciones de fechas usan un reloj inyectado.
+
+### Requisito: Creación de solicitudes de reserva
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Creación válida en estado pendiente | `test_servicio_reservas_creacion.py::test_creacion_valida_en_estado_pendiente`; `test_reservas_api.py::test_creacion_valida_por_rol[solicitante]` | `7519869` |
+| Creación por aprobador o administrador | `test_servicio_reservas_creacion.py::test_toda_solicitud_nace_pendiente_del_usuario_autenticado[aprobador, admin]`; `test_reservas_api.py::test_creacion_valida_por_rol[aprobador, admin]` | `7519869` |
+| Solicitante enviado en el cuerpo de la petición | `test_servicio_reservas_creacion.py::test_un_campo_de_solicitante_en_el_cuerpo` (2 variantes); `test_reservas_api.py::test_creacion_con_datos_invalidos[solicitante_en_el_cuerpo]` | `7519869` |
+| Campos obligatorios faltantes | `test_servicio_reservas_creacion.py::test_campos_obligatorios_faltantes` (3 variantes); `test_reservas_api.py::test_creacion_con_datos_invalidos[sin_inicio]` | `7519869` |
+| Fecha sin zona horaria es inválida | `test_servicio_reservas_creacion.py::test_fecha_sin_zona_horaria_es_invalida` (inicio y fin); `test_servicio_reservas_creacion.py::test_convertir_fecha_rechaza_sin_zona_horaria_o_formato_invalido` (9 variantes); `test_reservas_api.py::test_creacion_con_datos_invalidos[sin_zona_horaria]` | `7519869` |
+| Fin anterior o igual al inicio | `test_servicio_reservas_creacion.py::test_fin_igual_o_anterior_al_inicio` (2 variantes); `test_servicio_reservas_creacion.py::test_fin_igual_al_inicio_expresado_en_otra_zona`; `test_reservas_api.py::test_creacion_con_datos_invalidos[fin_igual_al_inicio]` | `7519869` |
+| Inicio en el pasado | `test_servicio_reservas_creacion.py::test_inicio_en_el_pasado_o_en_el_instante_actual[un_dia_antes, un_instante_antes]`; `test_servicio_reservas_creacion.py::test_el_instante_actual_lo_fija_el_reloj_inyectado`; `test_reservas_api.py::test_creacion_con_datos_invalidos[inicio_en_el_pasado]` | `7519869` |
+| Inicio en el instante actual | `test_servicio_reservas_creacion.py::test_inicio_en_el_pasado_o_en_el_instante_actual[instante_actual]`; `test_servicio_reservas_creacion.py::test_inicio_un_instante_despues_del_actual_se_acepta` (límite aceptado); `test_reservas_api.py::test_creacion_con_datos_invalidos[inicio_en_el_instante_actual]` | `7519869` |
+| Espacio inexistente | `test_servicio_reservas_creacion.py::test_espacio_inexistente` (4 variantes); `test_reservas_api.py::test_creacion_sobre_espacio_inexistente` | `7519869` |
+| Espacio inactivo rechaza la solicitud | `test_servicio_reservas_creacion.py::test_espacio_inactivo_rechaza_la_solicitud`; `test_reservas_api.py::test_creacion_sobre_espacio_inactivo_y_reactivado` | `7519869` |
+| Espacio desactivado y luego reactivado admite solicitudes | `test_servicio_reservas_creacion.py::test_espacio_desactivado_y_reactivado_admite_solicitudes`; `test_reservas_api.py::test_creacion_sobre_espacio_inactivo_y_reactivado` | `7519869` |
+| Creación sin autenticación | `test_reservas_api.py::test_creacion_sin_autenticacion` (comprueba que no se crea ninguna solicitud) | `7519869` |
+
+### Requisito: Catálogo de estados de una reserva
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Toda solicitud creada por la API queda pendiente | `test_servicio_reservas_creacion.py::test_toda_solicitud_nace_pendiente_del_usuario_autenticado` (3 roles); `test_servicio_reservas_creacion.py::test_la_peticion_no_puede_fijar_el_estado_ni_otros_campos` (3 variantes); `test_reservas_api.py::test_creacion_con_datos_invalidos[estado_en_el_cuerpo]` | `7519869` |
+| Estado fuera del catálogo rechazado al persistir | `test_reservas_esquema.py::test_un_estado_fuera_del_catalogo_es_rechazado` (3 variantes); `test_reservas_esquema.py::test_cada_estado_del_catalogo_se_acepta` (4 estados) | `7519869` |
+
+### Requisito: Ocupación por reservas aprobadas
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Solapamiento parcial con una reserva aprobada | `test_servicio_reservas_creacion.py::test_solapamiento_con_una_reserva_aprobada[solapamiento_parcial_final, solapamiento_parcial_inicial, mismo_rango]`; `test_reservas_api.py::test_creacion_solapada_con_una_aprobada` | `7519869` |
+| Solicitud contenida en una reserva aprobada | `test_servicio_reservas_creacion.py::test_solapamiento_con_una_reserva_aprobada[contenida]` | `7519869` |
+| Solicitud que contiene a una reserva aprobada | `test_servicio_reservas_creacion.py::test_solapamiento_con_una_reserva_aprobada[que_contiene]` | `7519869` |
+| Reserva que termina exactamente cuando otra empieza es permitida | `test_servicio_reservas_creacion.py::test_borde_exacto_permitido[empieza_cuando_termina, termina_cuando_empieza]` | `7519869` |
+| La misma franja en otro espacio no genera conflicto | `test_servicio_reservas_creacion.py::test_la_misma_franja_en_otro_espacio_no_genera_conflicto` | `7519869` |
+| Una reserva rechazada o cancelada no ocupa el espacio | `test_servicio_reservas_creacion.py::test_reservas_no_aprobadas_no_ocupan[rechazada, cancelada]` | `7519869` |
+| Varias solicitudes pendientes pueden solaparse entre sí | `test_servicio_reservas_creacion.py::test_varias_solicitudes_pendientes_pueden_solaparse`; `test_servicio_reservas_creacion.py::test_reservas_no_aprobadas_no_ocupan[pendiente]` | `7519869` |
+
+### Requisito: Garantía de integridad contra solapamientos aprobados
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Dos reservas aprobadas solapadas en el mismo espacio | `test_repositorio_reservas.py::test_dos_aprobadas_solapadas_en_el_mismo_espacio` | `7519869` |
+| Dos reservas aprobadas que solo comparten el extremo | `test_repositorio_reservas.py::test_inserciones_aceptadas[aprobadas_comparten_extremo]` | `7519869` |
+| Reservas aprobadas con el mismo rango en espacios distintos | `test_repositorio_reservas.py::test_inserciones_aceptadas[aprobadas_en_espacios_distintos]` | `7519869` |
+| Dos reservas pendientes solapadas | `test_repositorio_reservas.py::test_inserciones_aceptadas[pendientes_solapadas]` | `7519869` |
+| Una reserva aprobada y una pendiente solapadas | `test_repositorio_reservas.py::test_inserciones_aceptadas[aprobada_y_pendiente_solapadas]` | `7519869` |
+| Rango con fin igual o anterior al inicio | `test_reservas_esquema.py::test_un_rango_con_fin_igual_o_anterior_al_inicio_es_rechazado[fin_igual, fin_anterior]` | `7519869` |
+
+### Requisito: Consulta de disponibilidad de un espacio por rango
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Disponibilidad devuelve los intervalos de reservas aprobadas | `test_servicio_reservas_disponibilidad.py::test_devuelve_los_intervalos_de_reservas_aprobadas_en_orden`; `test_reservas_api.py::test_disponibilidad_por_rol` (3 roles; solo `inicio` y `fin` en UTC); `test_repositorio_reservas.py::test_aprobadas_por_espacio_y_rango` | `7519869` |
+| Disponibilidad ignora reservas que no están aprobadas | `test_servicio_reservas_disponibilidad.py::test_ignora_las_reservas_no_aprobadas` (3 estados) | `7519869` |
+| Intervalo que solapa parcialmente el rango se devuelve completo | `test_servicio_reservas_disponibilidad.py::test_intervalo_parcial_se_devuelve_completo` | `7519869` |
+| Reserva que solo toca el borde del rango | `test_servicio_reservas_disponibilidad.py::test_reserva_que_solo_toca_el_borde[borde_inicial, borde_final]` | `7519869` |
+| Espacio sin reservas aprobadas en el rango | `test_servicio_reservas_disponibilidad.py::test_espacio_sin_reservas_aprobadas_devuelve_lista_vacia`; `test_reservas_api.py::test_disponibilidad_vacia_y_espacio_inactivo`; `test_repositorio_reservas.py::test_aprobadas_por_espacio_y_rango_sin_coincidencias` | `7519869` |
+| Rango inválido | `test_servicio_reservas_disponibilidad.py::test_rango_invalido` (9 variantes); `test_reservas_api.py::test_disponibilidad_con_rango_invalido` (6 variantes) | `7519869` |
+| Espacio inexistente en la consulta | `test_servicio_reservas_disponibilidad.py::test_espacio_inexistente` (2 variantes); `test_reservas_api.py::test_disponibilidad_de_un_espacio_inexistente` | `7519869` |
+| Espacio inactivo en la consulta | `test_servicio_reservas_disponibilidad.py::test_espacio_inactivo_procede`; `test_reservas_api.py::test_disponibilidad_vacia_y_espacio_inactivo` | `7519869` |
+| Consulta sin autenticación | `test_reservas_api.py::test_disponibilidad_sin_autenticacion` | `7519869` |
+
+### Requisito: Listado y detalle de solicitudes
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Solicitante ve solo sus propias solicitudes | `test_servicio_reservas_consulta.py::test_solicitante_ve_solo_sus_solicitudes_en_orden`; `test_servicio_reservas_consulta.py::test_solicitante_sin_solicitudes_propias_aunque_existan_ajenas`; `test_reservas_api.py::test_listado_del_solicitante_solo_propias` | `7519869` |
+| Aprobador ve todas las solicitudes | `test_servicio_reservas_consulta.py::test_aprobador_y_admin_ven_todas_en_orden[aprobador]`; `test_reservas_api.py::test_listado_de_aprobador_y_admin_todas[aprobador]` | `7519869` |
+| Admin ve todas las solicitudes | `test_servicio_reservas_consulta.py::test_aprobador_y_admin_ven_todas_en_orden[admin]`; `test_reservas_api.py::test_listado_de_aprobador_y_admin_todas[admin]` | `7519869` |
+| Orden del listado | `test_repositorio_reservas.py::test_listados_ordenados_por_inicio_y_luego_por_id`; `test_servicio_reservas_consulta.py::test_solicitante_ve_solo_sus_solicitudes_en_orden`; `test_servicio_reservas_consulta.py::test_aprobador_y_admin_ven_todas_en_orden` | `7519869` |
+| Listado sin solicitudes | `test_servicio_reservas_consulta.py::test_listado_sin_solicitudes_visibles` (3 roles); `test_reservas_api.py::test_listado_vacio` (3 roles); `test_repositorio_reservas.py::test_listados_vacios` | `7519869` |
+| Detalle de una solicitud propia | `test_servicio_reservas_consulta.py::test_detalle_de_una_solicitud_propia`; `test_reservas_api.py::test_detalle_propio` | `7519869` |
+| Detalle de una solicitud ajena por un solicitante | `test_servicio_reservas_consulta.py::test_detalle_ajeno_por_un_solicitante`; `test_reservas_api.py::test_detalle_ajeno_por_un_solicitante` (sin datos de la solicitud) | `7519869` |
+| Detalle de una solicitud ajena por aprobador o admin | `test_servicio_reservas_consulta.py::test_detalle_ajeno_por_aprobador_o_admin` (2 roles); `test_reservas_api.py::test_detalle_ajeno_por_aprobador_o_admin` (2 roles) | `7519869` |
+| Detalle de una solicitud inexistente | `test_servicio_reservas_consulta.py::test_detalle_de_una_solicitud_inexistente` (6 variantes); `test_reservas_api.py::test_detalle_inexistente` (3 roles) | `7519869` |
+| Consulta sin autenticación | `test_reservas_api.py::test_listado_y_detalle_sin_autenticacion` (listado y detalle) | `7519869` |
+
+---
+
 ## Spec `interfaz-web`
 
 ### Requisito: Pantalla de inicio de sesión
@@ -329,30 +413,57 @@ Cada escenario se cita con la prueba del servicio (`test_servicio_espacios_*.py`
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Listado con espacios activos e inactivos | `features/espacios/ConsultaEspacios.test.jsx` › Listado con espacios activos e inactivos › «muestra a un %s cada espacio con su nombre, tipo, capacidad y estado» (3 roles); «identifica los espacios inactivos como tales» | pendiente |
-| Catálogo sin espacios | `features/espacios/ConsultaEspacios.test.jsx` › Catálogo sin espacios › «muestra el catálogo vacío sin un mensaje de error» | pendiente |
-| Detalle de un espacio | `features/espacios/ConsultaEspacios.test.jsx` › Detalle de un espacio › «consulta GET /api/espacios/{id} y muestra su nombre, tipo, capacidad y estado» | pendiente |
-| Error al consultar un espacio inexistente | `features/espacios/ConsultaEspacios.test.jsx` › Error al consultar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado y ningún dato de espacio» | pendiente |
+| Listado con espacios activos e inactivos | `features/espacios/ConsultaEspacios.test.jsx` › Listado con espacios activos e inactivos › «muestra a un %s cada espacio con su nombre, tipo, capacidad y estado» (3 roles); «identifica los espacios inactivos como tales» | `5e9f0d0` |
+| Catálogo sin espacios | `features/espacios/ConsultaEspacios.test.jsx` › Catálogo sin espacios › «muestra el catálogo vacío sin un mensaje de error» | `5e9f0d0` |
+| Detalle de un espacio | `features/espacios/ConsultaEspacios.test.jsx` › Detalle de un espacio › «consulta GET /api/espacios/{id} y muestra su nombre, tipo, capacidad y estado» | `5e9f0d0` |
+| Error al consultar un espacio inexistente | `features/espacios/ConsultaEspacios.test.jsx` › Error al consultar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado y ningún dato de espacio» | `5e9f0d0` |
 
 ### Requisito: Alta y edición de espacios en la interfaz
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Alta correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Alta correcta de un espacio › «un %s envía nombre, tipo y capacidad y el catálogo muestra el espacio activo» (aprobador y admin) | pendiente |
-| Edición correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Edición correcta de un espacio › «envía PATCH con nombre, tipo y capacidad y el catálogo refleja los datos sin alterar el estado» | pendiente |
-| Mensajes de error del alta y de la edición | `features/espacios/FormularioEspacio.test.jsx` › Mensajes de error del alta y de la edición › «el alta muestra el mensaje de %s y no refleja el espacio como creado»; «la edición muestra el mensaje de %s y no refleja el espacio como modificado» (4 códigos cada una); «no valida en el navegador: envía al servidor lo escrito» | pendiente |
-| Acciones de alta y edición no ofrecidas a un rol sin permiso | `features/espacios/FormularioEspacio.test.jsx` › Acciones de alta y edición no ofrecidas a un rol sin permiso › «un solicitante no ve las acciones de alta ni de edición»; `features/espacios/permisos.test.js` › puedeGestionarEspacios | pendiente |
+| Alta correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Alta correcta de un espacio › «un %s envía nombre, tipo y capacidad y el catálogo muestra el espacio activo» (aprobador y admin) | `5e9f0d0` |
+| Edición correcta de un espacio | `features/espacios/FormularioEspacio.test.jsx` › Edición correcta de un espacio › «envía PATCH con nombre, tipo y capacidad y el catálogo refleja los datos sin alterar el estado» | `5e9f0d0` |
+| Mensajes de error del alta y de la edición | `features/espacios/FormularioEspacio.test.jsx` › Mensajes de error del alta y de la edición › «el alta muestra el mensaje de %s y no refleja el espacio como creado»; «la edición muestra el mensaje de %s y no refleja el espacio como modificado» (4 códigos cada una); «no valida en el navegador: envía al servidor lo escrito» | `5e9f0d0` |
+| Acciones de alta y edición no ofrecidas a un rol sin permiso | `features/espacios/FormularioEspacio.test.jsx` › Acciones de alta y edición no ofrecidas a un rol sin permiso › «un solicitante no ve las acciones de alta ni de edición»; `features/espacios/permisos.test.js` › puedeGestionarEspacios | `5e9f0d0` |
 
 ### Requisito: Activación y desactivación de espacios en la interfaz
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Desactivación correcta de un espacio | `features/espacios/DesactivacionEspacios.test.jsx` › Desactivación correcta de un espacio › «un %s desactiva un espacio y el catálogo lo muestra inactivo conservando sus datos» (aprobador y admin) | pendiente |
-| Reactivación correcta de un espacio | `features/espacios/ReactivacionEspacios.test.jsx` › Reactivación correcta de un espacio › «un %s reactiva un espacio y el catálogo lo muestra activo conservando sus datos» (aprobador y admin) | pendiente |
-| Error al desactivar un espacio ya inactivo | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio ya inactivo › «muestra el mensaje de espacio_ya_inactivo y el catálogo mantiene el espacio inactivo» | pendiente |
-| Error al desactivar un espacio inexistente | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado» | pendiente |
-| Acción de desactivación no ofrecida a un rol sin permiso | `features/espacios/DesactivacionEspacios.test.jsx` › Acción de desactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de desactivación» | pendiente |
-| Acción de reactivación no ofrecida a un rol sin permiso | `features/espacios/ReactivacionEspacios.test.jsx` › Acción de reactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de reactivación» | pendiente |
+| Desactivación correcta de un espacio | `features/espacios/DesactivacionEspacios.test.jsx` › Desactivación correcta de un espacio › «un %s desactiva un espacio y el catálogo lo muestra inactivo conservando sus datos» (aprobador y admin) | `5e9f0d0` |
+| Reactivación correcta de un espacio | `features/espacios/ReactivacionEspacios.test.jsx` › Reactivación correcta de un espacio › «un %s reactiva un espacio y el catálogo lo muestra activo conservando sus datos» (aprobador y admin) | `5e9f0d0` |
+| Error al desactivar un espacio ya inactivo | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio ya inactivo › «muestra el mensaje de espacio_ya_inactivo y el catálogo mantiene el espacio inactivo» | `5e9f0d0` |
+| Error al desactivar un espacio inexistente | `features/espacios/DesactivacionEspacios.test.jsx` › Error al desactivar un espacio inexistente › «muestra el mensaje de espacio_no_encontrado» | `5e9f0d0` |
+| Acción de desactivación no ofrecida a un rol sin permiso | `features/espacios/DesactivacionEspacios.test.jsx` › Acción de desactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de desactivación» | `5e9f0d0` |
+| Acción de reactivación no ofrecida a un rol sin permiso | `features/espacios/ReactivacionEspacios.test.jsx` › Acción de reactivación no ofrecida a un rol sin permiso › «un solicitante no ve la acción de reactivación» | `5e9f0d0` |
+
+### Requisito: Creación de solicitudes en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Acceso al formulario de creación | `features/reservas/CreacionSolicitud.test.jsx` › Acceso al formulario de creación › «un %s abre la sección desde la navegación y ve los campos de espacio, inicio y fin» (3 roles) | pendiente |
+| Envío con zona horaria explícita | `features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «envía a POST /api/reservas el espacio y el inicio y el fin en ISO 8601 con zona horaria»; «la conversión conserva el instante del valor local y lo expresa en UTC» | pendiente |
+| Creación correcta | `features/reservas/CreacionSolicitud.test.jsx` › Creación correcta › «un %s ve la solicitud creada en estado pendiente con las fechas en UTC» (3 roles) | pendiente |
+| Mensajes de error de la creación | `features/reservas/CreacionSolicitud.test.jsx` › Mensajes de error de la creación › «con %i %s muestra el mensaje del servidor y ninguna solicitud creada» (4 códigos); «un error tras una creación correcta deja de mostrar la solicitud anterior»; › Envío con zona horaria explícita › «no valida en el navegador: con campos vacíos envía la petición y el servidor decide» | pendiente |
+
+### Requisito: Consulta de disponibilidad en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Intervalos ocupados visibles | `features/reservas/ConsultaDisponibilidad.test.jsx` › Intervalos ocupados visibles › «consulta el rango con zona horaria explícita y muestra cada intervalo en UTC tal como llega»; «también está disponible para un %s desde la navegación» (aprobador y admin) | pendiente |
+| Rango sin reservas aprobadas | `features/reservas/ConsultaDisponibilidad.test.jsx` › Rango sin reservas aprobadas › «con una lista vacía indica que no hay intervalos ocupados, sin mensaje de error» | pendiente |
+| Error en la consulta | `features/reservas/ConsultaDisponibilidad.test.jsx` › Error en la consulta › «con %i %s muestra el mensaje del servidor y ningún intervalo» (2 códigos); «un error tras una consulta correcta deja de mostrar los intervalos anteriores»; «no valida en el navegador: sin fechas envía la consulta sin el rango y muestra datos_invalidos» | pendiente |
+
+### Requisito: Listado de solicitudes en la interfaz
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Listado de un solicitante | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un solicitante › «muestra únicamente las solicitudes que devuelve la API, en su orden y con fechas en UTC» | pendiente |
+| Listado de un aprobador o administrador | `features/reservas/ListadoSolicitudes.test.jsx` › Listado de un aprobador o administrador › «un %s ve todas las solicitudes que devuelve la API» (aprobador y admin) | pendiente |
+| Listado vacío | `features/reservas/ListadoSolicitudes.test.jsx` › Listado vacío › «con una lista vacía muestra el listado vacío sin mensaje de error» | pendiente |
+
+El requisito «Listado de solicitudes en la interfaz» exige además mostrar el mensaje del servidor cuando la consulta falla, aunque no tiene un escenario propio. Lo cubre `features/reservas/ListadoSolicitudes.test.jsx` › Error al consultar el listado › «muestra el mensaje del servidor y ningún listado».
 
 Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backendFalso.js`) que responde con los códigos y cuerpos del contrato de errores de la API. Verifican el comportamiento de la interfaz, no el del servidor, que cubren las pruebas de `pytest`.
 
@@ -376,7 +487,16 @@ Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y 
 | `backend/tests/test_errores_espacios.py` | `espacios` | 2.1 | `08159a7` |
 | `frontend/src/App.test.jsx` | `usuarios-roles-auth` | 1.7 | `3a79345` |
 | `frontend/src/features/auth/almacenToken.test.jsx` | `usuarios-roles-auth` | 7.2 (almacenamiento del token sin `sessionStorage`) | `005a096` |
-| `frontend/src/features/espacios/ConsultaEspacios.test.jsx` › Navegación a la sección de espacios | `espacios` | 4.1 (enlace «Espacios» visible para todos los roles) | pendiente |
+| `frontend/src/features/espacios/ConsultaEspacios.test.jsx` › Navegación a la sección de espacios | `espacios` | 4.1 (enlace «Espacios» visible para todos los roles) | `5e9f0d0` |
+| `backend/tests/test_reservas_esquema.py` (extensión `btree_gist`, migraciones paso a paso, esquema, claves foráneas, exclusión e índices, DDL del modelo frente a las migraciones) | `reservas-disponibilidad` | 1.1, 1.2, 1.3 | `7519869` |
+| `backend/tests/test_repositorio_reservas.py::test_crear_y_buscar_por_id`, `::test_buscar_un_id_inexistente_devuelve_none` | `reservas-disponibilidad` | 2.1 | `7519869` |
+| `backend/tests/test_errores_reservas.py` | `reservas-disponibilidad` | 3.1 | `7519869` |
+| `backend/tests/test_servicio_reservas_creacion.py::test_convertir_fecha_con_zona_horaria_a_utc`, `::test_espacio_id_que_no_es_un_entero`, `::test_cuerpo_que_no_es_un_objeto` | `reservas-disponibilidad` | 3.2 | `7519869` |
+| `backend/tests/test_servicio_reservas_disponibilidad.py::test_otro_espacio_no_aparece`, `::test_el_rango_con_zona_horaria_se_convierte_a_utc` | `reservas-disponibilidad` | 3.5 | `7519869` |
+| `backend/tests/test_reservas_api.py::test_creacion_con_cuerpo_que_no_es_un_objeto_json`, `::test_disponibilidad_con_desplazamiento_codificado_en_la_url`, `::test_las_fechas_se_serializan_en_utc_con_otra_zona_en_la_sesion` | `reservas-disponibilidad` | 4.1 | `7519869` |
+| `backend/tests/test_readme.py` (módulo `reservas`) | `reservas-disponibilidad` | 4.2 | `7519869` |
+| `frontend/src/features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «un identificador de espacio no numérico se envía tal como se escribió» | `reservas-disponibilidad` | 5.1 | pendiente |
+| `frontend/src/features/reservas/ListadoSolicitudes.test.jsx` › Navegación al listado de solicitudes | `reservas-disponibilidad` | 5.3 (enlace «Solicitudes» visible para todos los roles) | pendiente |
 
 Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta; en `espacios`, el límite técnico de la capacidad (2147483647), los nombres con tildes y eñe, los campos ajenos y los cuerpos que no son JSON. No figuran en las tablas anteriores porque no corresponden a un escenario.
 
