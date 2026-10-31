@@ -33,6 +33,15 @@ def crear_usuario(nombre, correo, password_hash, rol, activo=True):
     return usuario
 
 
+def obtener_usuario_por_correo(correo):
+    """Busca por correo sin distinguir mayúsculas, con el rol cargado."""
+    return db.session.execute(
+        select(Usuario)
+        .options(joinedload(Usuario.rol))
+        .where(Usuario.correo == normalizar_correo(correo))
+    ).scalar_one_or_none()
+
+
 def obtener_usuario_por_id(usuario_id):
     """Carga el usuario junto con su rol en una única consulta."""
     return db.session.execute(

@@ -63,9 +63,14 @@ def esquema(migrar):
 
 @pytest.fixture(autouse=True)
 def entorno_de_pruebas(monkeypatch, test_database_url, jwt_secret_key_de_prueba):
-    """Apunta la configuración del entorno a la base de pruebas en cada prueba."""
+    """Apunta la configuración del entorno a la base de pruebas en cada prueba.
+
+    La vigencia del token parte del valor por defecto (60 minutos), para que
+    las pruebas sean deterministas; las que la cambian la fijan ellas mismas.
+    """
     monkeypatch.setenv("DATABASE_URL", test_database_url)
     monkeypatch.setenv("JWT_SECRET_KEY", jwt_secret_key_de_prueba)
+    monkeypatch.delenv("JWT_ACCESS_TOKEN_MINUTES", raising=False)
 
 
 @pytest.fixture
