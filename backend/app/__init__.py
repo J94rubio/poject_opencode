@@ -7,6 +7,7 @@ from .auth.errors import registrar_manejadores_errores
 from .auth.routes import bp as auth_bp
 from .commands import registrar_comandos
 from .config import cargar_config
+from .espacios.routes import bp as espacios_bp
 from .extensions import db
 from .usuarios.routes import bp as usuarios_bp
 
@@ -27,6 +28,7 @@ def create_app(config=None):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(usuarios_bp)
+    app.register_blueprint(espacios_bp)
 
     registrar_manejadores_errores(app)
     registrar_comandos(app)

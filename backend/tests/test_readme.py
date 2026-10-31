@@ -1,8 +1,11 @@
-"""Coherencia de `backend/README.md` con la implementación (tarea 5.7).
+"""Coherencia de `backend/README.md` con la implementación.
 
-Comprueba que los endpoints y los ejemplos del documento corresponden a rutas
-registradas y protegidas con el permiso indicado, y que el catálogo de códigos
-de error coincide con los códigos y los HTTP implementados.
+Tarea 5.7 de `usuarios-roles-auth`, generalizada en la tarea 3.6 de
+`espacios` a todos los módulos documentados. Comprueba que los endpoints y
+los ejemplos del documento corresponden a rutas registradas y protegidas con
+el permiso indicado, que toda ruta protegida por permiso está documentada y
+que el catálogo de códigos de error coincide con los códigos y los HTTP
+implementados.
 """
 
 import re
@@ -25,6 +28,17 @@ EJEMPLOS = _EJEMPLO_HTTP.findall(README)
 
 ERRORES_DEL_FRAMEWORK = {"ruta_no_encontrada": 404, "metodo_no_permitido": 405, "error_interno": 500}
 
+# Roles de menor a mayor privilegio (jerarquía de la matriz).
+ROLES = ["solicitante", "aprobador", "admin"]
+
+# Endpoints documentados por módulo.
+ENDPOINTS_POR_MODULO = {"usuarios": 8, "espacios": 6}
+
+# Blueprints cuyas rutas no exigen un permiso de la matriz (login y sesión).
+BLUEPRINTS_SIN_PERMISO = {"auth"}
+
+_METODOS_DOCUMENTABLES = {"GET", "POST", "PATCH", "PUT", "DELETE"}
+
 
 def _errores_implementados():
     dominio = {
@@ -34,38 +48,87 @@ def _errores_implementados():
     return {**dominio, **ERRORES_DEL_FRAMEWORK}
 
 
-def _a_regla_flask(ruta):
-    return ruta.replace("{id}", "<int:usuario_id>")
+def _normalizar_regla(regla):
+    """`/api/x/<int:cualquier_nombre>` → `/api/x/{id}`, para cualquier parámetro."""
+    return re.sub(r"<[^>]+>", "{id}", regla)
 
 
 def _rutas_registradas(app):
-    return {(regla.rule, metodo) for regla in app.url_map.iter_rules() for metodo in regla.methods}
+    return {
+        (_normalizar_regla(regla.rule), metodo)
+        for regla in app.url_map.iter_rules()
+        for metodo in regla.methods
+    }
 
 
-def test_el_documento_lista_los_endpoints_del_modulo_usuarios():
-    assert len(ENDPOINTS) == 8
-    assert len(EJEMPLOS) >= 8
+def _rutas_con_permiso(app):
+    """Rutas `/api` de los módulos protegidos por permiso, con sus métodos."""
+    return {
+        (metodo, _normalizar_regla(regla.rule))
+        for regla in app.url_map.iter_rules()
+        if regla.rule.startswith("/api/")
+        and regla.endpoint.split(".")[0] not in BLUEPRINTS_SIN_PERMISO
+        for metodo in regla.methods & _METODOS_DOCUMENTABLES
+    }
+
+
+def _modulo(ruta):
+    segmento = ruta.split("/")[2]
+    return "usuarios" if segmento in {"usuarios", "roles"} else segmento
+
+
+def test_el_documento_lista_los_endpoints_de_cada_modulo():
+    por_modulo = {}
+    for _, ruta, _ in ENDPOINTS:
+        por_modulo[_modulo(ruta)] = por_modulo.get(_modulo(ruta), 0) + 1
+    assert por_modulo == ENDPOINTS_POR_MODULO
+    assert len(ENDPOINTS) == len(set(ENDPOINTS)) == sum(ENDPOINTS_POR_MODULO.values())
+    assert len(EJEMPLOS) >= len(ENDPOINTS)
+
+
+def test_cada_ruta_implementada_con_permiso_esta_documentada(app):
+    documentadas = {(metodo, ruta) for metodo, ruta, _ in ENDPOINTS}
+    assert _rutas_con_permiso(app) == documentadas
 
 
 @pytest.mark.parametrize("metodo,ruta,permiso", ENDPOINTS)
 def test_cada_endpoint_documentado_existe_y_exige_su_permiso(
     app, client, crear_cuenta, cabecera, metodo, ruta, permiso
 ):
-    assert (_a_regla_flask(ruta), metodo) in _rutas_registradas(app)
-    # El permiso documentado es de la matriz y solo lo posee el `admin`.
+    assert (ruta, metodo) in _rutas_registradas(app)
+    # El permiso documentado es de la matriz (el `admin` los posee todos).
     assert permiso in PERMISOS_POR_ROL["admin"]
-    assert permiso not in PERMISOS_POR_ROL["aprobador"]
 
     url = ruta.replace("{id}", "1")
     assert client.open(url, method=metodo).get_json()["error"]["codigo"] == "token_ausente"
-    aprobador = cabecera(crear_cuenta("aprobador"))
-    respuesta = client.open(url, method=metodo, headers=aprobador, json={})
-    assert respuesta.get_json()["error"]["codigo"] == "permiso_insuficiente"
+
+    sin_permiso = [rol for rol in ROLES if permiso not in PERMISOS_POR_ROL[rol]]
+    con_permiso = [rol for rol in ROLES if permiso in PERMISOS_POR_ROL[rol]]
+
+    # El rol de mayor privilegio que carece del permiso recibe 403. Si todos
+    # los roles lo poseen (por ejemplo, `espacios:ver`), no hay a quién negarlo.
+    if sin_permiso:
+        denegado = cabecera(crear_cuenta(sin_permiso[-1]))
+        respuesta = client.open(url, method=metodo, headers=denegado, json={})
+        assert respuesta.get_json()["error"]["codigo"] == "permiso_insuficiente"
+
+    # El rol de menor privilegio que posee el permiso supera el guard.
+    permitido = cabecera(crear_cuenta(con_permiso[0], correo=f"{con_permiso[0]}.ok@example.com"))
+    respuesta = client.open(url, method=metodo, headers=permitido, json={})
+    assert respuesta.status_code not in (401, 403)
+
+
+@pytest.mark.parametrize(
+    "permiso", sorted({p for _, ruta, p in ENDPOINTS if _modulo(ruta) == "usuarios"})
+)
+def test_los_permisos_del_modulo_usuarios_son_solo_del_admin(permiso):
+    # El documento afirma que la gestión de usuarios y roles es exclusiva del `admin`.
+    assert [rol for rol in ROLES if permiso in PERMISOS_POR_ROL[rol]] == ["admin"]
 
 
 @pytest.mark.parametrize("metodo,ruta", EJEMPLOS)
 def test_cada_ejemplo_corresponde_a_una_ruta_registrada(app, metodo, ruta):
-    regla = re.sub(r"/\d+(?=/|$)", "/<int:usuario_id>", ruta)
+    regla = re.sub(r"/\d+(?=/|$)", "/{id}", ruta)
     assert (regla, metodo) in _rutas_registradas(app)
 
 

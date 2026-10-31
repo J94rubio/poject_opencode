@@ -1,8 +1,8 @@
 # Backend: sistema de reservas de espacios académicos
 
-API REST en Flask. Este documento describe los endpoints del módulo `usuarios` y el catálogo de códigos de error de la API (design.md, D7 y D8, del change `usuarios-roles-auth`).
+API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`) y `espacios` (design.md, D5 y D6, del change `espacios`) y el catálogo de códigos de error de la API.
 
-Todas las rutas del módulo `usuarios` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
+Todas las rutas de los módulos `usuarios` y `espacios` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
 
 ## Puesta en marcha
 
@@ -170,6 +170,81 @@ Respuesta 200:
 ```json
 [{"id": 1, "nombre": "solicitante"}, {"id": 2, "nombre": "aprobador"}, {"id": 3, "nombre": "admin"}]
 ```
+
+## Endpoints de espacios
+
+La consulta (`espacios:ver`) está permitida a los roles `solicitante`, `aprobador` y `admin`. El alta, la edición, la desactivación y la reactivación (`espacios:crear`, `espacios:editar`, `espacios:desactivar` y `espacios:activar`) solo a `aprobador` y `admin`; un `solicitante` recibe 403 con `permiso_insuficiente` y no se modifica ningún dato.
+
+| Método | Ruta | Permiso | Respuesta correcta |
+|---|---|---|---|
+| `GET` | `/api/espacios` | `espacios:ver` | 200 con la lista completa, incluidos los inactivos |
+| `GET` | `/api/espacios/{id}` | `espacios:ver` | 200 con el espacio |
+| `POST` | `/api/espacios` | `espacios:crear` | 201 con el espacio creado en estado `activo` |
+| `PATCH` | `/api/espacios/{id}` | `espacios:editar` | 200 con el espacio actualizado |
+| `POST` | `/api/espacios/{id}/desactivar` | `espacios:desactivar` | 200 con el espacio en estado `inactivo` |
+| `POST` | `/api/espacios/{id}/activar` | `espacios:activar` | 200 con el espacio en estado `activo` |
+
+Cada espacio se representa con exactamente estos campos, sin marcas de tiempo ni datos internos. El `tipo` es `laboratorio`, `auditorio` o `sala_de_computo`, y el `estado`, `activo` o `inactivo`:
+
+```json
+{"id": 3, "nombre": "Laboratorio de Redes", "tipo": "laboratorio", "capacidad": 30, "estado": "activo"}
+```
+
+### Listar espacios
+
+```http
+GET /api/espacios
+Authorization: Bearer <token>
+```
+
+Respuesta 200: lista de espacios con el formato anterior, ordenada por identificador e incluidos los inactivos, identificados por su `estado`. Sin espacios registrados, una lista vacía `[]`. No hay paginación ni filtros.
+
+### Consultar un espacio
+
+```http
+GET /api/espacios/3
+Authorization: Bearer <token>
+```
+
+Respuesta 200: el espacio, también si está inactivo. Error: `espacio_no_encontrado`.
+
+### Crear un espacio
+
+```http
+POST /api/espacios
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"nombre": "Laboratorio de Redes", "tipo": "laboratorio", "capacidad": 30}
+```
+
+Respuesta 201: el espacio creado en estado `activo`. Los tres campos son obligatorios y no se admite ningún otro, incluido `estado`. El nombre se guarda sin espacios exteriores y es único sin distinguir mayúsculas, también frente a los espacios inactivos. Errores: `datos_invalidos` (campo ausente, campo no admitido, nombre vacío o solo con espacios, o cuerpo que no es un objeto JSON), `tipo_espacio_invalido`, `capacidad_invalida` (cero, negativa, decimal, texto, `null` o cadena vacía) y `espacio_duplicado`.
+
+### Editar un espacio
+
+```http
+PATCH /api/espacios/3
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"capacidad": 35}
+```
+
+Respuesta 200: el espacio actualizado. Todos los campos son opcionales y solo se editan `nombre`, `tipo` y `capacidad`; los omitidos conservan su valor, el estado no cambia y un cuerpo vacío `{}` responde 200 sin cambios. Mantener el propio nombre, aunque cambien solo mayúsculas o espacios exteriores, no es un duplicado. Cualquier otro campo, incluido `estado`, responde `datos_invalidos` sin modificar nada: el estado se cambia con `desactivar`/`activar`. Errores: `datos_invalidos`, `tipo_espacio_invalido`, `capacidad_invalida`, `espacio_duplicado` y `espacio_no_encontrado`.
+
+### Desactivar y reactivar un espacio
+
+```http
+POST /api/espacios/3/desactivar
+Authorization: Bearer <token>
+```
+
+```http
+POST /api/espacios/3/activar
+Authorization: Bearer <token>
+```
+
+Respuesta 200: el espacio con `"estado": "inactivo"` o `"estado": "activo"`. El espacio conserva su nombre, tipo y capacidad, y el inactivo sigue apareciendo en las consultas; no existe eliminación física. Errores: `espacio_ya_inactivo` (desactivar un espacio inactivo), `espacio_ya_activo` (reactivar un espacio activo) y `espacio_no_encontrado`.
 
 ## Catálogo de códigos de error
 
