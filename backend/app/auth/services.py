@@ -14,10 +14,12 @@ from ..usuarios import repositories as repositorio_usuarios
 from .errors import (
     CredencialesInvalidas,
     DatosInvalidos,
+    PermisoInsuficiente,
     TokenAusente,
     TokenInvalido,
     UsuarioDesactivado,
 )
+from .permissions import PERMISOS, tiene_permiso
 from .tokens import TIPO_TOKEN, verificar_token
 
 
@@ -88,3 +90,27 @@ def requiere_autenticacion(vista):
         return vista(*args, **kwargs)
 
     return _vista_protegida
+
+
+def requiere_permiso(permiso):
+    """Guard que exige un permiso de la matriz (design.md, D1 y D8).
+
+    Autentica la petición como `requiere_autenticacion` y, con el rol vigente
+    del usuario, comprueba el permiso antes de ejecutar la lógica de negocio;
+    si el rol no lo posee responde 403 con `permiso_insuficiente`. Declarar un
+    permiso que no está en la matriz es un error de desarrollo y falla al
+    definir la ruta.
+    """
+    if permiso not in PERMISOS:
+        raise ValueError(f"Permiso no declarado en la matriz: {permiso!r}")
+
+    def _decorador(vista):
+        @wraps(vista)
+        def _vista_con_permiso(*args, **kwargs):
+            if not tiene_permiso(g.usuario_actual.rol.nombre, permiso):
+                raise PermisoInsuficiente()
+            return vista(*args, **kwargs)
+
+        return requiere_autenticacion(_vista_con_permiso)
+
+    return _decorador

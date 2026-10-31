@@ -29,8 +29,8 @@
 
 ## 4. Matriz de permisos
 
-- [ ] 4.1 Implementar en `backend/app/auth/permissions.py` la tabla de permisos por rol con la jerarquía `admin` ⊇ `aprobador` ⊇ `solicitante`, y verificar con una prueba unitaria que cada rol tiene exactamente los permisos de la matriz declarada en la spec `auth` (y en `design.md`, D2) y que cada rol incluye la totalidad de los del anterior.
-- [ ] 4.2 Implementar el guard que exige un permiso y produce `permiso_insuficiente` con HTTP 403, y verificar con pruebas de acceso permitido y de acceso denegado por rol.
+- [x] 4.1 Implementar en `backend/app/auth/permissions.py` la tabla de permisos por rol con la jerarquía `admin` ⊇ `aprobador` ⊇ `solicitante`, y verificar con una prueba unitaria que cada rol tiene exactamente los permisos de la matriz declarada en la spec `auth` (y en `design.md`, D2) y que cada rol incluye la totalidad de los del anterior.
+- [x] 4.2 Implementar el guard que exige un permiso y produce `permiso_insuficiente` con HTTP 403, y verificar con pruebas de acceso permitido y de acceso denegado por rol.
 
 ## 5. Gestión de usuarios
 
