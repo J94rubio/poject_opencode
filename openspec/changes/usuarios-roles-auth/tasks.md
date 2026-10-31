@@ -61,9 +61,9 @@
 
 ## 9. Verificación integral
 
-- [ ] 9.1 Ejecutar la suite completa de `pytest` y de `Vitest` contra la base PostgreSQL de pruebas `reservas_test` y verificar que todas las pruebas quedan en verde.
-- [ ] 9.2 Construir la matriz de trazabilidad requisito → escenario → prueba en `docs/matriz-trazabilidad.md` y verificar que cada requisito de las specs `auth`, `usuarios` e `interfaz-web` tiene al menos una prueba en verde, como exige la sección 5.3 del plan.
-- [ ] 9.3 Revisar el diff completo contra las specs `auth`, `usuarios` e `interfaz-web` y verificar que no queda ninguna funcionalidad implementada que no esté en la spec, conforme a la sección 6.4 del plan.
+- [x] 9.1 Ejecutar la suite completa de `pytest` y de `Vitest` contra la base PostgreSQL de pruebas `reservas_test` y verificar que todas las pruebas quedan en verde.
+- [x] 9.2 Construir la matriz de trazabilidad requisito → escenario → prueba en `docs/matriz-trazabilidad.md` y verificar que cada requisito de las specs `auth`, `usuarios` e `interfaz-web` tiene al menos una prueba en verde, como exige la sección 5.3 del plan.
+- [x] 9.3 Revisar el diff completo contra las specs `auth`, `usuarios` e `interfaz-web` y verificar que no queda ninguna funcionalidad implementada que no esté en la spec, conforme a la sección 6.4 del plan.
 
 ## Workflow follow-up
 

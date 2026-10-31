@@ -52,6 +52,20 @@ def test_credenciales_validas_de_una_cuenta_activa(client, usuario_id, jwt_secre
     assert "password" not in texto and "hash" not in texto
 
 
+@pytest.fixture
+def vigencia_de_5_minutos(monkeypatch):
+    """Fija la vigencia antes de que se cree la app de la prueba."""
+    monkeypatch.setenv("JWT_ACCESS_TOKEN_MINUTES", "5")
+
+
+def test_vigencia_configurada_en_el_login(vigencia_de_5_minutos, client, usuario_id):
+    """Escenario «Vigencia configurada» de la spec `auth` a través del login."""
+    respuesta = _login(client, correo=CORREO, contrasena=CONTRASENA)
+
+    assert respuesta.status_code == 200
+    assert respuesta.get_json()["expira_en"] == 300
+
+
 def test_login_con_el_correo_en_mayusculas(client, usuario_id):
     respuesta = _login(client, correo=CORREO.upper(), contrasena=CONTRASENA)
 
