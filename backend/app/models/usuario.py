@@ -6,7 +6,7 @@ guardan como `TIMESTAMP WITH TIME ZONE` en UTC.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import Base
@@ -21,6 +21,7 @@ class Usuario(Base):
     __table_args__ = (
         UniqueConstraint("correo", name="uq_usuarios_correo"),
         Index("ix_usuarios_rol_id", "rol_id"),
+        Index("uq_usuarios_correo_lower", text("lower(correo)"), unique=True),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

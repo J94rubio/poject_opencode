@@ -15,10 +15,15 @@ def obtener_rol_por_nombre(nombre):
     return db.session.execute(select(Rol).where(Rol.nombre == nombre)).scalar_one_or_none()
 
 
+def normalizar_correo(correo):
+    """El correo se almacena siempre en minúsculas (spec `usuarios`)."""
+    return correo.lower()
+
+
 def crear_usuario(nombre, correo, password_hash, rol, activo=True):
     usuario = Usuario(
         nombre=nombre,
-        correo=correo,
+        correo=normalizar_correo(correo),
         password_hash=password_hash,
         rol=rol,
         activo=activo,

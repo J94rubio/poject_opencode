@@ -14,9 +14,9 @@
 
 - [x] 2.1 Implementar los modelos `Rol` y `Usuario` en `backend/app/models/` con la relación, el rol único por usuario, el estado `activo` y las marcas de tiempo en UTC, y verificar que los modelos se importan sin error y que sus metadatos declaran las tablas `roles` y `usuarios`, la clave foránea y el rol único por usuario.
 - [x] 2.2 Crear la migración Alembic que genera las tablas `roles` y `usuarios` con clave foránea, índices y columnas `TIMESTAMP WITH TIME ZONE`, e inserta los tres roles del catálogo; verificar que `alembic upgrade head` y `alembic downgrade base` funcionan sobre una base vacía, que `backend/tests/conftest.py` prepara el esquema de la base `reservas_test` con `alembic upgrade head` antes de las pruebas de repositorio, y que con ese esquema ya preparado una prueba de repositorio verifica que un usuario se persiste y se recupera con su rol.
-- [ ] 2.3 Implementar el hash y la verificación de contraseñas con las utilidades de Werkzeug (incluidas con Flask), y verificar con pruebas que el valor almacenado difiere de la contraseña en texto plano, que la verificación con la contraseña correcta resulta exitosa y que dos cuentas con la misma contraseña almacenan valores distintos.
-- [ ] 2.4 Normalizar el correo a minúsculas en la capa de repositorios y verificar con una prueba de repositorio que el correo se guarda en minúsculas.
-- [ ] 2.5 Añadir en una migración separada el índice único funcional sobre `lower(correo)` y verificar con una prueba que el alta de dos cuentas con el mismo correo en distinto caso es rechazada por la base de datos.
+- [x] 2.3 Implementar el hash y la verificación de contraseñas con las utilidades de Werkzeug (incluidas con Flask), y verificar con pruebas que el valor almacenado difiere de la contraseña en texto plano, que la verificación con la contraseña correcta resulta exitosa y que dos cuentas con la misma contraseña almacenan valores distintos.
+- [x] 2.4 Normalizar el correo a minúsculas en la capa de repositorios y verificar con una prueba de repositorio que el correo se guarda en minúsculas.
+- [x] 2.5 Añadir en una migración separada el índice único funcional sobre `lower(correo)` y verificar con una prueba que el alta de dos cuentas con el mismo correo en distinto caso es rechazada por la base de datos.
 
 ## 3. Autenticación con JWT
 
