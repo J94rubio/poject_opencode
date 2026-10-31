@@ -133,6 +133,28 @@ class EspacioYaActivo(ErrorDeDominio):
     mensaje = "El espacio ya está activo."
 
 
+
+# --- Reservas (change `reservas-disponibilidad`) ----------------------------
+
+
+class EspacioInactivo(ErrorDeDominio):
+    http = 400
+    codigo = "espacio_inactivo"
+    mensaje = "El espacio está inactivo y no admite solicitudes."
+
+
+class ReservaSolapada(ErrorDeDominio):
+    http = 409
+    codigo = "reserva_solapada"
+    mensaje = "El rango se solapa con una reserva aprobada del espacio."
+
+
+class SolicitudNoEncontrada(ErrorDeDominio):
+    http = 404
+    codigo = "solicitud_no_encontrada"
+    mensaje = "La solicitud de reserva no existe."
+
+
 MENSAJE_RUTA_NO_ENCONTRADA ="La ruta solicitada no existe."
 MENSAJE_METODO_NO_PERMITIDO = "El método HTTP no está permitido en esta ruta."
 MENSAJE_ERROR_INTERNO = "Se produjo un error interno."

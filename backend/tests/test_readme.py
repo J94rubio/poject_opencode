@@ -1,7 +1,8 @@
 """Coherencia de `backend/README.md` con la implementación.
 
 Tarea 5.7 de `usuarios-roles-auth`, generalizada en la tarea 3.6 de
-`espacios` a todos los módulos documentados. Comprueba que los endpoints y
+`espacios` a todos los módulos documentados y ampliada en la tarea 4.2 de
+`reservas-disponibilidad` con el módulo `reservas`. Comprueba que los endpoints y
 los ejemplos del documento corresponden a rutas registradas y protegidas con
 el permiso indicado, que toda ruta protegida por permiso está documentada y
 que el catálogo de códigos de error coincide con los códigos y los HTTP
@@ -32,7 +33,7 @@ ERRORES_DEL_FRAMEWORK = {"ruta_no_encontrada": 404, "metodo_no_permitido": 405, 
 ROLES = ["solicitante", "aprobador", "admin"]
 
 # Endpoints documentados por módulo.
-ENDPOINTS_POR_MODULO = {"usuarios": 8, "espacios": 6}
+ENDPOINTS_POR_MODULO = {"usuarios": 8, "espacios": 6, "reservas": 4}
 
 # Blueprints cuyas rutas no exigen un permiso de la matriz (login y sesión).
 BLUEPRINTS_SIN_PERMISO = {"auth"}
@@ -73,8 +74,23 @@ def _rutas_con_permiso(app):
 
 
 def _modulo(ruta):
+    """Módulo de una ruta documentada; coincide con el blueprint que la registra.
+
+    La disponibilidad (`/api/espacios/{id}/disponibilidad`) cuelga del recurso
+    espacio, pero pertenece al módulo `reservas`.
+    """
+    if ruta.endswith("/disponibilidad"):
+        return "reservas"
     segmento = ruta.split("/")[2]
     return "usuarios" if segmento in {"usuarios", "roles"} else segmento
+
+
+def _blueprint_de(app, metodo, ruta):
+    return next(
+        regla.endpoint.split(".")[0]
+        for regla in app.url_map.iter_rules()
+        if _normalizar_regla(regla.rule) == ruta and metodo in regla.methods
+    )
 
 
 def test_el_documento_lista_los_endpoints_de_cada_modulo():
@@ -89,6 +105,11 @@ def test_el_documento_lista_los_endpoints_de_cada_modulo():
 def test_cada_ruta_implementada_con_permiso_esta_documentada(app):
     documentadas = {(metodo, ruta) for metodo, ruta, _ in ENDPOINTS}
     assert _rutas_con_permiso(app) == documentadas
+
+
+@pytest.mark.parametrize("metodo,ruta,permiso", ENDPOINTS)
+def test_cada_endpoint_documentado_pertenece_a_su_modulo(app, metodo, ruta, permiso):
+    assert _blueprint_de(app, metodo, ruta) == _modulo(ruta)
 
 
 @pytest.mark.parametrize("metodo,ruta,permiso", ENDPOINTS)
@@ -128,7 +149,8 @@ def test_los_permisos_del_modulo_usuarios_son_solo_del_admin(permiso):
 
 @pytest.mark.parametrize("metodo,ruta", EJEMPLOS)
 def test_cada_ejemplo_corresponde_a_una_ruta_registrada(app, metodo, ruta):
-    regla = re.sub(r"/\d+(?=/|$)", "/{id}", ruta)
+    # La cadena de consulta (`?inicio=...&fin=...`) no forma parte de la ruta.
+    regla = re.sub(r"/\d+(?=/|$)", "/{id}", ruta.split("?")[0])
     assert (regla, metodo) in _rutas_registradas(app)
 
 

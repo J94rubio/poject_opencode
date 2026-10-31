@@ -46,7 +46,8 @@ def test_el_modelo_declara_la_tabla_espacios_con_sus_restricciones():
 
 
 def test_upgrade_downgrade_y_upgrade_de_la_tabla_espacios(esquema, migrar, test_database_url):
-    migrar("downgrade", "-1")
+    # Revierte hasta la revisión anterior a `espacios` (y las que dependen de ella).
+    migrar("downgrade", "0002_correo_lower_unico")
     with _conectar(test_database_url) as conexion:
         assert "espacios" not in inspect(conexion).get_table_names()
         assert {"roles", "usuarios"} <= set(inspect(conexion).get_table_names())

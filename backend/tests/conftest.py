@@ -104,6 +104,39 @@ def crear_cuenta(sesion):
 
 
 @pytest.fixture
+def nuevo_espacio(sesion):
+    """Crea y confirma un espacio en el estado indicado; devuelve su id."""
+    from backend.app.espacios import repositories
+
+    def _crear(nombre="Laboratorio 1", estado="activo"):
+        espacio = repositories.crear_espacio(nombre, "laboratorio", 20)
+        if estado != "activo":
+            repositories.cambiar_estado(espacio, estado)
+        sesion.commit()
+        return espacio.id
+
+    return _crear
+
+
+@pytest.fixture
+def sembrar_reserva(sesion):
+    """Inserta y confirma una reserva directamente en el repositorio.
+
+    Como la aprobación llega con el change `aprobacion-reservas`, las pruebas
+    de servicio y de API siembran así las reservas aprobadas (por defecto) y
+    las de otros estados. Devuelve el id de la reserva.
+    """
+    from backend.app.reservas import repositories
+
+    def _sembrar(espacio_id, solicitante_id, inicio, fin, estado="aprobada"):
+        reserva = repositories.crear(espacio_id, solicitante_id, inicio, fin, estado)
+        sesion.commit()
+        return reserva.id
+
+    return _sembrar
+
+
+@pytest.fixture
 def cabecera(app):
     """Cabecera `Authorization` con un token vigente del usuario indicado."""
     from backend.app.auth.tokens import emitir_token
@@ -120,10 +153,13 @@ def sesion(esquema, app):
     """Sesión de base de datos sobre el esquema ya migrado.
 
     Al terminar la prueba se descartan los cambios pendientes y se vacían las
-    tablas `usuarios` y `espacios`; el catálogo de roles se conserva.
+    tablas `reservas`, `usuarios` y `espacios` en una sola sentencia: las
+    claves foráneas de `reservas` apuntan a las otras dos y PostgreSQL acepta
+    vaciarlas juntas sin CASCADE (CASCADE podría vaciar tablas no listadas).
+    El catálogo de roles se conserva.
     """
     with app.app_context():
         yield db.session
         db.session.rollback()
-        db.session.execute(text("TRUNCATE usuarios, espacios RESTART IDENTITY"))
+        db.session.execute(text("TRUNCATE reservas, usuarios, espacios RESTART IDENTITY"))
         db.session.commit()

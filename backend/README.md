@@ -1,8 +1,8 @@
 # Backend: sistema de reservas de espacios académicos
 
-API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`) y `espacios` (design.md, D5 y D6, del change `espacios`) y el catálogo de códigos de error de la API.
+API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`), `espacios` (design.md, D5 y D6, del change `espacios`) y `reservas` (change `reservas-disponibilidad`) y el catálogo de códigos de error de la API.
 
-Todas las rutas de los módulos `usuarios` y `espacios` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
+Todas las rutas de los módulos `usuarios`, `espacios` y `reservas` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
 
 ## Puesta en marcha
 
@@ -246,6 +246,74 @@ Authorization: Bearer <token>
 
 Respuesta 200: el espacio con `"estado": "inactivo"` o `"estado": "activo"`. El espacio conserva su nombre, tipo y capacidad, y el inactivo sigue apareciendo en las consultas; no existe eliminación física. Errores: `espacio_ya_inactivo` (desactivar un espacio inactivo), `espacio_ya_activo` (reactivar un espacio activo) y `espacio_no_encontrado`.
 
+## Endpoints de reservas
+
+Las solicitudes de reserva nacen siempre en estado `pendiente` y su solicitante es siempre el usuario autenticado. El catálogo cerrado de estados es `pendiente`, `aprobada`, `rechazada` y `cancelada`; en esta versión de la API solo se crean solicitudes `pendiente` (la aprobación y la cancelación llegarán en otros changes). Solo las reservas `aprobada` ocupan un espacio.
+
+Todos los roles (`solicitante`, `aprobador` y `admin`) poseen `reservas:crear`, `reservas:ver_propias` y `espacios:ver`. El listado y el detalle exigen `reservas:ver_propias`; con `reservas:ver_todas`, que poseen `aprobador` y `admin`, se ven además las solicitudes de los demás usuarios.
+
+| Método | Ruta | Permiso | Respuesta correcta |
+|---|---|---|---|
+| `POST` | `/api/reservas` | `reservas:crear` | 201 con la solicitud creada en estado `pendiente` |
+| `GET` | `/api/espacios/{id}/disponibilidad` | `espacios:ver` | 200 con los intervalos ocupados por reservas aprobadas |
+| `GET` | `/api/reservas` | `reservas:ver_propias` | 200 con las solicitudes propias, o todas con `reservas:ver_todas` |
+| `GET` | `/api/reservas/{id}` | `reservas:ver_propias` | 200 con la solicitud propia, o cualquiera con `reservas:ver_todas` |
+
+**Fechas.** Se envían en ISO 8601 con zona horaria explícita (`Z` o un desplazamiento como `-05:00`); una fecha sin zona horaria es `datos_invalidos`. Se almacenan en UTC y todas las respuestas las devuelven en UTC con sufijo `Z`. Los rangos son semiabiertos `[inicio, fin)`: una reserva que termina exactamente cuando otra empieza no se solapa con ella.
+
+Cada solicitud se representa con exactamente estos campos:
+
+```json
+{"id": 12, "espacio_id": 3, "solicitante_id": 7, "inicio": "2026-11-03T15:00:00Z", "fin": "2026-11-03T17:00:00Z", "estado": "pendiente"}
+```
+
+### Crear una solicitud
+
+```http
+POST /api/reservas
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"espacio_id": 3, "inicio": "2026-11-03T10:00:00-05:00", "fin": "2026-11-03T12:00:00-05:00"}
+```
+
+Respuesta 201: la solicitud creada en estado `pendiente`, con el usuario autenticado como solicitante. Los tres campos son obligatorios y no se admite ningún otro: un campo de solicitante (aunque coincida con el usuario autenticado) o de estado responde `datos_invalidos`. El fin debe ser posterior al inicio y el inicio, posterior al instante actual (una solicitud que empieza en el instante actual ya comenzó). Errores: `datos_invalidos` (campo ausente o no admitido, fecha sin zona horaria o mal formada, fin igual o anterior al inicio, inicio en el pasado o en el instante actual, o cuerpo que no es un objeto JSON), `espacio_no_encontrado`, `espacio_inactivo` y `reserva_solapada` (el rango se solapa con una reserva aprobada del mismo espacio; las solicitudes pendientes sí pueden solaparse entre sí). Un espacio reactivado vuelve a admitir solicitudes.
+
+### Consultar la disponibilidad de un espacio
+
+```http
+GET /api/espacios/3/disponibilidad?inicio=2026-11-03T08:00:00Z&fin=2026-11-03T18:00:00Z
+Authorization: Bearer <token>
+```
+
+Los parámetros `inicio` y `fin` son obligatorios. Con un desplazamiento positivo, el signo `+` debe codificarse en la URL como `%2B`: sin codificar se interpreta como un espacio y la fecha resulta inválida.
+
+Respuesta 200: lista de intervalos ocupados por reservas `aprobada` del espacio que se solapan con el rango `[inicio, fin)`, en orden ascendente y sin datos del solicitante. Un intervalo que solapa parcialmente el rango se devuelve completo, sin recortar, y una reserva que solo toca el borde del rango no se incluye. Sin reservas aprobadas en el rango, una lista vacía `[]`. La consulta procede también sobre espacios inactivos.
+
+```json
+[{"inicio": "2026-11-03T10:00:00Z", "fin": "2026-11-03T12:00:00Z"}, {"inicio": "2026-11-03T14:00:00Z", "fin": "2026-11-03T15:00:00Z"}]
+```
+
+Errores: `datos_invalidos` (falta el inicio o el fin, alguno sin zona horaria o mal formado, o fin igual o anterior al inicio) y `espacio_no_encontrado`.
+
+### Listar solicitudes
+
+```http
+GET /api/reservas
+Authorization: Bearer <token>
+```
+
+Respuesta 200: lista completa, sin paginación, ordenada por inicio ascendente y, a igual inicio, por identificador. Un `solicitante` recibe solo sus solicitudes; un `aprobador` o un `admin`, las de todos los usuarios. Sin solicitudes visibles, una lista vacía `[]`.
+
+### Consultar una solicitud
+
+```http
+GET /api/reservas/12
+Authorization: Bearer <token>
+```
+
+Respuesta 200: la solicitud. Un `solicitante` que consulta una solicitud de otro usuario recibe 403 con `permiso_insuficiente` y ningún dato de la solicitud; `aprobador` y `admin` pueden consultar cualquiera. Error: `solicitud_no_encontrada` (también para un `solicitante`, si el identificador no existe).
+
 ## Catálogo de códigos de error
 
 Todas las respuestas de error tienen la forma:
@@ -276,6 +344,9 @@ El mensaje es un texto fijo del catálogo y nunca incluye datos de la petición 
 | `espacio_no_encontrado` | 404 | Identificador de espacio inexistente |
 | `espacio_ya_inactivo` | 409 | Desactivar un espacio que ya está inactivo |
 | `espacio_ya_activo` | 409 | Reactivar un espacio que ya está activo |
+| `espacio_inactivo` | 400 | Crear una solicitud de reserva sobre un espacio inactivo |
+| `reserva_solapada` | 409 | Crear una solicitud cuyo rango `[inicio, fin)` se solapa con una reserva aprobada del mismo espacio |
+| `solicitud_no_encontrada` | 404 | Identificador de solicitud de reserva inexistente |
 | `ruta_no_encontrada` | 404 | Ruta inexistente |
 | `metodo_no_permitido` | 405 | Método HTTP no permitido en la ruta |
 | `error_interno` | 500 | Error interno no controlado |

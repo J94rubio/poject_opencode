@@ -9,6 +9,7 @@ from .commands import registrar_comandos
 from .config import cargar_config
 from .espacios.routes import bp as espacios_bp
 from .extensions import db
+from .reservas.routes import bp as reservas_bp
 from .usuarios.routes import bp as usuarios_bp
 
 
@@ -29,6 +30,7 @@ def create_app(config=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(espacios_bp)
+    app.register_blueprint(reservas_bp)
 
     registrar_manejadores_errores(app)
     registrar_comandos(app)
