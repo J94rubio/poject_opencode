@@ -55,9 +55,9 @@
 
 ## 8. Frontend: administración de usuarios
 
-- [ ] 8.1 Implementar la pantalla de listado de usuarios con su estado activo o inactivo y las acciones de editar, desactivar y reactivar, y verificar con pruebas Vitest del renderizado y de que cada acción llama al endpoint correspondiente (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
-- [ ] 8.2 Implementar el formulario de alta y de edición con los mensajes de error del servidor (`correo_duplicado`, `rol_invalido`, `contrasena_invalida`, `datos_invalidos`, `operacion_no_permitida`), y verificar con pruebas Vitest de cada mensaje de error y del alta correcta (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
-- [ ] 8.3 Implementar el formulario de restablecimiento de contraseña y verificar con pruebas Vitest del envío correcto y de la respuesta con el error `contrasena_invalida` (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
+- [x] 8.1 Implementar la pantalla de listado de usuarios con su estado activo o inactivo y las acciones de editar, desactivar y reactivar, y verificar con pruebas Vitest del renderizado y de que cada acción llama al endpoint correspondiente (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
+- [x] 8.2 Implementar el formulario de alta y de edición con los mensajes de error del servidor (`correo_duplicado`, `rol_invalido`, `contrasena_invalida`, `datos_invalidos`, `operacion_no_permitida`), y verificar con pruebas Vitest de cada mensaje de error y del alta correcta (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
+- [x] 8.3 Implementar el formulario de restablecimiento de contraseña y verificar con pruebas Vitest del envío correcto y de la respuesta con el error `contrasena_invalida` (requisito «Pantallas de administración de usuarios» de la spec `interfaz-web`).
 
 ## 9. Verificación integral
 
