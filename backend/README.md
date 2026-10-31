@@ -4,6 +4,73 @@ API REST en Flask. Este documento describe los endpoints del módulo `usuarios` 
 
 Todas las rutas del módulo `usuarios` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
 
+## Puesta en marcha
+
+Todos los comandos se ejecutan desde la raíz del repositorio, en PowerShell clásico (Windows PowerShell 5.1). Se necesita Python y un servidor PostgreSQL 17 con la base de datos ya creada.
+
+### 1. Instalar las dependencias en el entorno virtual
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
+```
+
+Si PowerShell bloquea `Activate.ps1` por la política de ejecución, permítala solo para la sesión actual con `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` y vuelva a activar el entorno.
+
+### 2. Definir las variables de entorno solo en la terminal
+
+La configuración se lee únicamente de variables de entorno. No se usa ningún archivo `.env`: las variables se definen en la terminal y valen solo para esa sesión. Nunca escriba sus valores en archivos del repositorio, en scripts ni en la documentación, y no los imprima en pantalla.
+
+**`DATABASE_URL`**, sin que la contraseña quede en el historial. `Read-Host -AsSecureString` pide la contraseña sin mostrarla; el historial de PowerShell guarda solo la línea del comando, nunca lo que se teclea en el prompt. La contraseña se codifica para URL por si contiene caracteres como `@`, `:` o `/`:
+
+```powershell
+$clave = Read-Host -AsSecureString "Contraseña de PostgreSQL"
+$texto = [System.Net.NetworkCredential]::new("", $clave).Password
+$env:DATABASE_URL = "postgresql+psycopg://<usuario>:" + [uri]::EscapeDataString($texto) + "@localhost:5432/<base>"
+Remove-Variable clave, texto
+```
+
+Sustituya `<usuario>` y `<base>` por el usuario y la base de datos de su instalación (y el host o el puerto, si no son los habituales).
+
+**`JWT_SECRET_KEY`**, generada aleatoriamente y asignada directamente a la variable, sin escribirla en ningún archivo ni mostrarla en pantalla:
+
+```powershell
+$env:JWT_SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(64))"
+```
+
+Como la clave se genera de nuevo en cada sesión, los tokens emitidos en una sesión anterior dejan de ser válidos al reiniciar el servidor con otra clave.
+
+**`CORS_ORIGINS`**: lista de orígenes permitidos, separados por comas. Para el servidor de desarrollo del frontend:
+
+```powershell
+$env:CORS_ORIGINS = "http://localhost:5173"
+```
+
+Sin esta variable no se permite ningún origen cruzado.
+
+### 3. Aplicar las migraciones
+
+```powershell
+alembic -c backend/alembic.ini upgrade head
+```
+
+### 4. Crear el primer administrador
+
+```powershell
+flask --app backend.app create-admin --correo <correo-del-administrador>
+```
+
+El comando pide la contraseña dos veces sin mostrarla. Las opciones y los casos de error se describen en [Primer administrador: `flask create-admin`](#primer-administrador-flask-create-admin).
+
+### 5. Arrancar el servidor
+
+```powershell
+flask --app backend.app run --port 5000
+```
+
+La API queda disponible en `http://localhost:5000`. Para conectar el frontend, consulte `frontend/README.md`.
+
 ## Endpoints del módulo `usuarios`
 
 | Método | Ruta | Permiso | Respuesta correcta |

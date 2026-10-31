@@ -2,11 +2,17 @@
 
 Aplicación React con Vite. Pruebas con Vitest y React Testing Library.
 
+## Puesta en marcha
+
+Desde la carpeta `frontend/`:
+
+```powershell
+npm install     # instalar las dependencias
+npm run dev     # arrancar el servidor de desarrollo en http://localhost:5173
+npm test        # ejecutar la suite de Vitest
 ```
-npm install
-npm run dev     # servidor de desarrollo en http://localhost:5173
-npm test        # suite de Vitest
-```
+
+Para que el frontend se conecte al backend, defina antes de `npm run dev` la variable `VITE_API_URL` como se explica en [URL del backend: `VITE_API_URL`](#url-del-backend-vite_api_url). El backend debe estar en marcha (ver «Puesta en marcha» en `backend/README.md`).
 
 ## URL del backend: `VITE_API_URL`
 
