@@ -133,3 +133,22 @@ El mensaje es un texto fijo del catálogo y nunca incluye datos de la petición 
 | `error_interno` | 500 | Error interno no controlado |
 
 Cuando una petición protegida no está autenticada se responde 401 antes de comprobar el permiso; con un token válido y un rol sin el permiso, 403 con `permiso_insuficiente`.
+
+## Primer administrador: `flask create-admin`
+
+Como solo el rol `admin` puede crear cuentas, la primera cuenta administradora se crea por consola (design.md, D9). El comando crea una cuenta activa con rol `admin` y nombre `Administrador` (editable después desde la API) únicamente si no existe ningún administrador activo; en cualquier otro caso falla con un mensaje explícito y no crea ninguna cuenta.
+
+- **Correo**: opción `--correo` o, si no se indica, variable de entorno `ADMIN_CORREO`. La opción tiene prioridad sobre la variable. Se guarda en minúsculas.
+- **Contraseña**: no existe ninguna opción de línea de comandos para la contraseña, porque quedaría en el historial del shell y en la lista de procesos. Se lee de la variable `ADMIN_CONTRASENA` o, si no está definida y el comando se ejecuta en una terminal interactiva, se pide de forma oculta con confirmación. Sin variable ni terminal interactiva, el comando falla. Debe tener al menos 8 caracteres, sin reglas de composición.
+
+El comando falla, sin crear ninguna cuenta, cuando ya existe un administrador activo, cuando falta el correo o la contraseña, cuando la contraseña tiene menos de 8 caracteres, cuando el correo no tiene un formato válido o cuando ya está registrado. Ningún mensaje del comando muestra la contraseña ni el correo.
+
+**Forma recomendada (prompt oculto)**, desde la raíz del repositorio y con `DATABASE_URL` y `JWT_SECRET_KEY` definidas en la terminal:
+
+```
+flask --app backend.app create-admin --correo <correo-del-administrador>
+```
+
+El comando pide la contraseña dos veces sin mostrarla en pantalla.
+
+**Con variables de entorno** (por ejemplo, en un despliegue no interactivo): defina `ADMIN_CORREO` y `ADMIN_CONTRASENA` solo en la terminal o en el proceso que ejecuta el comando, y elimínelas al terminar. Nunca las escriba en archivos del repositorio (ni en un `.env`, ni en scripts, ni en la documentación) y nunca las imprima en logs.

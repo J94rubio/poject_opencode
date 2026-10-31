@@ -45,7 +45,7 @@
 
 ## 6. Arranque con el primer administrador
 
-- [ ] 6.1 Implementar el comando `flask create-admin` que crea la cuenta administradora inicial desde argumentos o variables de entorno, y verificar con pruebas de creación correcta, de fallo con error explícito cuando ya existe un administrador activo, de validación de la contraseña y de correo inválido o duplicado, sin que ninguna de esas cuentas se cree (requisito «Creación del primer administrador por línea de comandos» de la spec `usuarios`).
+- [x] 6.1 Implementar el comando `flask create-admin` que crea la cuenta administradora inicial desde argumentos o variables de entorno, y verificar con pruebas de creación correcta, de fallo con error explícito cuando ya existe un administrador activo, de validación de la contraseña y de correo inválido o duplicado, sin que ninguna de esas cuentas se cree (requisito «Creación del primer administrador por línea de comandos» de la spec `usuarios`).
 
 ## 7. Frontend: autenticación y sesión
 

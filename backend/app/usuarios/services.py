@@ -116,6 +116,28 @@ def crear_usuario(datos):
     return usuario
 
 
+# Nombre de la cuenta creada por `flask create-admin`: el comando solo recibe
+# correo y contraseña (design.md, D9); el nombre se edita después si hace falta.
+NOMBRE_PRIMER_ADMIN = "Administrador"
+
+
+class YaExisteAdministradorActivo(Exception):
+    """Error del comando `flask create-admin`; no forma parte de la API."""
+
+
+def crear_primer_admin(correo, contrasena):
+    """Crea la cuenta `admin` inicial (spec `usuarios`, D9).
+
+    Falla sin crear nada si ya hay un administrador activo, o con las mismas
+    validaciones del alta (correo, contraseña, correo duplicado).
+    """
+    if repositories.contar_admins_activos() > 0:
+        raise YaExisteAdministradorActivo()
+    return crear_usuario(
+        {"nombre": NOMBRE_PRIMER_ADMIN, "correo": correo, "contrasena": contrasena, "rol": "admin"}
+    )
+
+
 def listar_usuarios():
     """Todas las cuentas, incluidas las desactivadas."""
     return repositories.listar_usuarios()
