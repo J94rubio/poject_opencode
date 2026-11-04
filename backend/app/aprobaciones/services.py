@@ -20,6 +20,9 @@ aprobación ve la primera ya confirmada y responde `reserva_solapada`.
 La restricción de exclusión sigue siendo la última barrera ante cualquier otra
 escritura: su violación se traduce a `reserva_solapada`. Cualquier fallo deshace
 la transacción y libera los bloqueos.
+
+La decisión y su entrada del historial se confirman en la misma transacción
+(change `cancelacion-historial`).
 """
 
 from sqlalchemy.exc import IntegrityError
@@ -35,6 +38,7 @@ from ..auth.errors import (
 )
 from ..espacios import repositories as repositorio_espacios
 from ..extensions import db
+from ..historial import repositories as repositorio_historial
 from ..models.usuario import ahora_utc
 from ..reservas import repositories
 from ..reservas.services import ID_MAXIMO
@@ -114,10 +118,14 @@ def decidir(solicitud_id, usuario, accion, motivo=None, reloj=ahora_utc):
         if reserva.solicitante_id == usuario_id:
             raise PermisoInsuficiente()
 
+        estado_anterior = reserva.estado
         if accion == APROBAR:
             _aprobar(reserva, reloj)
         else:
             _rechazar(reserva, motivo)
+        repositorio_historial.registrar(
+            db.session, reserva, estado_anterior, reserva.estado, usuario, reloj=reloj
+        )
         db.session.commit()
     except IntegrityError as error:
         db.session.rollback()

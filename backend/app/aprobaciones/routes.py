@@ -36,6 +36,6 @@ def aprobar_solicitud(reserva_id):
 @requiere_permiso("aprobaciones:rechazar")
 def rechazar_solicitud(reserva_id):
     reserva = services.decidir(
-        reserva_id, g.usuario_actual, services.RECHAZAR, _motivo_del_cuerpo()
+        reserva_id, g.usuario_actual, services.RECHAZAR, _motivo_del_cuerpo(), reloj=_reloj()
     )
     return datos_de_reserva(reserva)

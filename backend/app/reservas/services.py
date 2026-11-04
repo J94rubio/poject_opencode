@@ -28,6 +28,7 @@ from ..auth.errors import (
 from ..auth.permissions import tiene_permiso
 from ..espacios import services as servicio_espacios
 from ..extensions import db
+from ..historial import repositories as repositorio_historial
 from ..models.usuario import ahora_utc
 from . import repositories
 
@@ -109,8 +110,16 @@ def crear_solicitud(datos, solicitante, reloj=ahora_utc):
     if repositories.listar_aprobadas_por_espacio_y_rango(espacio.id, inicio_utc, fin_utc):
         raise ReservaSolapada()
 
-    reserva = repositories.crear(espacio.id, solicitante.id, inicio_utc, fin_utc)
-    db.session.commit()
+    # La solicitud y su entrada del historial se confirman juntas o no se aplican.
+    try:
+        reserva = repositories.crear(espacio.id, solicitante.id, inicio_utc, fin_utc)
+        repositorio_historial.registrar(
+            db.session, reserva, None, "pendiente", solicitante, reloj=reloj
+        )
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return reserva
 
 

@@ -77,11 +77,11 @@ def test_el_esquema_declara_la_columna_y_el_check(esquema, test_database_url):
     assert "<> 'rechazada'" in definicion
 
 
-def test_downgrade_menos_uno_quita_check_y_columna_y_upgrade_los_restaura(
+def test_downgrade_de_0007_quita_check_y_columna_y_upgrade_los_restaura(
     esquema, migrar, test_database_url
 ):
     try:
-        migrar("downgrade", "-1")
+        migrar("downgrade", "0006_reservas_exclusion")
         with _conectar(test_database_url) as conexion:
             assert "motivo_rechazo" not in _columnas(conexion)
             assert CHECK not in _checks(conexion)
@@ -93,4 +93,4 @@ def test_downgrade_menos_uno_quita_check_y_columna_y_upgrade_los_restaura(
         assert "motivo_rechazo" in _columnas(conexion)
         assert CHECK in _checks(conexion)
         version = conexion.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-    assert version == "0007_reservas_motivo_rechazo"
+    assert version == "0009_historial_inmutable"

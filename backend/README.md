@@ -1,8 +1,8 @@
 # Backend: sistema de reservas de espacios académicos
 
-API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`), `espacios` (design.md, D5 y D6, del change `espacios`), `reservas` (change `reservas-disponibilidad`) y `aprobaciones` (change `aprobacion-reservas`) y el catálogo de códigos de error de la API.
+API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`), `espacios` (design.md, D5 y D6, del change `espacios`), `reservas` (change `reservas-disponibilidad`), `aprobaciones` (change `aprobacion-reservas`) y `cancelaciones` e `historial` (change `cancelacion-historial`) y el catálogo de códigos de error de la API.
 
-Todas las rutas de los módulos `usuarios`, `espacios`, `reservas` y `aprobaciones` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
+Todas las rutas de los módulos `usuarios`, `espacios`, `reservas`, `aprobaciones`, `cancelaciones` e `historial` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
 
 ## Puesta en marcha
 
@@ -248,7 +248,7 @@ Respuesta 200: el espacio con `"estado": "inactivo"` o `"estado": "activo"`. El 
 
 ## Endpoints de reservas
 
-Las solicitudes de reserva nacen siempre en estado `pendiente` y su solicitante es siempre el usuario autenticado. El catálogo cerrado de estados es `pendiente`, `aprobada`, `rechazada` y `cancelada`; las solicitudes se crean siempre `pendiente`, y se aprueban o rechazan con los [endpoints de aprobaciones](#endpoints-de-aprobaciones) (la cancelación llegará en otro change). Solo las reservas `aprobada` ocupan un espacio.
+Las solicitudes de reserva nacen siempre en estado `pendiente` y su solicitante es siempre el usuario autenticado. El catálogo cerrado de estados es `pendiente`, `aprobada`, `rechazada` y `cancelada`; las solicitudes se crean siempre `pendiente`, y se aprueban o rechazan con los [endpoints de aprobaciones](#endpoints-de-aprobaciones) y su propio solicitante las cancela con el [endpoint de cancelación](#endpoints-de-cancelación). Solo las reservas `aprobada` ocupan un espacio.
 
 Todos los roles (`solicitante`, `aprobador` y `admin`) poseen `reservas:crear`, `reservas:ver_propias` y `espacios:ver`. El listado y el detalle exigen `reservas:ver_propias`; con `reservas:ver_todas`, que poseen `aprobador` y `admin`, se ven además las solicitudes de los demás usuarios.
 
@@ -350,6 +350,56 @@ El cuerpo es un objeto JSON con solo el campo `motivo`: texto de hasta 500 carac
 
 Las comprobaciones se hacen en este orden: permiso (`permiso_insuficiente`), existencia (`solicitud_no_encontrada`), autoría (`permiso_insuficiente`), motivo (`datos_invalidos`: falta, está vacío, supera el límite o no es texto; también un campo adicional o un cuerpo que no es un objeto JSON) y estado (`transicion_invalida`). Se puede rechazar una solicitud aunque se solape con una reserva aprobada, su espacio esté inactivo o ya haya comenzado. El motivo aparece también en el listado y en el detalle de la solicitud.
 
+## Endpoints de cancelación
+
+El usuario que creó una solicitud, cualquiera que sea su rol, la cancela mientras esté `pendiente` o `aprobada` y su inicio sea posterior al instante actual. Nadie cancela solicitudes ajenas, ni siquiera un `admin`. Cancelar una reserva `aprobada` libera el espacio de inmediato: deja de aparecer en la disponibilidad y una solicitud pendiente que se solapaba con ella se puede aprobar. Una solicitud cancelada no se reactiva.
+
+| Método | Ruta | Permiso | Respuesta correcta |
+|---|---|---|---|
+| `POST` | `/api/reservas/{id}/cancelar` | `reservas:cancelar_propia` | 200 con la solicitud en estado `cancelada` |
+
+### Cancelar una solicitud
+
+```http
+POST /api/reservas/12/cancelar
+Authorization: Bearer <token>
+```
+
+El cuerpo de la petición se ignora. Respuesta 200: la solicitud con `"estado": "cancelada"`. Las comprobaciones se hacen en este orden: permiso (`permiso_insuficiente`), existencia (`solicitud_no_encontrada`), dueño (`permiso_insuficiente`), estado (`transicion_invalida`: la solicitud está `rechazada` o `cancelada`) e inicio (`reserva_iniciada`: el inicio es anterior o igual al instante actual). Si falla cualquiera de ellas, la solicitud no cambia.
+
+## Endpoints de historial
+
+Cada creación, aprobación, rechazo y cancelación añade una entrada al historial en la misma transacción que el cambio de estado. El historial es inmutable: no existen rutas de escritura (`POST`, `PUT`, `PATCH` y `DELETE` sobre `/api/historial` responden 405 con `metodo_no_permitido`) y un disparador de la base de datos rechaza `UPDATE` y `DELETE`.
+
+Todos los roles poseen `historial:ver_propio`, que da acceso a las entradas de las reservas que el usuario creó, incluidas las decisiones de otros usuarios sobre ellas. Con `historial:ver_todos`, que poseen `aprobador` y `admin`, se ven las de todas las reservas.
+
+| Método | Ruta | Permiso | Respuesta correcta |
+|---|---|---|---|
+| `GET` | `/api/historial` | `historial:ver_propio` | 200 con las entradas de las reservas propias, o de todas con `historial:ver_todos` |
+
+### Consultar el historial
+
+```http
+GET /api/historial?espacio_id=3&estado=aprobada&desde=2026-11-01T00:00:00Z&hasta=2026-12-01T00:00:00Z
+Authorization: Bearer <token>
+```
+
+Todos los filtros son opcionales y los presentes se combinan con Y lógico, siempre dentro de lo que el rol puede ver:
+
+- `espacio_id`: entradas de reservas de ese espacio. Debe ser un entero; un espacio inexistente responde `espacio_no_encontrado`.
+- `estado`: entradas cuyo estado nuevo es ese estado, del catálogo `pendiente`, `aprobada`, `rechazada` o `cancelada`.
+- `desde` y `hasta`: fecha del cambio en el rango semiabierto `[desde, hasta)`. Se exigen juntos, en ISO 8601 con zona horaria explícita y con `hasta` posterior a `desde`. Con un desplazamiento positivo, el signo `+` debe codificarse en la URL como `%2B`.
+
+Como en la consulta de disponibilidad, los parámetros desconocidos se ignoran.
+
+Respuesta 200: lista completa, sin paginación, ordenada por fecha del cambio ascendente y, a igual fecha, por identificador. Sin entradas visibles, una lista vacía `[]`. El actor se expone solo por su identificador y `estado_anterior` es `null` en la creación. El motivo de un rechazo no se duplica aquí: sigue en la solicitud.
+
+```json
+[{"id": 31, "reserva_id": 12, "espacio_id": 3, "estado_anterior": "pendiente", "estado_nuevo": "aprobada", "actor_id": 2, "fecha_utc": "2026-11-03T15:00:00Z"}]
+```
+
+Errores: `datos_invalidos` (`espacio_id` que no es un entero, `estado` fuera del catálogo, valor vacío en un filtro, solo uno de `desde` y `hasta`, fecha sin zona horaria o mal formada, o `hasta` igual o anterior a `desde`) y `espacio_no_encontrado`.
+
 ## Catálogo de códigos de error
 
 Todas las respuestas de error tienen la forma:
@@ -383,8 +433,9 @@ El mensaje es un texto fijo del catálogo y nunca incluye datos de la petición 
 | `espacio_inactivo` | 400 | Crear o aprobar una solicitud de reserva sobre un espacio inactivo |
 | `reserva_solapada` | 409 | Crear o aprobar una solicitud cuyo rango `[inicio, fin)` se solapa con una reserva aprobada del mismo espacio |
 | `solicitud_no_encontrada` | 404 | Identificador de solicitud de reserva inexistente |
-| `transicion_invalida` | 409 | Aprobar o rechazar una solicitud que no está `pendiente` |
+| `transicion_invalida` | 409 | Aprobar o rechazar una solicitud que no está `pendiente`, o cancelar una que está `rechazada` o `cancelada` |
 | `solicitud_vencida` | 409 | Aprobar una solicitud cuyo inicio es anterior o igual al instante actual |
+| `reserva_iniciada` | 409 | Cancelar una solicitud cuyo inicio es anterior o igual al instante actual |
 | `ruta_no_encontrada` | 404 | Ruta inexistente |
 | `metodo_no_permitido` | 405 | Método HTTP no permitido en la ruta |
 | `error_interno` | 500 | Error interno no controlado |

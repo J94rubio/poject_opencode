@@ -82,6 +82,8 @@ def test_la_extension_btree_gist_esta_instalada_en_reservas_test(esquema, test_d
 
 def test_downgrade_menos_uno_y_upgrade_head_paso_a_paso(esquema, migrar, test_database_url):
     """Cada `downgrade -1` revierte una migración del change y `upgrade head` las restaura."""
+    migrar("downgrade", "0007_reservas_motivo_rechazo")  # Historial (`cancelacion-historial`)
+
     migrar("downgrade", "-1")  # 0007: motivo de rechazo (`aprobacion-reservas`)
     with _conectar(test_database_url) as conexion:
         assert "motivo_rechazo" not in {c["name"] for c in inspect(conexion).get_columns("reservas")}

@@ -6,10 +6,12 @@ from flask_cors import CORS
 from .aprobaciones.routes import bp as aprobaciones_bp
 from .auth.errors import registrar_manejadores_errores
 from .auth.routes import bp as auth_bp
+from .cancelaciones.routes import bp as cancelaciones_bp
 from .commands import registrar_comandos
 from .config import cargar_config
 from .espacios.routes import bp as espacios_bp
 from .extensions import db
+from .historial.routes import bp as historial_bp
 from .reservas.routes import bp as reservas_bp
 from .usuarios.routes import bp as usuarios_bp
 
@@ -33,6 +35,8 @@ def create_app(config=None):
     app.register_blueprint(espacios_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(aprobaciones_bp)
+    app.register_blueprint(cancelaciones_bp)
+    app.register_blueprint(historial_bp)
 
     registrar_manejadores_errores(app)
     registrar_comandos(app)

@@ -157,13 +157,14 @@ def sesion(esquema, app):
     """Sesión de base de datos sobre el esquema ya migrado.
 
     Al terminar la prueba se descartan los cambios pendientes y se vacían las
-    tablas `reservas`, `usuarios` y `espacios` en una sola sentencia: las
-    claves foráneas de `reservas` apuntan a las otras dos y PostgreSQL acepta
-    vaciarlas juntas sin CASCADE (CASCADE podría vaciar tablas no listadas).
-    El catálogo de roles se conserva.
+    tablas `historial_reservas`, `reservas`, `usuarios` y `espacios` en una sola
+    sentencia: sus claves foráneas se apuntan entre ellas y PostgreSQL acepta
+    vaciarlas juntas sin CASCADE (CASCADE podría vaciar tablas no listadas). No
+    se limpia con `DELETE`: el disparador de `historial_reservas` lo rechaza. El
+    catálogo de roles se conserva.
     """
     with app.app_context():
         yield db.session
         db.session.rollback()
-        db.session.execute(text("TRUNCATE reservas, usuarios, espacios RESTART IDENTITY"))
+        db.session.execute(text("TRUNCATE historial_reservas, reservas, usuarios, espacios RESTART IDENTITY"))
         db.session.commit()

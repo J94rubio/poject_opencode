@@ -170,6 +170,15 @@ class SolicitudVencida(ErrorDeDominio):
     mensaje = "La solicitud ya comenzó y no se puede aprobar."
 
 
+# --- Cancelaciones (change `cancelacion-historial`) --------------------------
+
+
+class ReservaIniciada(ErrorDeDominio):
+    http = 409
+    codigo = "reserva_iniciada"
+    mensaje = "La reserva ya comenzó y no se puede cancelar."
+
+
 MENSAJE_RUTA_NO_ENCONTRADA ="La ruta solicitada no existe."
 MENSAJE_METODO_NO_PERMITIDO = "El método HTTP no está permitido en esta ruta."
 MENSAJE_ERROR_INTERNO = "Se produjo un error interno."
