@@ -1,12 +1,12 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) y `aprobacion-reservas` (tarea 7.2 de `openspec/changes/aprobacion-reservas/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) y `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
   - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
   - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/specs/{reservas,interfaz-web}/spec.md` (publicadas al archivar el change).
-  - `aprobaciones` y el requisito de decisiones de `interfaz-web` (change `aprobacion-reservas`): specs delta en `openspec/changes/aprobacion-reservas/specs/{aprobaciones,interfaz-web}/spec.md`, hasta que se archive el change.
+  - `aprobaciones` y el requisito de decisiones de `interfaz-web` (change `aprobacion-reservas`): specs delta en `openspec/specs/{aprobaciones,interfaz-web}/spec.md`, hasta que se archive el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
 - Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; las de `aprobacion-reservas` figuran como `pendiente` hasta que se confirme el change.
@@ -469,7 +469,7 @@ El requisito «Listado de solicitudes en la interfaz» exige además mostrar el 
 
 ### Requisito: Decisión de solicitudes en la interfaz
 
-Requisito del change `aprobacion-reservas` (`openspec/changes/aprobacion-reservas/specs/interfaz-web/spec.md`; la ruta se actualizará al archivar el change).
+Requisito del change `aprobacion-reservas` (`openspec/specs/interfaz-web/spec.md`; la ruta se actualizará al archivar el change).
 
 | Escenario | Prueba | Commit |
 |---|---|---|
@@ -487,7 +487,7 @@ Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backe
 
 ## Spec `aprobaciones`
 
-Spec delta del change `aprobacion-reservas` (`openspec/changes/aprobacion-reservas/specs/aprobaciones/spec.md`; la ruta se actualizará al archivar el change). Cada escenario se cita con la prueba del servicio y la de integración HTTP cuando existen ambas. Las fechas son de 2030 y el reloj está inyectado. La columna Commit queda `pendiente` hasta que se confirme el change.
+Spec delta del change `aprobacion-reservas` (`openspec/specs/aprobaciones/spec.md`; la ruta se actualizará al archivar el change). Cada escenario se cita con la prueba del servicio y la de integración HTTP cuando existen ambas. Las fechas son de 2030 y el reloj está inyectado. La columna Commit queda `pendiente` hasta que se confirme el change.
 
 ### Requisito: Aprobación de solicitudes pendientes
 
