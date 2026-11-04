@@ -1,16 +1,17 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) y `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`) y `cancelacion-historial` (tarea 8.2 de `openspec/changes/cancelacion-historial/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
   - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
   - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/specs/{reservas,interfaz-web}/spec.md` (publicadas al archivar el change).
   - `aprobaciones` y el requisito de decisiones de `interfaz-web` (change `aprobacion-reservas`): specs delta en `openspec/specs/{aprobaciones,interfaz-web}/spec.md`, hasta que se archive el change.
+  - `cancelaciones`, `historial` y los requisitos de cancelación e historial de `interfaz-web` (change `cancelacion-historial`): specs delta en `openspec/changes/cancelacion-historial/specs/{cancelaciones,historial,interfaz-web}/spec.md`, hasta que se archive el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; las de `aprobacion-reservas` figuran como `pendiente` hasta que se confirme el change.
-- Estado: todas las pruebas citadas están en verde en la última ejecución: **906 pasadas en pytest** y **141 pasadas en Vitest**, sin fallos ni pruebas omitidas.
+- Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; las de `aprobacion-reservas` y `cancelacion-historial` figuran como `pendiente` hasta que se confirme el change.
+- Estado: todas las pruebas citadas están en verde en la última ejecución: **1099 pasadas en pytest** y **177 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
 
@@ -23,8 +24,10 @@ Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por s
 | `espacios` | 7 | 36 | 36 |
 | `reservas` | 6 | 46 | 46 |
 | `aprobaciones` | 6 | 29 | 29 |
-| `interfaz-web` | 12 (5 de `usuarios-roles-auth`, 3 de `espacios`, 3 de `reservas-disponibilidad` y 1 de `aprobacion-reservas`) | 46 | 46 |
-| **Total** | **50** | **232** | **232** |
+| `cancelaciones` | 5 | 15 | 15 |
+| `historial` | 4 | 23 | 23 |
+| `interfaz-web` | 14 (5 de `usuarios-roles-auth`, 3 de `espacios`, 3 de `reservas-disponibilidad`, 1 de `aprobacion-reservas` y 2 de `cancelacion-historial`) | 54 | 54 |
+| **Total** | **61** | **278** | **278** |
 
 Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cobertura están en [Observaciones](#observaciones).
 
@@ -481,6 +484,28 @@ Requisito del change `aprobacion-reservas` (`openspec/specs/interfaz-web/spec.md
 | Rechazo sin motivo | `features/reservas/DecisionSolicitudes.test.jsx` › Rechazo sin motivo › «con el motivo %s no envía la petición y avisa de que es obligatorio» (vacío y solo con espacios) | `pendiente` |
 | Mensajes de error de la decisión | `features/reservas/DecisionSolicitudes.test.jsx` › Mensajes de error de la decisión › «con %i %s muestra el mensaje del servidor y conserva el estado» (4 códigos); «%s sobre su propia solicitud: muestra permiso_insuficiente sin cerrar la sesión» (aprobador y admin); «al rechazar, muestra el mensaje y conserva el estado y el motivo escrito» | `pendiente` |
 
+### Requisito: Cancelación de reservas en la interfaz
+
+Requisito del change `cancelacion-historial` (`openspec/changes/cancelacion-historial/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Acción visible sobre solicitudes propias cancelables | `features/reservas/CancelacionSolicitudes.test.jsx` › Acción visible sobre solicitudes propias cancelables › «un solicitante la ve en su solicitud %s con inicio futuro» (2 variantes), «un %s la ve en sus propias solicitudes» (2 variantes), «la ve cuando el inicio es justo posterior al reloj del navegador» | `pendiente` |
+| Sin acción sobre solicitudes no cancelables | `features/reservas/CancelacionSolicitudes.test.jsx` › Sin acción sobre solicitudes no cancelables › «sin acción en una solicitud propia %s» (2 variantes), «sin acción en una solicitud propia que %s» (2 variantes), «un %s no la ve en solicitudes ajenas» (3 variantes) | `pendiente` |
+| Cancelación correcta | `features/reservas/CancelacionSolicitudes.test.jsx` › Cancelación correcta › «muestra la solicitud con el estado cancelada y sin la acción», «un aprobador cancela su propia solicitud y desaparecen las demás acciones» | `pendiente` |
+| Mensajes de error de la cancelación | `features/reservas/CancelacionSolicitudes.test.jsx` › Mensajes de error de la cancelación › «con %i %s muestra el mensaje y conserva el estado» (2 variantes), «con permiso_insuficiente muestra el mensaje sin cerrar la sesión y conserva el estado» | `pendiente` |
+
+### Requisito: Consulta del historial en la interfaz
+
+Requisito del change `cancelacion-historial` (`openspec/changes/cancelacion-historial/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Entradas del historial visibles | `features/historial/ConsultaHistorial.test.jsx` › Entradas del historial visibles › «un %s ve lo que devuelve la API, en su orden, con reserva, estados, actor y fecha» (3 variantes), «indica que las fechas están en UTC» | `pendiente` |
+| Envío de los filtros | `features/historial/ConsultaHistorial.test.jsx` › Envío de los filtros › «envía espacio, estado y rango con zona horaria explícita y muestra lo devuelto», «omite los campos vacíos» | `pendiente` |
+| Historial vacío | `features/historial/ConsultaHistorial.test.jsx` › Historial vacío › «indica que no hay entradas, sin mensaje de error» | `pendiente` |
+| Error en la consulta del historial | `features/historial/ConsultaHistorial.test.jsx` › Error en la consulta del historial › «con %i %s muestra el mensaje del servidor y ninguna entrada» (2 variantes) | `pendiente` |
+
 Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backendFalso.js`) que responde con los códigos y cuerpos del contrato de errores de la API. Verifican el comportamiento de la interfaz, no el del servidor, que cubren las pruebas de `pytest`.
 
 ---
@@ -552,6 +577,103 @@ Pruebas contra PostgreSQL real con hilos, conexiones propias y barrera; cada una
 
 ---
 
+## Spec `cancelaciones`
+
+Spec delta del change `cancelacion-historial`: `openspec/changes/cancelacion-historial/specs/cancelaciones/spec.md`.
+
+### Requisito: Cancelación de reservas propias
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Cancelación de una solicitud pendiente | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_propia`; `test_cancelaciones_api.py::test_cancelacion_propia_responde_con_el_detalle_de_la_solicitud` | `pendiente` |
+| Cancelación de una reserva aprobada | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_propia`; `test_cancelaciones_api.py::test_cancelacion_propia_responde_con_el_detalle_de_la_solicitud` | `pendiente` |
+| Cancelación por un aprobador de su propia solicitud | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_propia` (variantes `aprobador` y `admin`); `test_cancelaciones_api.py::test_cancelacion_propia_responde_con_el_detalle_de_la_solicitud` | `pendiente` |
+
+### Requisito: Liberación del espacio al cancelar
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| La disponibilidad refleja la cancelación | `test_servicio_cancelaciones.py::test_cancelar_una_aprobada_libera_la_disponibilidad` | `pendiente` |
+| Aprobación de una solicitud antes en conflicto | `test_servicio_cancelaciones.py::test_se_puede_aprobar_una_pendiente_que_estaba_en_conflicto` | `pendiente` |
+| Una reserva cancelada no se puede aprobar | `test_servicio_cancelaciones.py::test_una_reserva_cancelada_no_se_puede_aprobar` | `pendiente` |
+
+### Requisito: Condiciones de la cancelación
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Cancelación de una solicitud rechazada o ya cancelada | `test_servicio_cancelaciones.py::test_cancelacion_de_una_solicitud_rechazada_o_cancelada`; `test_cancelaciones_api.py::test_transicion_invalida` | `pendiente` |
+| Cancelación de una reserva que ya comenzó | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_que_ya_comenzo`; `test_cancelaciones_api.py::test_reserva_iniciada` | `pendiente` |
+| Cancelación en el instante de inicio | `test_servicio_cancelaciones.py::test_cancelacion_en_el_instante_de_inicio`; `test_cancelaciones_api.py::test_reserva_iniciada` | `pendiente` |
+
+### Requisito: Cancelación restringida al dueño
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Cancelación de una solicitud ajena por un solicitante | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_ajena`; `test_cancelaciones_api.py::test_cancelacion_ajena_para_cada_rol` | `pendiente` |
+| Cancelación de una solicitud ajena por un aprobador o administrador | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_ajena`; `test_cancelaciones_api.py::test_cancelacion_ajena_para_cada_rol` | `pendiente` |
+| Cancelación sin sesión | `test_cancelaciones_api.py::test_cancelacion_sin_token` | `pendiente` |
+| Cancelación de una solicitud inexistente | `test_servicio_cancelaciones.py::test_cancelacion_de_una_solicitud_inexistente`; `test_cancelaciones_api.py::test_cancelacion_de_una_solicitud_inexistente` | `pendiente` |
+
+### Requisito: Cancelaciones simultáneas
+
+Pruebas contra PostgreSQL real con hilos, conexiones propias y barrera; cada una repite la carrera 20 veces.
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Dos cancelaciones simultáneas de la misma solicitud | `test_concurrencia_cancelaciones.py::test_dos_cancelaciones_simultaneas_de_la_misma_solicitud` (2 variantes) | `pendiente` |
+| Cancelación y aprobación simultáneas de la misma solicitud | `test_concurrencia_cancelaciones.py::test_cancelacion_y_aprobacion_simultaneas_de_la_misma_solicitud`; `test_concurrencia_cancelaciones.py::test_la_respuesta_de_aprobar_muestra_una_cancelacion_confirmada_justo_despues` | `pendiente` |
+
+---
+
+## Spec `historial`
+
+Spec delta del change `cancelacion-historial`: `openspec/changes/cancelacion-historial/specs/historial/spec.md`.
+
+### Requisito: Registro de cada cambio de estado
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Registro de la creación | `test_historial_integracion.py::test_cada_creacion_correcta_anade_exactamente_una_entrada` | `pendiente` |
+| Registro de la aprobación | `test_historial_integracion.py::test_la_aprobacion_anade_una_entrada_con_el_aprobador_como_actor` | `pendiente` |
+| Registro del rechazo | `test_historial_integracion.py::test_el_rechazo_anade_una_entrada_con_el_aprobador_como_actor` | `pendiente` |
+| Registro de la cancelación | `test_servicio_cancelaciones.py::test_cancelacion_de_una_reserva_propia`; `test_cancelaciones_api.py::test_el_ciclo_completo_queda_en_el_historial_por_la_api` | `pendiente` |
+| Las operaciones fallidas no se registran | `test_historial_integracion.py::test_decision_inexistente_no_anade_entrada`, `::test_decision_propia_no_anade_entrada`, `::test_decision_sobre_no_pendiente_no_anade_entrada`, `::test_aprobacion_con_solapamiento_no_anade_entrada`, `::test_aprobacion_vencida_no_anade_entrada`, `::test_rechazo_sin_motivo_no_anade_entrada`; `test_servicio_cancelaciones.py::test_cancelacion_de_una_solicitud_rechazada_o_cancelada`, `::test_cancelacion_de_una_reserva_ajena`, `::test_cancelacion_de_una_reserva_que_ya_comenzo` | `pendiente` |
+| Atomicidad del registro | `test_historial_integracion.py::test_fallo_al_registrar_durante_una_decision_no_cambia_el_estado`, `::test_fallo_al_registrar_durante_una_cancelacion_no_cambia_el_estado`, `::test_fallo_al_registrar_durante_la_creacion_no_deja_la_solicitud` | `pendiente` |
+
+### Requisito: Inmutabilidad del historial
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Modificación directa de una entrada | `test_historial_esquema.py::test_un_update_directo_falla_y_la_entrada_conserva_sus_valores` | `pendiente` |
+| Borrado directo de una entrada | `test_historial_esquema.py::test_un_delete_directo_falla_y_la_entrada_sigue_existiendo` | `pendiente` |
+| Escritura por la API | `test_historial_api.py::test_escritura_por_la_api` (4 variantes); `test_historial_api.py::test_escritura_por_la_api_sin_token_tambien_responde_405` (4 variantes) | `pendiente` |
+
+### Requisito: Consulta del historial según el rol
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Historial de un solicitante | `test_repositorio_historial.py::test_restringido_devuelve_las_entradas_de_sus_reservas_incluidas_decisiones_ajenas`; `test_historial_api.py::test_historial_de_un_solicitante` | `pendiente` |
+| Historial de un aprobador o administrador | `test_historial_api.py::test_historial_de_un_aprobador_o_administrador` (2 variantes) | `pendiente` |
+| Contenido de cada entrada | `test_historial_api.py::test_contenido_de_cada_entrada` | `pendiente` |
+| Orden de las entradas | `test_repositorio_historial.py::test_a_igual_fecha_se_ordena_por_identificador`; `test_historial_api.py::test_orden_de_las_entradas` | `pendiente` |
+| Historial vacío | `test_historial_api.py::test_historial_vacio` | `pendiente` |
+| Consulta sin sesión | `test_historial_api.py::test_consulta_sin_sesion` | `pendiente` |
+
+### Requisito: Filtros del historial
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Filtro por espacio | `test_repositorio_historial.py::test_filtro_por_espacio`; `test_historial_api.py::test_filtro_por_espacio` | `pendiente` |
+| Filtro por estado | `test_repositorio_historial.py::test_filtro_por_estado_coincide_con_el_estado_nuevo`; `test_historial_api.py::test_filtro_por_estado` | `pendiente` |
+| Filtro por rango de fechas | `test_repositorio_historial.py::test_filtro_por_rango_incluye_desde_y_excluye_hasta`, `::test_el_limite_inferior_del_rango_se_incluye`, `::test_el_limite_superior_del_rango_se_excluye`; `test_historial_api.py::test_filtro_por_rango_de_fechas` | `pendiente` |
+| Filtros combinados | `test_repositorio_historial.py::test_filtros_combinados`; `test_historial_api.py::test_filtros_combinados` | `pendiente` |
+| Filtros y visibilidad del solicitante | `test_repositorio_historial.py::test_la_restriccion_se_mantiene_con_el_filtro_de_espacio`; `test_historial_api.py::test_filtros_y_visibilidad_del_solicitante` | `pendiente` |
+| Estado fuera del catálogo | `test_historial_api.py::test_filtros_invalidos` (variantes `estado`) | `pendiente` |
+| Rango de fechas inválido | `test_historial_api.py::test_filtros_invalidos` (variantes `desde` y `hasta`) | `pendiente` |
+| Espacio inexistente | `test_historial_api.py::test_espacio_inexistente` | `pendiente` |
+
+---
+
 ## Pruebas de tareas sin escenario de spec
 
 Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y documentación) que no corresponden a ningún escenario de las specs. Se listan para que la matriz recoja todas las pruebas de la suite.
@@ -588,6 +710,17 @@ Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y 
 | `backend/tests/test_readme.py` (módulo `aprobaciones`) | `aprobacion-reservas` | 4.3 | `pendiente` |
 | `backend/tests/test_concurrencia_aprobaciones.py::test_las_llamadas_se_solapan_en_el_tiempo`, `::test_cada_llamada_usa_su_propia_sesion_y_su_propia_conexion`, `::test_la_utilidad_propaga_las_excepciones_de_las_llamadas`, `::test_la_utilidad_devuelve_las_conexiones_al_pool` | `aprobacion-reservas` | 5.1 | `pendiente` |
 | `frontend/src/features/reservas/DecisionSolicitudes.test.jsx` › Sin acciones para el solicitante › «muestra el motivo de sus solicitudes rechazadas»; Rechazo con motivo › «cancelar cierra el formulario sin enviar nada»; Rechazo sin motivo › «no valida la longitud: envía el motivo largo y muestra el mensaje del servidor»; Mensajes de error de la decisión › «una decisión correcta posterior borra el mensaje de error anterior» | `aprobacion-reservas` | 6.1, 6.2 | `pendiente` |
+| `backend/tests/test_historial_esquema.py` (esquema, DDL del modelo, restricciones y migraciones paso a paso) | `cancelacion-historial` | 1.1, 1.2 | `pendiente` |
+| `backend/tests/test_reservas_esquema.py`, `backend/tests/test_aprobaciones_esquema.py` (revisiones 0008 y 0009) | `cancelacion-historial` | 1.1, 1.2 | `pendiente` |
+| `backend/tests/test_repositorio_historial.py::test_registrar_copia_la_reserva_y_usa_el_reloj_inyectado`, `::test_registrar_no_confirma_la_transaccion`, `::test_sin_filtros_devuelve_todas_por_fecha`, `::test_el_actor_de_una_decision_no_ve_por_ello_la_entrada`, `::test_la_restriccion_se_mantiene_con_todos_los_filtros`, `::test_ninguna_id_de_usuario_equivale_a_todos` | `cancelacion-historial` | 2.1, 2.2 | `pendiente` |
+| `backend/tests/test_historial_integracion.py` (creaciones rechazadas, reloj de la ruta de rechazo y fallo de registro por la API) | `cancelacion-historial` | 3.1, 3.2, 3.3 | `pendiente` |
+| `backend/tests/test_errores_cancelaciones.py` | `cancelacion-historial` | 4.1 | `pendiente` |
+| `backend/tests/test_servicio_cancelaciones.py::test_cancelacion_cuando_el_inicio_es_justo_despues_del_instante_actual`, `::test_orden_dueno_antes_que_estado`, `::test_orden_dueno_antes_que_inicio`, `::test_orden_estado_antes_que_inicio`, `::test_un_error_de_dominio_libera_el_bloqueo_de_la_fila`, `::test_la_fila_de_la_solicitud_queda_bloqueada_y_la_del_espacio_no` | `cancelacion-historial` | 4.2 | `pendiente` |
+| `backend/tests/test_cancelaciones_api.py::test_el_cuerpo_se_ignora`, `::test_identificador_fuera_del_rango_de_postgresql`, `::test_cancelacion_usa_el_reloj_inyectado` | `cancelacion-historial` | 5.1 | `pendiente` |
+| `backend/tests/test_historial_api.py::test_el_actor_se_expone_solo_por_identificador`, `::test_lista_vacia_con_filtros_que_no_coinciden`, `::test_rango_con_desfase_codificado_en_la_url`, `::test_rango_con_mas_sin_codificar_es_invalido`, `::test_filtros_invalidos` (`espacio_id` no entero y valores vacíos), `::test_un_filtro_invalido_se_detecta_antes_que_el_espacio_inexistente`, `::test_filtro_por_espacio_inactivo_procede`, `::test_los_parametros_desconocidos_se_ignoran_como_en_disponibilidad`, `::test_un_parametro_desconocido_no_amplia_la_visibilidad`, `::test_no_existen_rutas_del_historial_por_entrada` | `cancelacion-historial` | 5.2, 5.3 | `pendiente` |
+| `backend/tests/test_readme.py` (módulos `cancelaciones` e `historial`) | `cancelacion-historial` | 5.4 | `pendiente` |
+| `frontend/src/features/reservas/CancelacionSolicitudes.test.jsx` › Sin acción sobre solicitudes no cancelables › «un aprobador ve aprobar y rechazar en una ajena, pero no cancelar», «al rechazar una propia, el único «Cancelar» es el que cierra el formulario» | `cancelacion-historial` | 7.1 | `pendiente` |
+| `frontend/src/features/historial/ConsultaHistorial.test.jsx` › Envío de los filtros › «el estado se elige de la lista del catálogo», «no valida en el navegador: envía un identificador no numérico y una sola fecha», «una consulta correcta posterior borra el mensaje de error anterior»; Error en la consulta del historial › «también muestra el mensaje si falla la carga inicial»; Navegación al historial | `cancelacion-historial` | 7.2 | `pendiente` |
 
 Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta; en `espacios`, el límite técnico de la capacidad (2147483647), los nombres con tildes y eñe, los campos ajenos y los cuerpos que no son JSON. No figuran en las tablas anteriores porque no corresponden a un escenario.
 
@@ -597,3 +730,5 @@ Algunas pruebas de los archivos citados en las specs cubren casos que ningún es
 2. **Errores HTTP fuera del contrato.** El manejador de errores (`backend/app/auth/errors.py`) traduce al formato JSON los errores 400, 404, 405 y 500. Cualquier otro error HTTP del framework (por ejemplo, 413 o 415) conserva la respuesta por defecto de Flask, que no tiene el formato `{"error": {...}}`. Con el código actual ninguna de esas respuestas es alcanzable: las rutas leen el cuerpo con `get_json(silent=True)` y no se configura un tamaño máximo de petición. Por eso no tienen prueba.
 3. **Catálogo desactualizado en la interfaz de espacios (spec `interfaz-web`).** El escenario «Error al desactivar un espacio ya inactivo» y la prueba de `espacio_ya_activo` de la tarea 4.4 solo pueden darse cuando el catálogo mostrado está desactualizado, porque la interfaz ofrece desactivar solo los espacios activos y reactivar solo los inactivos. Para que el catálogo «mantenga» el estado real, la interfaz vuelve a pedir `GET /api/espacios` cuando la operación responde 404 o 409. Las pruebas simulan ese desfase: la primera consulta devuelve el estado anterior y la segunda el real.
 4. **Serialización de las aprobaciones por espacio (spec `aprobaciones`, «Decisiones simultáneas»).** Con solo el bloqueo de la solicitud y la restricción de exclusión descritos en `design.md`, una ejecución de estrés de la carrera entre solicitudes solapadas produjo un `deadlock_detected` (`40P01`) hacia la repetición 200, que la API respondía como `500 error_interno`. Por eso la aprobación bloquea además la fila del espacio con `FOR NO KEY UPDATE`. Con ese bloqueo, 1500 repeticiones de cada una de las tres carreras terminaron sin errores. Las 20 repeticiones de la suite no bastan por sí solas para detectar este fallo; lo cubre también `test_servicio_aprobaciones.py::test_aprobar_bloquea_el_espacio_sin_impedir_nuevas_solicitudes`, que es determinista.
+5. **Respuesta de una aprobación que coincide con una cancelación (spec `cancelaciones`, «Cancelaciones simultáneas»).** La respuesta se serializa después de confirmar la transacción, releyendo la fila. Si el dueño cancela justo en ese intervalo, la aprobación responde 200 con `estado: cancelada`, el estado vigente. La spec solo fija el código HTTP de la aprobación en esa carrera, y el historial conserva la secuencia real. Lo fija de forma determinista `test_concurrencia_cancelaciones.py::test_la_respuesta_de_aprobar_muestra_una_cancelacion_confirmada_justo_despues`.
+6. **Columna «Acciones» del listado.** Ahora se muestra a todos los roles, porque un solicitante también puede cancelar. Por eso se retiró de `DecisionSolicitudes.test.jsx` › Sin acciones para el solicitante la comprobación de que esa columna no existe; las de que no se ofrecen aprobar ni rechazar se mantienen.

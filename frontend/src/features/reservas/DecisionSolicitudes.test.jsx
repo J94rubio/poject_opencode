@@ -84,7 +84,6 @@ describe('Sin acciones para el solicitante', () => {
     await screen.findByRole('table', { name: 'Solicitudes' })
     expect(screen.queryByRole('button', { name: 'Aprobar' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Rechazar' })).toBeNull()
-    expect(screen.queryByRole('columnheader', { name: 'Acciones' })).toBeNull()
   })
 
   it('muestra el motivo de sus solicitudes rechazadas', async () => {

@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext.jsx'
 import { LoginPage } from './features/auth/LoginPage.jsx'
 import { RutaProtegida } from './features/auth/RutaProtegida.jsx'
 import { SeccionEspacios } from './features/espacios/SeccionEspacios.jsx'
+import { ConsultaHistorial } from './features/historial/ConsultaHistorial.jsx'
 import { ConsultaDisponibilidad } from './features/reservas/ConsultaDisponibilidad.jsx'
 import { FormularioSolicitud } from './features/reservas/FormularioSolicitud.jsx'
 import { ListadoSolicitudes } from './features/reservas/ListadoSolicitudes.jsx'
@@ -29,6 +30,7 @@ function Marco({ ruta, children }) {
           <Enlace a="/reservas">Solicitudes</Enlace>
           <Enlace a="/reservas/nueva">Nueva solicitud</Enlace>
           <Enlace a="/reservas/disponibilidad">Disponibilidad</Enlace>
+          <Enlace a="/historial">Historial</Enlace>
           {usuario.rol === 'admin' && (
             <Enlace a="/admin/usuarios">Administración de usuarios</Enlace>
           )}
@@ -58,6 +60,7 @@ const SECCIONES = {
   '/reservas': ListadoSolicitudes,
   '/reservas/nueva': FormularioSolicitud,
   '/reservas/disponibilidad': ConsultaDisponibilidad,
+  '/historial': ConsultaHistorial,
 }
 
 export function Aplicacion() {

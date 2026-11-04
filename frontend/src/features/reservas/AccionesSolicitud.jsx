@@ -1,5 +1,7 @@
-// Acciones de aprobar y rechazar de una solicitud pendiente (requisito «Decisión
-// de solicitudes en la interfaz» de la spec interfaz-web).
+// Acciones de una solicitud (requisitos «Decisión de solicitudes en la interfaz» y
+// «Cancelación de reservas en la interfaz» de la spec interfaz-web): aprobar y
+// rechazar, y cancelar la propia. Mientras se escribe un rechazo solo se muestra su
+// formulario, cuyo «Cancelar» cierra el formulario y no cancela la solicitud.
 //
 // La spec exige bloquear, sin petición, el rechazo con motivo vacío o solo con
 // espacios. Es la única validación en el navegador: la longitud del motivo la
@@ -7,7 +9,7 @@
 
 import { useState } from 'react'
 
-export function AccionesSolicitud({ solicitud, ocupado, alDecidir }) {
+export function AccionesSolicitud({ solicitud, puedeDecidir, puedeCancelar, ocupado, alDecidir }) {
   const [rechazando, setRechazando] = useState(false)
   const [motivo, setMotivo] = useState('')
   const [motivoFaltante, setMotivoFaltante] = useState(false)
@@ -28,7 +30,7 @@ export function AccionesSolicitud({ solicitud, ocupado, alDecidir }) {
     alDecidir(solicitud.id, 'rechazar', { motivo })
   }
 
-  if (rechazando) {
+  if (rechazando && puedeDecidir) {
     const campo = `motivo-solicitud-${solicitud.id}`
     return (
       <form aria-label={`Rechazar solicitud ${solicitud.id}`} onSubmit={enviarRechazo}>
@@ -47,16 +49,29 @@ export function AccionesSolicitud({ solicitud, ocupado, alDecidir }) {
 
   return (
     <>
-      <button
-        type="button"
-        disabled={ocupado}
-        onClick={() => alDecidir(solicitud.id, 'aprobar')}
-      >
-        Aprobar
-      </button>
-      <button type="button" disabled={ocupado} onClick={() => setRechazando(true)}>
-        Rechazar
-      </button>
+      {puedeDecidir && (
+        <>
+          <button
+            type="button"
+            disabled={ocupado}
+            onClick={() => alDecidir(solicitud.id, 'aprobar')}
+          >
+            Aprobar
+          </button>
+          <button type="button" disabled={ocupado} onClick={() => setRechazando(true)}>
+            Rechazar
+          </button>
+        </>
+      )}
+      {puedeCancelar && (
+        <button
+          type="button"
+          disabled={ocupado}
+          onClick={() => alDecidir(solicitud.id, 'cancelar')}
+        >
+          Cancelar
+        </button>
+      )}
     </>
   )
 }
