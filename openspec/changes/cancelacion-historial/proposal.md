@@ -29,11 +29,12 @@ Con la creación y la aprobación implementadas, faltan dos piezas del plan: que
 
 - `cancelaciones`: cancelación de reservas propias, condiciones de estado e inicio, liberación del espacio, control de acceso y cancelaciones simultáneas.
 - `historial`: registro de cada cambio de estado, inmutabilidad, consulta según rol y filtros.
-- `interfaz-web`: el change reutiliza esta capability, aún no publicada en `openspec/specs/`. Se añaden solo requisitos ADDED, con nombres distintos de los ya propuestos.
 
 ### Modified Capabilities
 
-_(Ninguna. El proyecto no tiene specs publicadas, por lo que todo se expresa con requisitos ADDED.)_
+- `interfaz-web`: capability ya publicada en `openspec/specs/`; este change solo le añade requisitos ADDED, sin modificar los existentes.
+
+Las specs `usuarios`, `auth`, `espacios`, `reservas`, `aprobaciones` e `interfaz-web` ya están publicadas en `openspec/specs/`. Este change crea las capabilities `cancelaciones` e `historial`.
 
 ## Impact
 
@@ -52,8 +53,8 @@ _(Ninguna. El proyecto no tiene specs publicadas, por lo que todo se expresa con
 2. **Cancelación de reservas ajenas:** 403 `permiso_insuficiente` para cualquier rol, incluido admin, porque el permiso es `reservas:cancelar_propia`.
 3. **Orden de comprobaciones al cancelar:** permiso, existencia, dueño, estado (`pendiente` o `aprobada`) e inicio no ocurrido.
 4. **Contenido de cada entrada del historial:** reserva, espacio, estado anterior (nulo en la creación), estado nuevo, actor y fecha en UTC. El motivo del rechazo sigue en la reserva y no se duplica.
-5. **Filtro de estado:** coincide con el estado nuevo de la entrada. **Decisión pendiente de confirmar por el estudiante.**
-6. **Filtro de rango de fechas:** se aplica a la fecha del cambio, con rango semiabierto `[desde, hasta)`, ISO 8601 con zona horaria explícita. **Decisión pendiente de confirmar por el estudiante.**
+5. **Filtro de estado:** coincide con el estado nuevo de la entrada. **Decisión confirmada por el estudiante.**
+6. **Filtro de rango de fechas:** se aplica a la fecha del cambio, con rango semiabierto `[desde, hasta)`, ISO 8601 con zona horaria explícita. **Decisión confirmada por el estudiante.**
 7. **Orden del historial:** ascendente por fecha del cambio y luego por identificador; sin paginación.
 8. **Visibilidad del solicitante:** ve todas las entradas de sus reservas, incluidas las decisiones tomadas por un aprobador.
 9. **Atomicidad:** si no se puede escribir la entrada del historial, el cambio de estado o la creación no se aplican.

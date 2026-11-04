@@ -2,7 +2,7 @@
 
 ## Context
 
-Ver proposal.md - Why. El proyecto ya cuenta con estructura modular en capas (usuarios-roles-auth, espacios, reservas-disponibilidad, aprobacion-reservas) con auth/JWT, guard de permisos, manejador de errores, modelo de reservas con estados cerrados, restricción de exclusión sobre reservas aprobadas, función única `decidir` con transacción y bloqueo de fila, y reloj inyectable. Los errores siguen el formato `{"error": {"codigo", "mensaje"}}` de usuarios-roles-auth. El plan atribuye a `aprobaciones` el «registro de quién decidió y cuándo»; ese registro se implementa aquí, en el historial.
+Ver proposal.md - Why. El proyecto ya cuenta con estructura modular en capas (usuarios-roles-auth, espacios, reservas-disponibilidad, aprobacion-reservas) con auth/JWT, guard de permisos, manejador de errores, modelo de reservas con estados cerrados, restricción de exclusión sobre reservas aprobadas, función única `decidir` con transacción y bloqueo de fila (la de la solicitud y, desde `aprobacion-reservas`, también la del espacio, con `FOR NO KEY UPDATE`), y reloj inyectable. Los errores siguen el formato `{"error": {"codigo", "mensaje"}}` de usuarios-roles-auth. El plan atribuye a `aprobaciones` el «registro de quién decidió y cuándo»; ese registro se implementa aquí, en el historial.
 
 ## Goals / Non-Goals
 
@@ -36,7 +36,8 @@ Ver proposal.md - Why. El proyecto ya cuenta con estructura modular en capas (us
 - [Rendimiento de las consultas del historial] → Índices por reserva, espacio y fecha; sin paginación porque el volumen del proyecto es pequeño (decisión explícita).
 - [Pruebas de concurrencia inestables] → Reutilizar la utilidad con barrera y conexiones independientes de `aprobacion-reservas`, con aserciones sobre el resultado final.
 - [Falta de historial para reservas creadas antes del cambio] → No aplica: el sistema aún no tiene datos en producción.
+- El disparador impide UPDATE y DELETE, pero no TRUNCATE ni que el propietario de la tabla lo desactive; frente a esas operaciones la inmutabilidad depende de los permisos de la base de datos (límite aceptado).
 
 ## Open Questions
 
-Ninguna bloqueante. Las decisiones 5 (filtro de estado) y 6 (rango de fechas sobre la fecha del cambio) de proposal.md quedan pendientes de confirmación del estudiante, con el valor por defecto indicado allí.
+Ninguna.
