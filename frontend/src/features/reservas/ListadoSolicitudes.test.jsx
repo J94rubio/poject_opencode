@@ -37,7 +37,14 @@ function filasMostradas() {
   return tabla
     .getAllByRole('row')
     .slice(1)
-    .map((fila) => within(fila).getAllByRole('cell').map((celda) => celda.textContent))
+    .map((fila) =>
+      within(fila)
+        .getAllByRole('cell')
+        // Solo los datos de la solicitud: el motivo y las acciones de decisión
+        // se prueban en DecisionSolicitudes.test.jsx.
+        .slice(0, 6)
+        .map((celda) => celda.textContent),
+    )
 }
 
 function filasEsperadas(solicitudes) {

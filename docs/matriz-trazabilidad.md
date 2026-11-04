@@ -1,15 +1,16 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) y `aprobacion-reservas` (tarea 7.2 de `openspec/changes/aprobacion-reservas/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
   - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
   - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/specs/{reservas,interfaz-web}/spec.md` (publicadas al archivar el change).
+  - `aprobaciones` y el requisito de decisiones de `interfaz-web` (change `aprobacion-reservas`): specs delta en `openspec/changes/aprobacion-reservas/specs/{aprobaciones,interfaz-web}/spec.md`, hasta que se archive el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
-- Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo.
-- Estado: todas las pruebas citadas están en verde en la última ejecución: **775 pasadas en pytest** y **119 pasadas en Vitest**, sin fallos ni pruebas omitidas.
+- Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; las de `aprobacion-reservas` figuran como `pendiente` hasta que se confirme el change.
+- Estado: todas las pruebas citadas están en verde en la última ejecución: **906 pasadas en pytest** y **141 pasadas en Vitest**, sin fallos ni pruebas omitidas.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
 
@@ -21,8 +22,9 @@ Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por s
 | `usuarios` | 10 | 40 | 40 |
 | `espacios` | 7 | 36 | 36 |
 | `reservas` | 6 | 46 | 46 |
-| `interfaz-web` | 11 (5 de `usuarios-roles-auth`, 3 de `espacios` y 3 de `reservas-disponibilidad`) | 39 | 39 |
-| **Total** | **43** | **196** | **196** |
+| `aprobaciones` | 6 | 29 | 29 |
+| `interfaz-web` | 12 (5 de `usuarios-roles-auth`, 3 de `espacios`, 3 de `reservas-disponibilidad` y 1 de `aprobacion-reservas`) | 46 | 46 |
+| **Total** | **50** | **232** | **232** |
 
 Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cobertura están en [Observaciones](#observaciones).
 
@@ -465,7 +467,88 @@ Spec delta del change `reservas-disponibilidad` (`openspec/specs/reservas/spec.m
 
 El requisito «Listado de solicitudes en la interfaz» exige además mostrar el mensaje del servidor cuando la consulta falla, aunque no tiene un escenario propio. Lo cubre `features/reservas/ListadoSolicitudes.test.jsx` › Error al consultar el listado › «muestra el mensaje del servidor y ningún listado».
 
+### Requisito: Decisión de solicitudes en la interfaz
+
+Requisito del change `aprobacion-reservas` (`openspec/changes/aprobacion-reservas/specs/interfaz-web/spec.md`; la ruta se actualizará al archivar el change).
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Acciones visibles para aprobador y administrador | `features/reservas/DecisionSolicitudes.test.jsx` › Acciones visibles para aprobador y administrador › «un %s ve aprobar y rechazar en cada pendiente»; «un %s ve las acciones también en sus propias pendientes» (aprobador y admin) | `pendiente` |
+| Sin acciones para el solicitante | `features/reservas/DecisionSolicitudes.test.jsx` › Sin acciones para el solicitante › «no ofrece aprobar ni rechazar en ninguna solicitud» | `pendiente` |
+| Sin acciones sobre solicitudes decididas | `features/reservas/DecisionSolicitudes.test.jsx` › Sin acciones sobre solicitudes decididas › «un %s no ve acciones en aprobadas, rechazadas ni canceladas» (aprobador y admin) | `pendiente` |
+| Aprobación correcta | `features/reservas/DecisionSolicitudes.test.jsx` › Aprobación correcta › «muestra la solicitud con el estado devuelto por el servidor y sin acciones» | `pendiente` |
+| Rechazo con motivo | `features/reservas/DecisionSolicitudes.test.jsx` › Rechazo con motivo › «envía el motivo y muestra el estado y el motivo devueltos por el servidor» | `pendiente` |
+| Rechazo sin motivo | `features/reservas/DecisionSolicitudes.test.jsx` › Rechazo sin motivo › «con el motivo %s no envía la petición y avisa de que es obligatorio» (vacío y solo con espacios) | `pendiente` |
+| Mensajes de error de la decisión | `features/reservas/DecisionSolicitudes.test.jsx` › Mensajes de error de la decisión › «con %i %s muestra el mensaje del servidor y conserva el estado» (4 códigos); «%s sobre su propia solicitud: muestra permiso_insuficiente sin cerrar la sesión» (aprobador y admin); «al rechazar, muestra el mensaje y conserva el estado y el motivo escrito» | `pendiente` |
+
 Las pruebas de `interfaz-web` usan un backend simulado (`frontend/src/test/backendFalso.js`) que responde con los códigos y cuerpos del contrato de errores de la API. Verifican el comportamiento de la interfaz, no el del servidor, que cubren las pruebas de `pytest`.
+
+---
+
+## Spec `aprobaciones`
+
+Spec delta del change `aprobacion-reservas` (`openspec/changes/aprobacion-reservas/specs/aprobaciones/spec.md`; la ruta se actualizará al archivar el change). Cada escenario se cita con la prueba del servicio y la de integración HTTP cuando existen ambas. Las fechas son de 2030 y el reloj está inyectado. La columna Commit queda `pendiente` hasta que se confirme el change.
+
+### Requisito: Aprobación de solicitudes pendientes
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Aprobación por un aprobador | `test_servicio_aprobaciones.py::test_aprobacion[aprobador]`; `test_aprobaciones_api.py::test_aprobacion_por_rol[aprobador]` | `pendiente` |
+| Aprobación por un administrador | `test_servicio_aprobaciones.py::test_aprobacion[admin]`; `test_aprobaciones_api.py::test_aprobacion_por_rol[admin]` | `pendiente` |
+| La reserva aprobada ocupa el espacio | `test_aprobaciones_api.py::test_la_reserva_aprobada_ocupa_el_espacio` | `pendiente` |
+| Aprobación con solapamiento | `test_servicio_aprobaciones.py::test_aprobacion_con_solapamiento` (4 variantes); `test_aprobaciones_api.py::test_aprobacion_con_solapamiento` | `pendiente` |
+| Aprobación con borde exacto | `test_servicio_aprobaciones.py::test_aprobacion_con_borde_exacto` (2 variantes) | `pendiente` |
+| Aprobación en otro espacio | `test_servicio_aprobaciones.py::test_aprobacion_en_otro_espacio` | `pendiente` |
+| Las pendientes solapadas no cambian al aprobar | `test_servicio_aprobaciones.py::test_las_pendientes_solapadas_no_cambian_y_luego_fallan` | `pendiente` |
+| Aprobación de una pendiente que quedó en conflicto | `test_servicio_aprobaciones.py::test_las_pendientes_solapadas_no_cambian_y_luego_fallan` | `pendiente` |
+| Aprobación sobre un espacio desactivado | `test_servicio_aprobaciones.py::test_aprobacion_sobre_un_espacio_desactivado`; `test_aprobaciones_api.py::test_aprobacion_sobre_un_espacio_inactivo` | `pendiente` |
+| Aprobación de una solicitud vencida | `test_servicio_aprobaciones.py::test_aprobacion_de_una_solicitud_ya_comenzada[anterior]` | `pendiente` |
+| Aprobación en el instante de inicio | `test_servicio_aprobaciones.py::test_aprobacion_de_una_solicitud_ya_comenzada[en_el_instante_actual]`; `test_aprobaciones_api.py::test_aprobacion_vencida_usa_el_reloj_inyectado` | `pendiente` |
+
+### Requisito: Rechazo de solicitudes pendientes con motivo
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Rechazo con motivo | `test_servicio_aprobaciones.py::test_rechazo_con_motivo`; `test_servicio_aprobaciones.py::test_rechazo_con_500_caracteres`; `test_aprobaciones_api.py::test_rechazo_por_rol` (2 variantes) | `pendiente` |
+| Rechazo sin motivo | `test_servicio_aprobaciones.py::test_rechazo_con_motivo_invalido[ausente]`; `test_aprobaciones_api.py::test_rechazo_con_cuerpo_invalido[sin_motivo]`; `test_aprobaciones_api.py::test_rechazo_sin_cuerpo` | `pendiente` |
+| Rechazo con motivo vacío | `test_servicio_aprobaciones.py::test_rechazo_con_motivo_invalido[vacio, espacios, blancos]`; `test_aprobaciones_api.py::test_rechazo_con_cuerpo_invalido[vacio, espacios]` | `pendiente` |
+| Rechazo con motivo demasiado largo | `test_servicio_aprobaciones.py::test_rechazo_con_motivo_invalido[501]`; `test_aprobaciones_api.py::test_rechazo_con_cuerpo_invalido[501]` | `pendiente` |
+| Rechazo de una pendiente solapada con una aprobada | `test_servicio_aprobaciones.py::test_rechazo_de_una_pendiente_solapada_con_una_aprobada` | `pendiente` |
+| Rechazo sobre un espacio desactivado o con la solicitud ya comenzada | `test_servicio_aprobaciones.py::test_rechazo_sobre_un_espacio_inactivo`; `test_servicio_aprobaciones.py::test_rechazo_con_la_solicitud_ya_comenzada` (2 variantes) | `pendiente` |
+| El motivo aparece en el detalle | `test_aprobaciones_api.py::test_el_solicitante_ve_el_motivo_en_el_detalle_de_su_solicitud` | `pendiente` |
+| La reserva rechazada no ocupa el espacio | `test_aprobaciones_api.py::test_la_reserva_rechazada_no_ocupa_el_espacio` | `pendiente` |
+
+### Requisito: Transiciones permitidas desde el estado pendiente
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Aprobar una solicitud que no está pendiente | `test_servicio_aprobaciones.py::test_solo_se_decide_sobre_solicitudes_pendientes[aprobada, rechazada, cancelada; aprobar]`; `test_aprobaciones_api.py::test_segunda_decision_con_transicion_invalida[aprobar]` | `pendiente` |
+| Rechazar una solicitud que no está pendiente | `test_servicio_aprobaciones.py::test_solo_se_decide_sobre_solicitudes_pendientes[aprobada, rechazada, cancelada; rechazar]`; `test_aprobaciones_api.py::test_segunda_decision_con_transicion_invalida[rechazar]` | `pendiente` |
+
+### Requisito: Prohibición de decidir las propias solicitudes
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Aprobador aprueba su propia solicitud | `test_servicio_aprobaciones.py::test_nadie_decide_su_propia_solicitud[aprobador; aprobar]`; `test_aprobaciones_api.py::test_decision_sobre_la_solicitud_propia[aprobador; aprobar]` | `pendiente` |
+| Administrador rechaza su propia solicitud | `test_servicio_aprobaciones.py::test_nadie_decide_su_propia_solicitud[admin; rechazar]`; `test_aprobaciones_api.py::test_decision_sobre_la_solicitud_propia[admin; rechazar]` | `pendiente` |
+
+### Requisito: Control de acceso a las decisiones
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Decisión de un solicitante | `test_aprobaciones_api.py::test_decision_de_un_solicitante` (2 variantes) | `pendiente` |
+| Decisión sin sesión | `test_aprobaciones_api.py::test_decision_sin_sesion` (2 variantes) | `pendiente` |
+| Decisión sobre una solicitud inexistente | `test_servicio_aprobaciones.py::test_solicitud_inexistente` (6 variantes); `test_aprobaciones_api.py::test_decision_sobre_una_solicitud_inexistente` (4 variantes) | `pendiente` |
+
+### Requisito: Decisiones simultáneas
+
+Pruebas contra PostgreSQL real con hilos, conexiones propias y barrera; cada una repite la carrera 20 veces.
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Dos aprobaciones simultáneas de solicitudes solapadas | `test_concurrencia_aprobaciones.py::test_dos_aprobaciones_simultaneas_de_solicitudes_solapadas`; `test_servicio_aprobaciones.py::test_aprobar_bloquea_el_espacio_sin_impedir_nuevas_solicitudes`; `test_servicio_aprobaciones.py::test_la_carrera_contra_la_exclusion_se_traduce_a_reserva_solapada` | `pendiente` |
+| Dos aprobaciones simultáneas de la misma solicitud | `test_concurrencia_aprobaciones.py::test_dos_aprobaciones_simultaneas_de_la_misma_solicitud` | `pendiente` |
+| Aprobación y rechazo simultáneos de la misma solicitud | `test_concurrencia_aprobaciones.py::test_aprobacion_y_rechazo_simultaneos_de_la_misma_solicitud` | `pendiente` |
 
 ---
 
@@ -497,6 +580,14 @@ Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y 
 | `backend/tests/test_readme.py` (módulo `reservas`) | `reservas-disponibilidad` | 4.2 | `7519869` |
 | `frontend/src/features/reservas/CreacionSolicitud.test.jsx` › Envío con zona horaria explícita › «un identificador de espacio no numérico se envía tal como se escribió» | `reservas-disponibilidad` | 5.1 | `acf861c` |
 | `frontend/src/features/reservas/ListadoSolicitudes.test.jsx` › Navegación al listado de solicitudes | `reservas-disponibilidad` | 5.3 (enlace «Solicitudes» visible para todos los roles) | `acf861c` |
+| `backend/tests/test_aprobaciones_esquema.py` | `aprobacion-reservas` | 1.1 | `pendiente` |
+| `backend/tests/test_reservas_esquema.py` (migración 0007 y `CHECK` en las comprobaciones existentes) | `aprobacion-reservas` | 1.1 | `pendiente` |
+| `backend/tests/test_errores_aprobaciones.py` | `aprobacion-reservas` | 2.1 | `pendiente` |
+| `backend/tests/test_servicio_aprobaciones.py::test_una_accion_desconocida_es_un_error_de_desarrollo`, `::test_un_error_de_dominio_libera_el_bloqueo_de_la_fila`, `::test_el_motivo_se_guarda_recortado`, `::test_rechazo_por_admin`, `::test_los_500_caracteres_se_cuentan_tras_recortar`, `::test_al_rechazar_el_motivo_se_valida_antes_que_el_estado`, `::test_al_rechazar_la_autoria_se_valida_antes_que_el_motivo`, `::test_aprobacion_de_una_solicitud_que_empieza_justo_despues`, `::test_orden_estado_antes_que_vigencia`, `::test_orden_vigencia_antes_que_espacio_activo`, `::test_orden_espacio_activo_antes_que_solapamiento`, `::test_otra_violacion_de_integridad_no_se_traduce` | `aprobacion-reservas` | 3.1 a 3.4 | `pendiente` |
+| `backend/tests/test_aprobaciones_api.py::test_aprobar_ignora_el_cuerpo`, `::test_rechazo_con_cuerpo_invalido` (formas del cuerpo), `::test_el_cuerpo_del_rechazo_se_valida_en_su_lugar_del_orden`, `::test_el_motivo_aparece_en_el_listado_solo_en_las_rechazadas`, `::test_otra_violacion_de_integridad_responde_error_interno` | `aprobacion-reservas` | 4.1 | `pendiente` |
+| `backend/tests/test_readme.py` (módulo `aprobaciones`) | `aprobacion-reservas` | 4.3 | `pendiente` |
+| `backend/tests/test_concurrencia_aprobaciones.py::test_las_llamadas_se_solapan_en_el_tiempo`, `::test_cada_llamada_usa_su_propia_sesion_y_su_propia_conexion`, `::test_la_utilidad_propaga_las_excepciones_de_las_llamadas`, `::test_la_utilidad_devuelve_las_conexiones_al_pool` | `aprobacion-reservas` | 5.1 | `pendiente` |
+| `frontend/src/features/reservas/DecisionSolicitudes.test.jsx` › Sin acciones para el solicitante › «muestra el motivo de sus solicitudes rechazadas»; Rechazo con motivo › «cancelar cierra el formulario sin enviar nada»; Rechazo sin motivo › «no valida la longitud: envía el motivo largo y muestra el mensaje del servidor»; Mensajes de error de la decisión › «una decisión correcta posterior borra el mensaje de error anterior» | `aprobacion-reservas` | 6.1, 6.2 | `pendiente` |
 
 Algunas pruebas de los archivos citados en las specs cubren casos que ningún escenario nombra, como la cuenta inexistente en edición, activación o restablecimiento (404), los campos no editables en la edición o la cuenta desactivada con contraseña incorrecta; en `espacios`, el límite técnico de la capacidad (2147483647), los nombres con tildes y eñe, los campos ajenos y los cuerpos que no son JSON. No figuran en las tablas anteriores porque no corresponden a un escenario.
 
@@ -505,3 +596,4 @@ Algunas pruebas de los archivos citados en las specs cubren casos que ningún es
 1. **«Vigencia configurada» (spec `auth`).** La revisión de la tarea 9.2 detectó que este escenario solo se probaba al nivel de la emisión del token. Para cubrir el recorrido completo se añadió `test_login.py::test_vigencia_configurada_en_el_login`, que ejecuta el login con `JWT_ACCESS_TOKEN_MINUTES=5` y comprueba que `expira_en` es 300.
 2. **Errores HTTP fuera del contrato.** El manejador de errores (`backend/app/auth/errors.py`) traduce al formato JSON los errores 400, 404, 405 y 500. Cualquier otro error HTTP del framework (por ejemplo, 413 o 415) conserva la respuesta por defecto de Flask, que no tiene el formato `{"error": {...}}`. Con el código actual ninguna de esas respuestas es alcanzable: las rutas leen el cuerpo con `get_json(silent=True)` y no se configura un tamaño máximo de petición. Por eso no tienen prueba.
 3. **Catálogo desactualizado en la interfaz de espacios (spec `interfaz-web`).** El escenario «Error al desactivar un espacio ya inactivo» y la prueba de `espacio_ya_activo` de la tarea 4.4 solo pueden darse cuando el catálogo mostrado está desactualizado, porque la interfaz ofrece desactivar solo los espacios activos y reactivar solo los inactivos. Para que el catálogo «mantenga» el estado real, la interfaz vuelve a pedir `GET /api/espacios` cuando la operación responde 404 o 409. Las pruebas simulan ese desfase: la primera consulta devuelve el estado anterior y la segunda el real.
+4. **Serialización de las aprobaciones por espacio (spec `aprobaciones`, «Decisiones simultáneas»).** Con solo el bloqueo de la solicitud y la restricción de exclusión descritos en `design.md`, una ejecución de estrés de la carrera entre solicitudes solapadas produjo un `deadlock_detected` (`40P01`) hacia la repetición 200, que la API respondía como `500 error_interno`. Por eso la aprobación bloquea además la fila del espacio con `FOR NO KEY UPDATE`. Con ese bloqueo, 1500 repeticiones de cada una de las tres carreras terminaron sin errores. Las 20 repeticiones de la suite no bastan por sí solas para detectar este fallo; lo cubre también `test_servicio_aprobaciones.py::test_aprobar_bloquea_el_espacio_sin_impedir_nuevas_solicitudes`, que es determinista.
