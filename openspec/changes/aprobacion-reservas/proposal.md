@@ -27,11 +27,10 @@ Las solicitudes de reserva nacen en estado `pendiente` y, según `PLAN_INGENIERI
 ### New Capabilities
 
 - `aprobaciones`: aprobación y rechazo de solicitudes pendientes, transiciones permitidas, prohibición de decidir las propias solicitudes, motivo del rechazo, control de acceso y comportamiento ante aprobaciones simultáneas.
-- `interfaz-web`: el change reutiliza esta capability, que aún no está publicada en `openspec/specs/` porque ningún change se ha archivado. Se añade solo un requisito ADDED, con nombre distinto de los ya propuestos, dedicado a las decisiones sobre solicitudes.
 
 ### Modified Capabilities
 
-_(Ninguna. El proyecto no tiene specs publicadas, por lo que todo se expresa con requisitos ADDED.)_
+_(Ninguna se modifica. Las specs `usuarios`, `auth`, `espacios`, `reservas` e `interfaz-web` ya están publicadas en `openspec/specs/`. Este change solo crea la capability `aprobaciones` y añade a `interfaz-web` un requisito nuevo (ADDED), dedicado a las decisiones sobre solicitudes.)_
 
 ## Impact
 
@@ -40,7 +39,7 @@ _(Ninguna. El proyecto no tiene specs publicadas, por lo que todo se expresa con
 - **API:** `POST /api/reservas/{id}/aprobar` y `POST /api/reservas/{id}/rechazar` (este último con el motivo en el cuerpo). El detalle de una solicitud rechazada incluye `motivo_rechazo`.
 - **Permisos:** se usan `aprobaciones:aprobar` y `aprobaciones:rechazar` de la matriz de `usuarios-roles-auth` (aprobador y admin). No se crean permisos nuevos.
 - **Errores:** códigos nuevos `transicion_invalida` (409) y `solicitud_vencida` (409); se reutilizan `reserva_solapada`, `espacio_inactivo`, `solicitud_no_encontrada`, `datos_invalidos` y `permiso_insuficiente`.
-- **Frontend (React):** acciones de aprobar y rechazar en el listado y el detalle de solicitudes.
+- **Frontend (React):** acciones de aprobar y rechazar en el listado de solicitudes. No existe pantalla de detalle y este change no la crea.
 - **Dependencias:** ninguna nueva.
 - **Contrato con el resto del sistema:** `cancelacion-historial` consumirá el estado `aprobada` y el motivo de rechazo definidos aquí. Las pruebas de este change ya no necesitan sembrar reservas aprobadas: las crean aprobando solicitudes.
 - **Datos existentes:** ninguno.
@@ -49,7 +48,7 @@ _(Ninguna. El proyecto no tiene specs publicadas, por lo que todo se expresa con
 
 1. **Sin rechazo automático de pendientes solapadas.** Se evaluó y se descartó: es irreversible si la reserva aprobada se cancela después y añade complejidad (transacción atómica y eventos adicionales en el historial). Decisión confirmada por el estudiante.
 2. **Rechazo con motivo obligatorio:** texto no vacío tras recortar espacios, de hasta 500 caracteres; de lo contrario, 400 `datos_invalidos`.
-3. **Aprobar sobre un espacio desactivado después de crear la solicitud:** responde 400 `espacio_inactivo` y la solicitud sigue pendiente, coherente con la regla de creación (un espacio inactivo no admite nuevas ocupaciones). Rechazarla sigue permitido. Las reservas ya aprobadas de un espacio que se desactiva no se tocan (decisión de `espacios`). **Decisión pendiente de confirmar por el estudiante.**
-4. **Aprobar una solicitud que ya comenzó (inicio anterior o igual al momento actual, el mismo criterio que la cancelación):** responde 409 `solicitud_vencida` y la solicitud sigue pendiente; rechazarla sigue permitido. Se compara contra el reloj inyectable. **Decisión pendiente de confirmar por el estudiante.**
+3. **Aprobar sobre un espacio desactivado después de crear la solicitud:** responde 400 `espacio_inactivo` y la solicitud sigue pendiente, coherente con la regla de creación (un espacio inactivo no admite nuevas ocupaciones). Rechazarla sigue permitido. Las reservas ya aprobadas de un espacio que se desactiva no se tocan (decisión de `espacios`). Decisión confirmada por el estudiante.
+4. **Aprobar una solicitud que ya comenzó (inicio anterior o igual al momento actual, el mismo criterio que la cancelación):** responde 409 `solicitud_vencida` y la solicitud sigue pendiente; rechazarla sigue permitido. Se compara contra el reloj inyectable. Decisión confirmada por el estudiante.
 5. **Decisión sobre la propia solicitud:** 403 `permiso_insuficiente` para cualquier rol, incluido admin.
 6. **Orden de las comprobaciones al aprobar:** permiso, existencia, autoría, estado `pendiente`, solicitud vigente, espacio activo y, por último, solapamiento.

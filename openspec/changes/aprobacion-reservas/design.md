@@ -35,8 +35,8 @@ Ver proposal.md - Why. El proyecto ya cuenta con estructura modular en capas (us
 - [Pruebas de concurrencia inestables] → Barrera de sincronización, conexiones independientes, aserciones sobre el resultado final (exactamente una aprobada) y no sobre el orden de llegada.
 - [Violación de la restricción tratada como error interno] → Capturar la excepción de integridad específica de la restricción de exclusión y traducirla a `reserva_solapada`; verificarlo con una prueba de repositorio que fuerce la violación.
 - [Fixtures de `reservas-disponibilidad` con estado `rechazada` sin motivo] → El nuevo `CHECK` las rechazaría; actualizar esos fixtures para incluir un motivo.
-- [Bloqueo de filas] → La transacción es corta (lectura, validación, actualización) y bloquea una sola fila, por lo que el riesgo de contención es bajo.
+- [Bloqueo de filas] → La transacción es corta (lectura, validación, actualización). Bloquea la fila de la solicitud y, al aprobar, también la fila del espacio con `FOR NO KEY UPDATE`: sin ese segundo bloqueo, dos aprobaciones simultáneas de solicitudes solapadas se esperaban mutuamente en la restricción `EXCLUDE` y PostgreSQL abortaba una con `deadlock_detected` (40P01), que sería un error interno. El bloqueo del espacio serializa las aprobaciones de un mismo espacio, no impide crear solicitudes (no choca con el `FOR KEY SHARE` de las claves foráneas) y sí serializa una desactivación del espacio con una aprobación simultánea.
 
 ## Open Questions
 
-Ninguna bloqueante. Las decisiones 3 (espacio desactivado) y 4 (solicitud vencida) de proposal.md quedan pendientes de confirmación del estudiante, con el valor por defecto indicado allí.
+Ninguna.
