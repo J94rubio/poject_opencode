@@ -122,14 +122,18 @@ def nuevo_espacio(sesion):
 def sembrar_reserva(sesion):
     """Inserta y confirma una reserva directamente en el repositorio.
 
-    Como la aprobación llega con el change `aprobacion-reservas`, las pruebas
-    de servicio y de API siembran así las reservas aprobadas (por defecto) y
-    las de otros estados. Devuelve el id de la reserva.
+    Las pruebas de servicio y de API siembran así las reservas aprobadas (por
+    defecto) y las de otros estados. Una `rechazada` lleva siempre un motivo,
+    porque la base lo exige. Devuelve el id de la reserva.
     """
     from backend.app.reservas import repositories
 
-    def _sembrar(espacio_id, solicitante_id, inicio, fin, estado="aprobada"):
-        reserva = repositories.crear(espacio_id, solicitante_id, inicio, fin, estado)
+    def _sembrar(espacio_id, solicitante_id, inicio, fin, estado="aprobada",
+                 motivo_rechazo=None):
+        if estado == "rechazada" and motivo_rechazo is None:
+            motivo_rechazo = "Motivo sembrado"
+        reserva = repositories.crear(espacio_id, solicitante_id, inicio, fin, estado,
+                                     motivo_rechazo)
         sesion.commit()
         return reserva.id
 

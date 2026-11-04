@@ -20,15 +20,17 @@ def _rango(inicio, fin):
     return func.tstzrange(inicio, fin, _LIMITES)
 
 
-def crear(espacio_id, solicitante_id, inicio_utc, fin_utc, estado="pendiente"):
+def crear(espacio_id, solicitante_id, inicio_utc, fin_utc, estado="pendiente",
+          motivo_rechazo=None):
     """Inserta una reserva. El servicio solo crea `pendiente`; las pruebas
-    siembran otros estados directamente (la aprobación llega en otro change)."""
+    siembran otros estados directamente."""
     reserva = Reserva(
         espacio_id=espacio_id,
         solicitante_id=solicitante_id,
         inicio_utc=inicio_utc,
         fin_utc=fin_utc,
         estado=estado,
+        motivo_rechazo=motivo_rechazo,
     )
     db.session.add(reserva)
     db.session.flush()
@@ -37,6 +39,28 @@ def crear(espacio_id, solicitante_id, inicio_utc, fin_utc, estado="pendiente"):
 
 def buscar_por_id(reserva_id):
     return db.session.get(Reserva, reserva_id)
+
+
+def buscar_por_id_para_decidir(reserva_id):
+    """Reserva bloqueada con `SELECT ... FOR UPDATE` hasta el fin de la transacción.
+
+    `populate_existing` refresca el objeto si la sesión ya lo tenía cargado:
+    tras esperar el bloqueo debe verse el estado que dejó la otra transacción.
+    """
+    return db.session.execute(
+        select(Reserva)
+        .where(Reserva.id == reserva_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+
+
+def registrar_decision(reserva, estado, motivo_rechazo=None):
+    """Aplica el nuevo estado de una decisión; la confirma el servicio."""
+    reserva.estado = estado
+    reserva.motivo_rechazo = motivo_rechazo
+    db.session.flush()
+    return reserva
 
 
 def _ordenadas(consulta):

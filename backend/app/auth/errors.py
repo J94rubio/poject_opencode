@@ -155,6 +155,21 @@ class SolicitudNoEncontrada(ErrorDeDominio):
     mensaje = "La solicitud de reserva no existe."
 
 
+# --- Aprobaciones (change `aprobacion-reservas`) ----------------------------
+
+
+class TransicionInvalida(ErrorDeDominio):
+    http = 409
+    codigo = "transicion_invalida"
+    mensaje = "La solicitud ya no está pendiente y no admite esta decisión."
+
+
+class SolicitudVencida(ErrorDeDominio):
+    http = 409
+    codigo = "solicitud_vencida"
+    mensaje = "La solicitud ya comenzó y no se puede aprobar."
+
+
 MENSAJE_RUTA_NO_ENCONTRADA ="La ruta solicitada no existe."
 MENSAJE_METODO_NO_PERMITIDO = "El método HTTP no está permitido en esta ruta."
 MENSAJE_ERROR_INTERNO = "Se produjo un error interno."

@@ -4,10 +4,11 @@ Las fechas se guardan como `TIMESTAMP WITH TIME ZONE` en UTC y el rango es
 semiabierto `[inicio_utc, fin_utc)`. La base impone el catálogo cerrado de
 estados y `fin_utc > inicio_utc` con `CHECK`, y la restricción de exclusión
 `ex_reservas_aprobadas_sin_solape` impide dos reservas `aprobada` solapadas
-del mismo espacio (requiere la extensión `btree_gist`).
+del mismo espacio (requiere la extensión `btree_gist`). Una reserva `rechazada`
+exige `motivo_rechazo` (change `aprobacion-reservas`).
 
 La restricción y los índices con expresiones se declaran con `text` para que
-el DDL del modelo coincida exactamente con el de las migraciones 0005 y 0006.
+el DDL del modelo coincida exactamente con el de las migraciones 0005 a 0007.
 """
 
 from datetime import datetime
@@ -32,6 +33,10 @@ class Reserva(Base):
             name="ck_reservas_estado",
         ),
         CheckConstraint("fin_utc > inicio_utc", name="ck_reservas_rango"),
+        CheckConstraint(
+            "estado <> 'rechazada' OR motivo_rechazo IS NOT NULL",
+            name="ck_reservas_motivo_rechazo",
+        ),
         ExcludeConstraint(
             ("espacio_id", "="),
             (text(RANGO_SQL), "&&"),
@@ -60,3 +65,4 @@ class Reserva(Base):
     estado: Mapped[str] = mapped_column(
         Text, nullable=False, default="pendiente", server_default="pendiente"
     )
+    motivo_rechazo: Mapped[str | None] = mapped_column(Text, nullable=True)

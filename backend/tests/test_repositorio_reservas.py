@@ -91,7 +91,8 @@ def test_aprobadas_por_espacio_y_rango(sesion, espacio, otro_espacio, ana):
     # las anteriores y la restricción de exclusión las rechazaría.
     # No aprobadas o de otro espacio: excluidas.
     for estado in ("pendiente", "rechazada", "cancelada"):
-        repositories.crear(espacio, ana, _h(12), _h(13), estado=estado)
+        motivo = "Motivo sembrado" if estado == "rechazada" else None
+        repositories.crear(espacio, ana, _h(12), _h(13), estado=estado, motivo_rechazo=motivo)
     repositories.crear(otro_espacio, ana, _h(12), _h(13), estado="aprobada")
     sesion.commit()
     sesion.expunge_all()

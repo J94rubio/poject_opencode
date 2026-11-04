@@ -30,8 +30,9 @@ def fecha_utc(fecha):
 
 
 def datos_de_reserva(reserva):
-    """Representación de una solicitud: id, espacio, solicitante, inicio, fin y estado."""
-    return {
+    """Representación de una solicitud: id, espacio, solicitante, inicio, fin y
+    estado, más `motivo_rechazo` solo cuando está `rechazada`."""
+    datos = {
         "id": reserva.id,
         "espacio_id": reserva.espacio_id,
         "solicitante_id": reserva.solicitante_id,
@@ -39,6 +40,9 @@ def datos_de_reserva(reserva):
         "fin": fecha_utc(reserva.fin_utc),
         "estado": reserva.estado,
     }
+    if reserva.estado == "rechazada":
+        datos["motivo_rechazo"] = reserva.motivo_rechazo
+    return datos
 
 
 def datos_de_intervalo(reserva):

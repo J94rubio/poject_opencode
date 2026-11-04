@@ -2,7 +2,8 @@
 
 Tarea 5.7 de `usuarios-roles-auth`, generalizada en la tarea 3.6 de
 `espacios` a todos los módulos documentados y ampliada en la tarea 4.2 de
-`reservas-disponibilidad` con el módulo `reservas`. Comprueba que los endpoints y
+`reservas-disponibilidad` con el módulo `reservas` y en la tarea 4.3 de
+`aprobacion-reservas` con el módulo `aprobaciones`. Comprueba que los endpoints y
 los ejemplos del documento corresponden a rutas registradas y protegidas con
 el permiso indicado, que toda ruta protegida por permiso está documentada y
 que el catálogo de códigos de error coincide con los códigos y los HTTP
@@ -33,7 +34,7 @@ ERRORES_DEL_FRAMEWORK = {"ruta_no_encontrada": 404, "metodo_no_permitido": 405, 
 ROLES = ["solicitante", "aprobador", "admin"]
 
 # Endpoints documentados por módulo.
-ENDPOINTS_POR_MODULO = {"usuarios": 8, "espacios": 6, "reservas": 4}
+ENDPOINTS_POR_MODULO = {"usuarios": 8, "espacios": 6, "reservas": 4, "aprobaciones": 2}
 
 # Blueprints cuyas rutas no exigen un permiso de la matriz (login y sesión).
 BLUEPRINTS_SIN_PERMISO = {"auth"}
@@ -77,8 +78,11 @@ def _modulo(ruta):
     """Módulo de una ruta documentada; coincide con el blueprint que la registra.
 
     La disponibilidad (`/api/espacios/{id}/disponibilidad`) cuelga del recurso
-    espacio, pero pertenece al módulo `reservas`.
+    espacio, pero pertenece al módulo `reservas`; aprobar y rechazar cuelgan del
+    recurso reserva, pero pertenecen al módulo `aprobaciones`.
     """
+    if ruta.endswith(("/aprobar", "/rechazar")):
+        return "aprobaciones"
     if ruta.endswith("/disponibilidad"):
         return "reservas"
     segmento = ruta.split("/")[2]

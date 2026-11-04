@@ -1,8 +1,8 @@
 # Backend: sistema de reservas de espacios académicos
 
-API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`), `espacios` (design.md, D5 y D6, del change `espacios`) y `reservas` (change `reservas-disponibilidad`) y el catálogo de códigos de error de la API.
+API REST en Flask. Este documento describe los endpoints de los módulos `usuarios` (design.md, D7 y D8, del change `usuarios-roles-auth`), `espacios` (design.md, D5 y D6, del change `espacios`), `reservas` (change `reservas-disponibilidad`) y `aprobaciones` (change `aprobacion-reservas`) y el catálogo de códigos de error de la API.
 
-Todas las rutas de los módulos `usuarios`, `espacios` y `reservas` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
+Todas las rutas de los módulos `usuarios`, `espacios`, `reservas` y `aprobaciones` son protegidas: exigen la cabecera `Authorization: Bearer <token>` con un token obtenido en `POST /api/auth/login`, y el permiso indicado en la tabla de cada módulo. Los permisos de gestión de usuarios y de consulta de roles los tiene únicamente el rol `admin`.
 
 ## Puesta en marcha
 
@@ -248,7 +248,7 @@ Respuesta 200: el espacio con `"estado": "inactivo"` o `"estado": "activo"`. El 
 
 ## Endpoints de reservas
 
-Las solicitudes de reserva nacen siempre en estado `pendiente` y su solicitante es siempre el usuario autenticado. El catálogo cerrado de estados es `pendiente`, `aprobada`, `rechazada` y `cancelada`; en esta versión de la API solo se crean solicitudes `pendiente` (la aprobación y la cancelación llegarán en otros changes). Solo las reservas `aprobada` ocupan un espacio.
+Las solicitudes de reserva nacen siempre en estado `pendiente` y su solicitante es siempre el usuario autenticado. El catálogo cerrado de estados es `pendiente`, `aprobada`, `rechazada` y `cancelada`; las solicitudes se crean siempre `pendiente`, y se aprueban o rechazan con los [endpoints de aprobaciones](#endpoints-de-aprobaciones) (la cancelación llegará en otro change). Solo las reservas `aprobada` ocupan un espacio.
 
 Todos los roles (`solicitante`, `aprobador` y `admin`) poseen `reservas:crear`, `reservas:ver_propias` y `espacios:ver`. El listado y el detalle exigen `reservas:ver_propias`; con `reservas:ver_todas`, que poseen `aprobador` y `admin`, se ven además las solicitudes de los demás usuarios.
 
@@ -261,7 +261,7 @@ Todos los roles (`solicitante`, `aprobador` y `admin`) poseen `reservas:crear`, 
 
 **Fechas.** Se envían en ISO 8601 con zona horaria explícita (`Z` o un desplazamiento como `-05:00`); una fecha sin zona horaria es `datos_invalidos`. Se almacenan en UTC y todas las respuestas las devuelven en UTC con sufijo `Z`. Los rangos son semiabiertos `[inicio, fin)`: una reserva que termina exactamente cuando otra empieza no se solapa con ella.
 
-Cada solicitud se representa con exactamente estos campos:
+Cada solicitud se representa con exactamente estos campos, a los que una solicitud `rechazada` añade `motivo_rechazo`:
 
 ```json
 {"id": 12, "espacio_id": 3, "solicitante_id": 7, "inicio": "2026-11-03T15:00:00Z", "fin": "2026-11-03T17:00:00Z", "estado": "pendiente"}
@@ -314,6 +314,42 @@ Authorization: Bearer <token>
 
 Respuesta 200: la solicitud. Un `solicitante` que consulta una solicitud de otro usuario recibe 403 con `permiso_insuficiente` y ningún dato de la solicitud; `aprobador` y `admin` pueden consultar cualquiera. Error: `solicitud_no_encontrada` (también para un `solicitante`, si el identificador no existe).
 
+## Endpoints de aprobaciones
+
+Un `aprobador` o un `admin` decide sobre las solicitudes `pendiente`: aprobarla la pasa a `aprobada` y ocupa el espacio; rechazarla la pasa a `rechazada` con un motivo obligatorio. Nadie decide sus propias solicitudes, cualquiera que sea su rol. Aprobar una solicitud no cambia las demás pendientes que se solapan con ella.
+
+| Método | Ruta | Permiso | Respuesta correcta |
+|---|---|---|---|
+| `POST` | `/api/reservas/{id}/aprobar` | `aprobaciones:aprobar` | 200 con la solicitud en estado `aprobada` |
+| `POST` | `/api/reservas/{id}/rechazar` | `aprobaciones:rechazar` | 200 con la solicitud en estado `rechazada` y su `motivo_rechazo` |
+
+### Aprobar una solicitud
+
+```http
+POST /api/reservas/12/aprobar
+Authorization: Bearer <token>
+```
+
+El cuerpo de la petición se ignora. Respuesta 200: la solicitud con `"estado": "aprobada"`. Las comprobaciones se hacen en este orden: permiso (`permiso_insuficiente`), existencia (`solicitud_no_encontrada`), autoría (`permiso_insuficiente`), estado (`transicion_invalida`), vigencia (`solicitud_vencida`: el inicio es anterior o igual al instante actual), espacio activo (`espacio_inactivo`) y solapamiento con una reserva aprobada del mismo espacio (`reserva_solapada`). Si falla cualquiera de ellas, la solicitud no cambia.
+
+### Rechazar una solicitud
+
+```http
+POST /api/reservas/12/rechazar
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"motivo": "El espacio está reservado para mantenimiento."}
+```
+
+El cuerpo es un objeto JSON con solo el campo `motivo`: texto de hasta 500 caracteres, no vacío tras recortar los espacios exteriores, que se guarda recortado. Respuesta 200:
+
+```json
+{"id": 12, "espacio_id": 3, "solicitante_id": 7, "inicio": "2026-11-03T15:00:00Z", "fin": "2026-11-03T17:00:00Z", "estado": "rechazada", "motivo_rechazo": "El espacio está reservado para mantenimiento."}
+```
+
+Las comprobaciones se hacen en este orden: permiso (`permiso_insuficiente`), existencia (`solicitud_no_encontrada`), autoría (`permiso_insuficiente`), motivo (`datos_invalidos`: falta, está vacío, supera el límite o no es texto; también un campo adicional o un cuerpo que no es un objeto JSON) y estado (`transicion_invalida`). Se puede rechazar una solicitud aunque se solape con una reserva aprobada, su espacio esté inactivo o ya haya comenzado. El motivo aparece también en el listado y en el detalle de la solicitud.
+
 ## Catálogo de códigos de error
 
 Todas las respuestas de error tienen la forma:
@@ -344,9 +380,11 @@ El mensaje es un texto fijo del catálogo y nunca incluye datos de la petición 
 | `espacio_no_encontrado` | 404 | Identificador de espacio inexistente |
 | `espacio_ya_inactivo` | 409 | Desactivar un espacio que ya está inactivo |
 | `espacio_ya_activo` | 409 | Reactivar un espacio que ya está activo |
-| `espacio_inactivo` | 400 | Crear una solicitud de reserva sobre un espacio inactivo |
-| `reserva_solapada` | 409 | Crear una solicitud cuyo rango `[inicio, fin)` se solapa con una reserva aprobada del mismo espacio |
+| `espacio_inactivo` | 400 | Crear o aprobar una solicitud de reserva sobre un espacio inactivo |
+| `reserva_solapada` | 409 | Crear o aprobar una solicitud cuyo rango `[inicio, fin)` se solapa con una reserva aprobada del mismo espacio |
 | `solicitud_no_encontrada` | 404 | Identificador de solicitud de reserva inexistente |
+| `transicion_invalida` | 409 | Aprobar o rechazar una solicitud que no está `pendiente` |
+| `solicitud_vencida` | 409 | Aprobar una solicitud cuyo inicio es anterior o igual al instante actual |
 | `ruta_no_encontrada` | 404 | Ruta inexistente |
 | `metodo_no_permitido` | 405 | Método HTTP no permitido en la ruta |
 | `error_interno` | 500 | Error interno no controlado |

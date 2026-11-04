@@ -36,6 +36,20 @@ def obtener_espacio_por_id(espacio_id):
     return db.session.get(Espacio, espacio_id)
 
 
+def bloquear_espacio(espacio_id):
+    """Espacio bloqueado con `FOR NO KEY UPDATE` hasta el fin de la transacción.
+
+    Este modo no entra en conflicto con el `FOR KEY SHARE` de las claves
+    foráneas: no impide crear solicitudes sobre el espacio mientras dura.
+    """
+    return db.session.execute(
+        select(Espacio)
+        .where(Espacio.id == espacio_id)
+        .with_for_update(key_share=True)
+        .execution_options(populate_existing=True)
+    ).scalar_one()
+
+
 def obtener_espacio_por_nombre(nombre):
     """Espacio cuyo nombre es equivalente, con la misma expresión del índice único.
 

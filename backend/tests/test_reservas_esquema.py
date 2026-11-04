@@ -18,7 +18,7 @@ from sqlalchemy.schema import CreateIndex, CreateTable
 from backend.app.extensions import Base
 from backend.app.models import ESTADOS_DE_RESERVA, Reserva
 
-CHECKS_ESPERADOS = {"ck_reservas_estado", "ck_reservas_rango"}
+CHECKS_ESPERADOS = {"ck_reservas_estado", "ck_reservas_rango", "ck_reservas_motivo_rechazo"}
 EXCLUSION = "ex_reservas_aprobadas_sin_solape"
 INDICES_ESPERADOS = {"ix_reservas_espacio_rango", "ix_reservas_solicitante_id"}
 ESQUEMA_DEL_MODELO = "modelo_reservas_tmp"
@@ -82,6 +82,10 @@ def test_la_extension_btree_gist_esta_instalada_en_reservas_test(esquema, test_d
 
 def test_downgrade_menos_uno_y_upgrade_head_paso_a_paso(esquema, migrar, test_database_url):
     """Cada `downgrade -1` revierte una migración del change y `upgrade head` las restaura."""
+    migrar("downgrade", "-1")  # 0007: motivo de rechazo (`aprobacion-reservas`)
+    with _conectar(test_database_url) as conexion:
+        assert "motivo_rechazo" not in {c["name"] for c in inspect(conexion).get_columns("reservas")}
+
     migrar("downgrade", "-1")  # 0006: restricción de exclusión e índices
     with _conectar(test_database_url) as conexion:
         assert "reservas" in inspect(conexion).get_table_names()
@@ -137,7 +141,7 @@ def test_el_esquema_de_la_tabla_reservas(esquema, test_database_url):
         restricciones, _ = _definiciones(conexion, "public")
 
     assert set(columnas) == {"id", "espacio_id", "solicitante_id", "inicio_utc", "fin_utc",
-                             "estado"}
+                             "estado", "motivo_rechazo"}
     for nombre in ("inicio_utc", "fin_utc"):
         assert columnas[nombre]["type"].timezone is True
     assert claves == {(("espacio_id",), "espacios"), (("solicitante_id",), "usuarios")}
@@ -185,8 +189,10 @@ def test_una_clave_foranea_inexistente_es_rechazada(sesion, ids, clave):
 @pytest.mark.parametrize("estado", ESTADOS_DE_RESERVA)
 def test_cada_estado_del_catalogo_se_acepta(sesion, ids, estado):
     espacio_id, usuario_id = ids
+    motivo = "Motivo de prueba" if estado == "rechazada" else None
     sesion.add(Reserva(espacio_id=espacio_id, solicitante_id=usuario_id,
-                       inicio_utc=_h(10), fin_utc=_h(12), estado=estado))
+                       inicio_utc=_h(10), fin_utc=_h(12), estado=estado,
+                       motivo_rechazo=motivo))
     sesion.commit()
     assert sesion.execute(select(Reserva.estado)).scalars().all() == [estado]
 

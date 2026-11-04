@@ -3,6 +3,7 @@
 from flask import Flask
 from flask_cors import CORS
 
+from .aprobaciones.routes import bp as aprobaciones_bp
 from .auth.errors import registrar_manejadores_errores
 from .auth.routes import bp as auth_bp
 from .commands import registrar_comandos
@@ -31,6 +32,7 @@ def create_app(config=None):
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(espacios_bp)
     app.register_blueprint(reservas_bp)
+    app.register_blueprint(aprobaciones_bp)
 
     registrar_manejadores_errores(app)
     registrar_comandos(app)
