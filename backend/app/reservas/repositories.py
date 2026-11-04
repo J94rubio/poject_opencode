@@ -63,6 +63,17 @@ def registrar_decision(reserva, estado, motivo_rechazo=None):
     return reserva
 
 
+def desvincular(reserva):
+    """Saca de la sesión la reserva ya escrita, para que confirmar no expire sus atributos.
+
+    La reserva conserva los valores de la transacción y leerlos no vuelve a consultar
+    la base: una decisión o una cancelación responde con su propio resultado, aunque
+    otra transacción cambie la fila justo después de confirmar.
+    """
+    db.session.expunge(reserva)
+    return reserva
+
+
 def _ordenadas(consulta):
     return db.session.execute(
         consulta.order_by(Reserva.inicio_utc, Reserva.id)

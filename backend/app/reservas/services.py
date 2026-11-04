@@ -48,8 +48,8 @@ ID_MAXIMO = 2_147_483_647
 def convertir_fecha(valor):
     """ISO 8601 con zona horaria explícita → `datetime` en UTC.
 
-    Una fecha sin zona horaria, con formato inválido o que no es texto es
-    `datos_invalidos`.
+    Una fecha sin zona horaria, con formato inválido, que no es texto o que no
+    se puede expresar en UTC es `datos_invalidos`.
     """
     if not isinstance(valor, str):
         raise DatosInvalidos()
@@ -59,7 +59,10 @@ def convertir_fecha(valor):
         raise DatosInvalidos() from None
     if fecha.tzinfo is None or fecha.utcoffset() is None:
         raise DatosInvalidos()
-    return fecha.astimezone(timezone.utc)
+    try:
+        return fecha.astimezone(timezone.utc)
+    except OverflowError:
+        raise DatosInvalidos() from None
 
 
 def validar_rango(inicio, fin):

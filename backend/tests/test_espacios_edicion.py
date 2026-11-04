@@ -125,10 +125,16 @@ def test_edicion_sin_autenticacion(client, sesion, espacio_id):
         ({"capacidad": 12.5}, "capacidad_invalida"),
         ({"capacidad": None}, "capacidad_invalida"),
         ({"capacidad": True}, "capacidad_invalida"),
+        ({"nombre": "Lab\x001"}, "datos_invalidos"),
+        ({"nombre": "\x00"}, "datos_invalidos"),
+        ({"nombre": "Lab\ud8001"}, "datos_invalidos"),
+        ({"nombre": "\udc00"}, "datos_invalidos"),
     ],
     ids=[
         "nombre_vacio", "nombre_solo_espacios", "tipo_fuera_del_catalogo", "capacidad_cero",
         "capacidad_negativa", "capacidad_decimal", "capacidad_nula", "capacidad_booleana",
+        "nombre_con_nul", "nombre_solo_nul", "nombre_con_sustituto_alto",
+        "nombre_con_sustituto_bajo",
     ],
 )
 def test_edicion_propaga_los_errores_400_del_servicio(

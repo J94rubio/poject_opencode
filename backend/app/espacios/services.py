@@ -45,9 +45,18 @@ def _validar_cuerpo(datos):
 
 
 def _validar_nombre(nombre):
-    if not isinstance(nombre, str) or not repositories.normalizar_nombre(nombre):
+    """Nombre normalizado: texto no vacío que PostgreSQL pueda almacenar (sin NUL
+    ni sustitutos UTF-16 sueltos)."""
+    if not isinstance(nombre, str):
         raise DatosInvalidos()
-    return repositories.normalizar_nombre(nombre)
+    normalizado = repositories.normalizar_nombre(nombre)
+    if not normalizado or "\x00" in normalizado:
+        raise DatosInvalidos()
+    try:
+        normalizado.encode("utf-8")
+    except UnicodeEncodeError:
+        raise DatosInvalidos() from None
+    return normalizado
 
 
 def _validar_tipo(tipo):

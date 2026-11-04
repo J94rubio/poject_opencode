@@ -89,7 +89,7 @@ def test_convertir_fecha_con_zona_horaria_a_utc(texto, esperado):
 @pytest.mark.parametrize(
     "valor",
     ["2026-11-03T10:00:00", "2026-11-03", "10:00", "mañana", "", None, 20261103, True,
-     ["2026-11-03T10:00:00Z"]],
+     ["2026-11-03T10:00:00Z"], "0001-01-01T00:00:00+14:00", "9999-12-31T23:59:59-14:00"],
 )
 def test_convertir_fecha_rechaza_sin_zona_horaria_o_formato_invalido(valor):
     with pytest.raises(DatosInvalidos):

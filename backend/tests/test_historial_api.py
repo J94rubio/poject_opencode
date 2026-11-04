@@ -218,6 +218,7 @@ def test_filtros_y_visibilidad_del_solicitante(client, cabecera, mundo):
         "?desde=2030-03-02T00:00:00Z&hasta=2030-03-02T00:00:00Z",
         "?desde=2030-03-03T00:00:00Z&hasta=2030-03-02T00:00:00Z",
         "?desde=0001-01-01T00:00:00%2B14:00&hasta=2030-03-02T00:00:00Z",
+        "?desde=2030-03-01T00:00:00Z&hasta=9999-12-31T23:59:59-14:00",
     ],
 )
 def test_filtros_invalidos(client, cabecera, mundo, consulta):

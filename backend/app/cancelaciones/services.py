@@ -8,7 +8,8 @@ La solicitud se lee con `SELECT ... FOR UPDATE`, igual que en `decidir`: una
 cancelación y otra cancelación o una decisión sobre la misma solicitud se
 serializan, y la segunda ve el estado ya cambiado. No se bloquea el espacio: pasar
 a `cancelada` no puede crear un solapamiento. El cambio de estado y su entrada del
-historial se confirman juntos; cualquier fallo deshace ambos.
+historial se confirman juntos; cualquier fallo deshace ambos. La solicitud devuelta
+describe el resultado de esa transacción, no una relectura posterior a confirmarla.
 """
 
 from ..auth.errors import (
@@ -51,6 +52,7 @@ def cancelar(solicitud_id, usuario, reloj=ahora_utc):
         repositorio_historial.registrar(
             db.session, reserva, estado_anterior, "cancelada", usuario, reloj=reloj
         )
+        repositories.desvincular(reserva)
         db.session.commit()
     except Exception:
         db.session.rollback()

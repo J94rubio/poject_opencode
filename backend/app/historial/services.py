@@ -25,14 +25,6 @@ def _espacio_id(valor):
         raise DatosInvalidos() from None
 
 
-def _rango(desde, hasta):
-    """`desde` y `hasta` se exigen juntos, con zona horaria y `hasta` posterior."""
-    try:
-        return validar_rango(desde, hasta)
-    except OverflowError:  # Una fecha extrema no se puede expresar en UTC.
-        raise DatosInvalidos() from None
-
-
 def consultar(usuario, espacio_id=None, estado=None, desde=None, hasta=None):
     """Entradas visibles para el usuario con los filtros recibidos como texto (o `None`)."""
     espacio = _espacio_id(espacio_id) if espacio_id is not None else None
@@ -40,7 +32,8 @@ def consultar(usuario, espacio_id=None, estado=None, desde=None, hasta=None):
         raise DatosInvalidos()
     desde_utc, hasta_utc = (None, None)
     if desde is not None or hasta is not None:
-        desde_utc, hasta_utc = _rango(desde, hasta)
+        # Se exigen juntos, con zona horaria y `hasta` posterior a `desde`.
+        desde_utc, hasta_utc = validar_rango(desde, hasta)
     if espacio is not None:
         _obtener_espacio(espacio)
 

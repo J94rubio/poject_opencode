@@ -73,11 +73,16 @@ def test_alta_sin_autenticacion(client, sesion):
         ({"nombre": "Lab 1", "tipo": "laboratorio"}, 400, "datos_invalidos"),
         ({**VALIDO, "nombre": "   "}, 400, "datos_invalidos"),
         ({**VALIDO, "estado": "inactivo"}, 400, "datos_invalidos"),
+        ({**VALIDO, "nombre": "Lab\x001"}, 400, "datos_invalidos"),
+        ({**VALIDO, "nombre": "\x00"}, 400, "datos_invalidos"),
+        ({**VALIDO, "nombre": "Lab\ud8001"}, 400, "datos_invalidos"),
+        ({**VALIDO, "nombre": "\udc00"}, 400, "datos_invalidos"),
     ],
     ids=[
         "capacidad_cero", "capacidad_negativa", "capacidad_decimal", "capacidad_texto",
         "capacidad_nula", "capacidad_cadena_vacia", "tipo_fuera_del_catalogo", "sin_nombre",
-        "sin_tipo", "sin_capacidad", "nombre_solo_espacios", "con_estado",
+        "sin_tipo", "sin_capacidad", "nombre_solo_espacios", "con_estado", "nombre_con_nul",
+        "nombre_solo_nul", "nombre_con_sustituto_alto", "nombre_con_sustituto_bajo",
     ],
 )
 def test_alta_propaga_los_errores_400_del_servicio(

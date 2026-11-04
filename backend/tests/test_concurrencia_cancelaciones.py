@@ -9,10 +9,12 @@ nunca sobre el orden de llegada: quién gana la carrera no está determinado.
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from backend.app.aprobaciones import services as servicio_aprobaciones
+from backend.app.cancelaciones import services as servicio_cancelaciones
 from backend.app.cancelaciones.services import cancelar
+from backend.app.extensions import db
 from backend.app.models import EntradaHistorial, Reserva
 from backend.app.usuarios import repositories as repositorio_usuarios
 from soporte_concurrencia import ejecutar_en_paralelo
@@ -114,9 +116,8 @@ def test_cancelacion_y_aprobacion_simultaneas_de_la_misma_solicitud(sesion, esce
         assert cancelacion == (200, None, "cancelada"), contexto
         assert _estado(sesion, reserva) == "cancelada", contexto
         if aprobacion[0] == 200:
-            # La respuesta se serializa tras confirmar la decisión: si la cancelación se
-            # confirma en ese intervalo, muestra el estado ya vigente (prueba siguiente).
-            assert aprobacion[1] is None and aprobacion[2] in ("aprobada", "cancelada"), contexto
+            # La respuesta describe la decisión, aunque la cancelación se confirme justo después.
+            assert aprobacion == (200, None, "aprobada"), contexto
             esperadas = [("pendiente", "aprobada", aprobador),
                          ("aprobada", "cancelada", duenio)]
         else:
@@ -125,10 +126,10 @@ def test_cancelacion_y_aprobacion_simultaneas_de_la_misma_solicitud(sesion, esce
         assert _entradas(sesion, reserva) == esperadas, contexto
 
 
-def test_la_respuesta_de_aprobar_muestra_una_cancelacion_confirmada_justo_despues(
+def test_la_respuesta_de_aprobar_no_refleja_una_cancelacion_confirmada_justo_despues(
     app, client, sesion, escenario, sembrar_reserva, monkeypatch
 ):
-    """Reproduce sin carrera el intervalo entre confirmar la decisión y serializarla."""
+    """Reproduce sin carrera el intervalo entre confirmar la decisión y responder."""
     duenio, aprobador = escenario["solicitante"], escenario["aprobador"]
     reserva = sembrar_reserva(escenario["espacio"], duenio, _dia(0, 10), _dia(0, 12), "pendiente")
     decidir = servicio_aprobaciones.decidir
@@ -144,6 +145,45 @@ def test_la_respuesta_de_aprobar_muestra_una_cancelacion_confirmada_justo_despue
                             headers=escenario["cabecera_aprobador"])
 
     assert respuesta.status_code == 200
-    assert respuesta.get_json()["estado"] == "cancelada"
+    assert respuesta.get_json()["estado"] == "aprobada"
+    assert _estado(sesion, reserva) == "cancelada"
     assert _entradas(sesion, reserva) == [("pendiente", "aprobada", aprobador),
                                           ("aprobada", "cancelada", duenio)]
+
+
+@pytest.mark.parametrize(
+    "servicio,funcion,accion,actor,cuerpo,esperado",
+    [
+        (servicio_aprobaciones, "decidir", "rechazar", "aprobador", {"motivo": "Sala ocupada"},
+         {"estado": "rechazada", "motivo_rechazo": "Sala ocupada"}),
+        (servicio_cancelaciones, "cancelar", "cancelar", "solicitante", {},
+         {"estado": "cancelada"}),
+    ],
+    ids=["rechazar", "cancelar"],
+)
+def test_la_respuesta_no_es_una_relectura_posterior_a_la_confirmacion(
+    client, sesion, escenario, sembrar_reserva, monkeypatch, servicio, funcion, accion, actor,
+    cuerpo, esperado,
+):
+    """Ninguna operación de la API cambia una solicitud rechazada o cancelada, así que otra
+    transacción altera la fila justo después de confirmar: la respuesta no debe verlo."""
+    duenio = escenario["solicitante"]
+    reserva = sembrar_reserva(escenario["espacio"], duenio, _dia(0, 10), _dia(0, 12), "pendiente")
+    original = getattr(servicio, funcion)
+
+    def _operar_y_alterar_la_fila(*args, **kwargs):
+        resultado = original(*args, **kwargs)
+        with db.engine.begin() as conexion:
+            conexion.execute(update(Reserva).where(Reserva.id == reserva).values(
+                estado="pendiente", motivo_rechazo=None))
+        return resultado
+
+    monkeypatch.setattr(servicio, funcion, _operar_y_alterar_la_fila)
+
+    respuesta = client.post(f"/api/reservas/{reserva}/{accion}",
+                            headers=escenario[f"cabecera_{actor}"], json=cuerpo)
+
+    assert respuesta.status_code == 200
+    assert {campo: respuesta.get_json().get(campo) for campo in esperado} == esperado
+    assert _estado(sesion, reserva) == "pendiente"
+    assert _entradas(sesion, reserva) == [("pendiente", esperado["estado"], escenario[actor])]

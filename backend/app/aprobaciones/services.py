@@ -22,7 +22,8 @@ escritura: su violación se traduce a `reserva_solapada`. Cualquier fallo deshac
 la transacción y libera los bloqueos.
 
 La decisión y su entrada del historial se confirman en la misma transacción
-(change `cancelacion-historial`).
+(change `cancelacion-historial`). La solicitud devuelta describe el resultado de
+esa transacción, no una relectura posterior a confirmarla.
 """
 
 from sqlalchemy.exc import IntegrityError
@@ -126,6 +127,7 @@ def decidir(solicitud_id, usuario, accion, motivo=None, reloj=ahora_utc):
         repositorio_historial.registrar(
             db.session, reserva, estado_anterior, reserva.estado, usuario, reloj=reloj
         )
+        repositories.desvincular(reserva)
         db.session.commit()
     except IntegrityError as error:
         db.session.rollback()

@@ -105,9 +105,12 @@ def test_creacion_sin_autenticacion(client, sesion, espacio):
         {"inicio": "2026-11-01T10:00:00Z", "fin": "2026-11-01T12:00:00Z"},
         {"solicitante_id": 1},
         {"estado": "aprobada"},
+        {"inicio": "0001-01-01T00:00:00+14:00"},
+        {"fin": "9999-12-31T23:59:59-14:00"},
     ],
     ids=["sin_inicio", "sin_zona_horaria", "fin_igual_al_inicio", "inicio_en_el_instante_actual",
-         "inicio_en_el_pasado", "solicitante_en_el_cuerpo", "estado_en_el_cuerpo"],
+         "inicio_en_el_pasado", "solicitante_en_el_cuerpo", "estado_en_el_cuerpo",
+         "inicio_fuera_del_rango_utc", "fin_fuera_del_rango_utc"],
 )
 def test_creacion_con_datos_invalidos(client, sesion, crear_cuenta, cabecera, espacio, cambios):
     datos = {**_solicitud(espacio), **cambios}
@@ -213,8 +216,11 @@ def test_disponibilidad_vacia_y_espacio_inactivo(client, sesion, crear_cuenta, c
 @pytest.mark.parametrize(
     "rango",
     [{"fin": _z(18)}, {"inicio": _z(8)}, {}, {"inicio": "2026-11-03T08:00:00", "fin": _z(18)},
-     {"inicio": _z(18), "fin": _z(8)}, {"inicio": _z(8), "fin": _z(8)}],
-    ids=["sin_inicio", "sin_fin", "sin_rango", "sin_zona_horaria", "fin_anterior", "fin_igual"],
+     {"inicio": _z(18), "fin": _z(8)}, {"inicio": _z(8), "fin": _z(8)},
+     {"inicio": "0001-01-01T00:00:00+14:00", "fin": _z(18)},
+     {"inicio": _z(8), "fin": "9999-12-31T23:59:59-14:00"}],
+    ids=["sin_inicio", "sin_fin", "sin_rango", "sin_zona_horaria", "fin_anterior", "fin_igual",
+         "inicio_fuera_del_rango_utc", "fin_fuera_del_rango_utc"],
 )
 def test_disponibilidad_con_rango_invalido(client, sesion, crear_cuenta, cabecera, espacio,
                                            rango):
