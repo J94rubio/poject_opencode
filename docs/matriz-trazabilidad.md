@@ -1,13 +1,13 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`) y `cancelacion-historial` (tarea 8.2 de `openspec/changes/cancelacion-historial/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`) y `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`) `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`) y `cancelacion-historial` (tarea 8.2 de `openspec/changes/archive/2026-11-04-cancelacion-historial/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
   - `espacios` y los requisitos de espacios de `interfaz-web`: specs publicadas en `openspec/specs/{espacios,interfaz-web}/spec.md`.
   - `reservas` y los requisitos de reservas de `interfaz-web` (change `reservas-disponibilidad`): specs delta del change en `openspec/specs/{reservas,interfaz-web}/spec.md` (publicadas al archivar el change).
   - `aprobaciones` y el requisito de decisiones de `interfaz-web` (change `aprobacion-reservas`): specs delta en `openspec/specs/{aprobaciones,interfaz-web}/spec.md`, hasta que se archive el change.
-  - `cancelaciones`, `historial` y los requisitos de cancelación e historial de `interfaz-web` (change `cancelacion-historial`): specs delta en `openspec/changes/cancelacion-historial/specs/{cancelaciones,historial,interfaz-web}/spec.md`, hasta que se archive el change.
+  - `cancelaciones`, `historial` y los requisitos de cancelación e historial de `interfaz-web` (change `cancelacion-historial`): specs delta en `openspec/specs/{cancelaciones,historial,interfaz-web}/spec.md`, hasta que se archive el change.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
 - Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; las de `aprobacion-reservas` y `cancelacion-historial` figuran como `pendiente` hasta que se confirme el change.
@@ -486,7 +486,7 @@ Requisito del change `aprobacion-reservas` (`openspec/specs/interfaz-web/spec.md
 
 ### Requisito: Cancelación de reservas en la interfaz
 
-Requisito del change `cancelacion-historial` (`openspec/changes/cancelacion-historial/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
+Requisito del change `cancelacion-historial` (`openspec/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
 
 | Escenario | Prueba | Commit |
 |---|---|---|
@@ -497,7 +497,7 @@ Requisito del change `cancelacion-historial` (`openspec/changes/cancelacion-hist
 
 ### Requisito: Consulta del historial en la interfaz
 
-Requisito del change `cancelacion-historial` (`openspec/changes/cancelacion-historial/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
+Requisito del change `cancelacion-historial` (`openspec/specs/interfaz-web/spec.md`). Las pruebas fijan la hora con fake timers.
 
 | Escenario | Prueba | Commit |
 |---|---|---|
@@ -579,7 +579,7 @@ Pruebas contra PostgreSQL real con hilos, conexiones propias y barrera; cada una
 
 ## Spec `cancelaciones`
 
-Spec delta del change `cancelacion-historial`: `openspec/changes/cancelacion-historial/specs/cancelaciones/spec.md`.
+Spec delta del change `cancelacion-historial`: `openspec/specs/cancelaciones/spec.md`.
 
 ### Requisito: Cancelación de reservas propias
 
@@ -627,7 +627,7 @@ Pruebas contra PostgreSQL real con hilos, conexiones propias y barrera; cada una
 
 ## Spec `historial`
 
-Spec delta del change `cancelacion-historial`: `openspec/changes/cancelacion-historial/specs/historial/spec.md`.
+Spec delta del change `cancelacion-historial`: `openspec/specs/historial/spec.md`.
 
 ### Requisito: Registro de cada cambio de estado
 
