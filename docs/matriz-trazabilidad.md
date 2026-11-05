@@ -12,7 +12,8 @@ Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
 - Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; en una fila con pruebas de varios changes, el commit de cada una se lista separado por comas.
-- Estado: todas las pruebas citadas están en verde en la última ejecución: **1388 pasadas en pytest** y **178 pasadas en Vitest**, sin fallos ni pruebas omitidas.
+- Estilos de la interfaz (change `estilos-interfaz`, sin archivar): spec en `openspec/changes/estilos-interfaz/specs/estilos-interfaz/spec.md`. Es una capacidad nueva; `interfaz-web` no cambia.
+- Estado: todas las pruebas de Vitest citadas están en verde en la última ejecución: **300 pasadas** (178 anteriores, sin modificar, y 122 de `estilos-interfaz`), sin fallos ni pruebas omitidas. pytest ejecutado el 2026-11-05 con el change completo: 1388 pruebas de backend en verde.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
 
@@ -28,9 +29,10 @@ Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por s
 | `cancelaciones` | 5 | 15 | 15 |
 | `historial` | 4 | 23 | 23 |
 | `interfaz-web` | 14 (5 de `usuarios-roles-auth`, 3 de `espacios`, 3 de `reservas-disponibilidad`, 1 de `aprobacion-reservas` y 2 de `cancelacion-historial`) | 55 | 55 |
-| **Total** | **62** | **296** | **296** |
+| `estilos-interfaz` | 13 | 41 | 31 (27 con Vitest y 4 con comandos); los otros 10 son de revisión manual RV-01 a RV-12, verificado manualmente el 2026-11-05 |
+| **Total** | **75** | **337** | **327** |
 
-Todos los requisitos tienen al menos una prueba en verde. Las notas sobre la cobertura están en [Observaciones](#observaciones).
+Todos los requisitos tienen al menos una prueba en verde, salvo dos de `estilos-interfaz`, «Información no dependiente solo del color» y «Lista de revisión visual manual», que se verifican solo con la revisión manual (verificado manualmente el 2026-11-05). Las notas sobre la cobertura están en [Observaciones](#observaciones).
 
 ---
 
@@ -698,6 +700,118 @@ Spec delta del change `cancelacion-historial`: `openspec/specs/historial/spec.md
 
 ---
 
+## Spec `estilos-interfaz`
+
+Spec del change `estilos-interfaz`, sin archivar. Las pruebas están en `estilos/estilos.test.js` (lectura estática del CSS) y `estilos/clases.test.jsx` (clases en el DOM), y el commit está `pendiente` porque los commits los hace el estudiante. «RV-xx» es un punto de la revisión visual manual de `design.md`, que jsdom no puede sustituir porque no calcula el diseño; «Comando» es una comprobación por línea de comandos de la tarea indicada.
+
+### Requisito: Variables de diseño globales
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Existen las variables de cada familia | `estilos/estilos.test.js` › Variables de diseño globales › «existe al menos una variable de cada familia», «las variables citadas por el contraste existen con valor #rrggbb», «todos los valores de color son #rrggbb en ambos modos» | `pendiente` |
+| Sin colores literales fuera del archivo global | `estilos/estilos.test.js` › Variables de diseño globales › «fuera de variables.css no hay colores literales» | `pendiente` |
+| Sin recursos externos | `estilos/estilos.test.js` › Variables de diseño globales › «no hay recursos externos ni @font-face», «la tipografía es una pila de fuentes del sistema» | `pendiente` |
+| Todos los estilos llegan a la aplicación | `estilos/estilos.test.js` › Variables de diseño globales › «main.jsx importa el punto de entrada y este importa cada archivo» | `pendiente` |
+
+### Requisito: Modo claro y oscuro automático
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| El modo oscuro redefine todos los colores | `estilos/estilos.test.js` › Modo claro y oscuro automático › «el modo oscuro redefine exactamente las mismas variables de color» | `pendiente` |
+| Los controles nativos siguen el modo | `estilos/estilos.test.js` › Modo claro y oscuro automático › «declara color-scheme: light dark» | `pendiente` |
+| El cambio de preferencia se refleja en la interfaz | Revisión manual RV-02: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Composición de las pantallas
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Existen los estilos de composición | `estilos/estilos.test.js` › Composición de las pantallas › «existe una regla para %s» (5 variantes), «el contenedor principal declara un ancho máximo» | `pendiente` |
+| La pantalla de acceso se identifica | `estilos/clases.test.jsx` › Composición de las pantallas › «el main de la pantalla de acceso tiene la clase pagina-acceso» | `pendiente` |
+| Tablas legibles | `estilos/estilos.test.js` › Composición de las pantallas: tablas › «existen reglas para th y para las filas alternas», «%s no declara display» (2 variantes) | `pendiente` |
+| Fechas en una sola línea | `estilos/clases.test.jsx` › Composición de las pantallas: fechas › «el listado de solicitudes marca inicio y fin», «el historial marca la fecha», «la disponibilidad marca inicio y fin», «la solicitud creada marca inicio y fin»; `estilos/estilos.test.js` › Composición de las pantallas: tablas › «.fecha no parte la línea y usa cifras tabulares» | `pendiente` |
+| Revisión de la composición | Revisiones manuales RV-01, RV-03 y RV-04: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Formularios y botones coherentes
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Existen las cuatro variantes | `estilos/estilos.test.js` › Formularios y botones coherentes › «existe una regla para %s» (4 variantes), «existe la regla del botón por defecto, que es la variante secundaria», «el envío no supera en especificidad a .boton-peligro», «los campos comparten una misma regla» | `pendiente` |
+| Acciones marcadas como peligro | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `pendiente` |
+| Acciones marcadas como primarias | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `pendiente` |
+| El botón deshabilitado no depende solo del color | `estilos/estilos.test.js` › Formularios y botones coherentes › «el botón deshabilitado cambia de cursor y de borde, no solo de color» | `pendiente` |
+| Revisión de formularios y botones | Revisión manual RV-05: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Insignias de estado de una solicitud
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Clase de estado en el listado de solicitudes | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «listado: la celda de %s tiene su clase y su texto intacto» (4 variantes) | `pendiente` |
+| Clase de estado en la solicitud creada | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito» | `pendiente` |
+| Clase de estado en el historial | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › «las dos columnas de estado llevan la clase de %s» (4 variantes) | `pendiente` |
+| Estado anterior vacío sin insignia | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › sin estado anterior, la celda muestra «—» sin insignia | `pendiente` |
+| Cada estado tiene su regla de color | `estilos/estilos.test.js` › Insignias de estado de una solicitud › «.insignia-%s usa la variable de texto de su estado» (4 variantes), «.insignia::before declara un punto decorativo», «las insignias no tienen fondo propio»; Composición de las pantallas: tablas › «%s no declara display» | `pendiente` |
+| Revisión de las insignias | Revisión manual RV-06: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Mensajes de error y de éxito distinguibles
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Estilos por rol | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «cada rol usa sus propias variables» | `pendiente` |
+| Símbolos distintos y decorativos | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «los símbolos son distintos», «toda declaración content con símbolo tiene un texto alternativo vacío» | `pendiente` |
+| La solicitud creada se presenta como éxito | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito»; `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «la sección de éxito usa el borde de éxito» | `pendiente` |
+| Revisión de los mensajes | Revisión manual RV-07: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Adaptación a móvil
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Existen reglas para ancho móvil | `estilos/estilos.test.js` › Adaptación a móvil › «el bloque móvil da a botones y campos una altura mínima de 44 px», «el bloque móvil reorganiza la navegación», «la tarjeta se desplaza dentro de sí misma» | `pendiente` |
+| Revisión en ancho móvil | Revisiones manuales RV-08 y RV-09: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Contraste suficiente
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Contraste de texto | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «texto %s sobre %s alcanza 4,5:1» (25 variantes por modo) | `pendiente` |
+| Contraste de indicadores no textuales | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «indicador %s sobre %s alcanza 3:1» (5 variantes por modo) | `pendiente` |
+
+### Requisito: Foco visible y movimiento reducido
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Indicador de foco global | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «la regla :focus-visible declara outline con --color-foco», «ninguna regla suprime el contorno de foco» | `pendiente` |
+| Movimiento reducido | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «con movimiento reducido se desactivan las transiciones» | `pendiente` |
+| Revisión del foco | Revisión manual RV-10: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Información no dependiente solo del color
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Revisión en escala de grises | Revisión manual RV-11: verificado manualmente el 2026-11-05 | `pendiente` |
+
+### Requisito: Invariancia del DOM y de las pruebas existentes
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Las pruebas existentes pasan sin modificarlas | Comando (tareas 7.1 y 7.2): `npm test` y `git diff` respecto de `7b017bb` | `pendiente` |
+| En los componentes solo se añaden clases | Comando (tarea 7.2): `git diff --word-diff=porcelain --word-diff-regex='[A-Za-z0-9_]+\|[^[:space:]]'` respecto de `7b017bb`; ver la observación 8 | `pendiente` |
+
+### Requisito: Alcance limitado a la presentación
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Sin cambios en el backend ni en las dependencias | Comando (tarea 7.2): `git diff --stat` respecto de `7b017bb` | `pendiente` |
+| La compilación es correcta | Comando (tarea 7.1): `npm run build` y lectura del CSS de `dist/` | `pendiente` |
+
+### Requisito: Lista de revisión visual manual
+
+| Escenario | Prueba | Commit |
+|---|---|---|
+| Revisión de cabecera, navegación y acceso | Revisiones manuales RV-01 y RV-12: verificado manualmente el 2026-11-05 | `pendiente` |
+| Revisión completa registrada | Tarea 7.4, a cargo del estudiante: verificado manualmente el 2026-11-05 | `pendiente` |
+
+---
+
 ## Pruebas de tareas sin escenario de spec
 
 Estas pruebas verifican tareas de `tasks.md` (infraestructura, configuración y documentación) que no corresponden a ningún escenario de las specs. Se listan para que la matriz recoja todas las pruebas de la suite.
@@ -762,3 +876,4 @@ Algunas pruebas de los archivos citados en las specs cubren casos que ningún es
 5. **Respuesta de una decisión o una cancelación (spec `aprobaciones`, «Aprobación de solicitudes pendientes»; spec `cancelaciones`, «Cancelaciones simultáneas»).** La respuesta describe el resultado de la transacción, sin releer la fila después de confirmarla. Una aprobación que tuvo éxito responde 200 con `estado: aprobada`, aunque el dueño la cancele justo después, y el historial conserva la secuencia real. Lo fijan de forma determinista `test_concurrencia_cancelaciones.py::test_la_respuesta_de_aprobar_no_refleja_una_cancelacion_confirmada_justo_despues` y, para rechazar y cancelar, `::test_la_respuesta_no_es_una_relectura_posterior_a_la_confirmacion`.
 6. **Columna «Acciones» del listado.** Ahora se muestra a todos los roles, porque un solicitante también puede cancelar. Por eso se retiró de `DecisionSolicitudes.test.jsx` › Sin acciones para el solicitante la comprobación de que esa columna no existe; las de que no se ofrecen aprobar ni rechazar se mantienen.
 7. **Pruebas ajustadas por la duración máxima (tarea 1.1 de `limite-duracion-reserva`).** Cinco casos que creaban solicitudes de 24 a 48 horas cambiaron solo sus datos de entrada, a 4 horas como máximo, y conservan lo que esperan: `test_reservas_api.py::test_creacion_con_datos_invalidos[inicio_en_el_instante_actual]`, las tres variantes de `test_entradas_no_validas.py::test_solicitud_que_termina_despues_de_la_ultima_fecha_admitida` y `test_entradas_no_validas.py::test_la_ultima_fecha_admitida_se_lee_en_la_zona_con_mayor_desfase`.
+8. **Comprobación de que solo se añadieron clases (`estilos-interfaz`, tarea 7.2).** El escenario exige `git diff --word-diff=porcelain --word-diff-regex='[A-Za-z0-9_]+|[^[:space:]]'`, porque sin esa expresión las palabras se separan por espacios y un `<td>{x}</td>` figura como eliminado y añadido aunque solo reciba un atributo. El resultado es de 0 fragmentos eliminados, y lo añadido son solo atributos `className` y la línea de importación de `main.jsx`. Además, al comparar cada archivo con `7b017bb` tras quitar los `className` y esa línea, los 9 archivos quedan idénticos.

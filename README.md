@@ -80,8 +80,9 @@ Las decisiones de diseño están en el `design.md` de cada change (archivado en 
 | `aprobacion-reservas` | Implementado y archivado |
 | `cancelacion-historial` | Implementado y archivado |
 | `limite-duracion-reserva` | Implementado y archivado (cambio de regla, etapa 8) |
+| `estilos-interfaz` | Pendiente de archivar |
 
-Resultado de la verificación final: 8 specs publicadas en `openspec/specs/` (`openspec validate --all --strict` en verde), 1388 pruebas de backend y 178 de frontend en verde, migraciones 0001 a 0009 y matriz de trazabilidad sin filas pendientes.
+Resultado de la verificación final: 8 specs publicadas en `openspec/specs/` (`openspec validate --all --strict` en verde), 1388 pruebas de backend y 178 de frontend en verde, migraciones 0001 a 0009 y matriz de trazabilidad sin filas pendientes. `estilos-interfaz` añade 122 pruebas de frontend, con lo que el total es de 300, y no modifica el backend.
 
 ## Uso de IA
 
