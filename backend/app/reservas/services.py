@@ -50,9 +50,12 @@ def convertir_fecha(valor):
     """ISO 8601 con zona horaria explícita → `datetime` en UTC.
 
     Una fecha sin zona horaria, con formato inválido, que no es texto o que no
-    se puede expresar en UTC es `datos_invalidos`.
+    se puede expresar en UTC es `datos_invalidos`. También lo es la que tiene
+    caracteres de control o no ASCII, que `fromisoformat` puede aceptar: ignora un
+    NUL y admite cualquier carácter como separador entre la fecha y la hora.
     """
-    if not isinstance(valor, str):
+    # En ASCII, los únicos caracteres no imprimibles son los de control (categoría Cc).
+    if not isinstance(valor, str) or not valor.isascii() or not valor.isprintable():
         raise DatosInvalidos()
     try:
         fecha = datetime.fromisoformat(valor)

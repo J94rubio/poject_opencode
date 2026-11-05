@@ -14,8 +14,10 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy import event, select, text
 
+from backend.app.auth.errors import DatosInvalidos
 from backend.app.extensions import db
 from backend.app.models import Espacio, Reserva, Usuario
+from backend.app.reservas.services import convertir_fecha
 
 CONTRASENA = "contrasena-valida"
 
@@ -366,3 +368,114 @@ def test_la_ultima_fecha_admitida_se_lee_en_la_zona_con_mayor_desfase(client, se
     disponibilidad = client.get(f"/api/espacios/{espacio}/disponibilidad",
                                 headers=aprobador, query_string={"inicio": inicio, "fin": fin})
     assert disponibilidad.get_json() == [{"inicio": inicio, "fin": fin}]
+
+
+# --- Fechas con caracteres de control o no ASCII ------------------------------
+
+# `datetime.fromisoformat` acepta varias de estas cadenas: un NUL antes del desfase y
+# cualquier carácter como separador entre la fecha y la hora.
+FECHAS_CON_CARACTERES_NO_ADMITIDOS = {
+    "nul_antes_del_desfase": "2030-01-01T00:00:00\x00+00:00",
+    "nul_antes_de_la_z": "2030-01-01T00:00:00\x00Z",
+    "nul_al_final": "2030-01-01T00:00:00+00:00\x00",
+    "nul_como_separador": "2030-01-01\x0000:00:00+00:00",
+    "tabulador_como_separador": "2030-01-01\t00:00:00+00:00",
+    "salto_de_linea_al_final": "2030-01-01T00:00:00+00:00\n",
+    "control_c0": "2030-01-01\x1f00:00:00+00:00",
+    "supr": "2030-01-01\x7f00:00:00+00:00",
+    "control_c1": "2030-01-01\x8500:00:00+00:00",
+    "espacio_duro_como_separador": "2030-01-01 00:00:00+00:00",
+    "letra_no_ascii_como_separador": "2030-01-01ñ00:00:00+00:00",
+    "digitos_no_ascii": "٢٠٣٠-01-01T00:00:00+00:00",
+    "signo_no_ascii": "2030-01-01T00:00:00＋00:00",
+}
+FECHAS_VALIDAS = {
+    "2030-01-01T10:00:00Z": datetime(2030, 1, 1, 10, tzinfo=timezone.utc),
+    "2030-01-01T10:00:00+00:00": datetime(2030, 1, 1, 10, tzinfo=timezone.utc),
+    "2030-01-01T10:00:00+05:30": datetime(2030, 1, 1, 4, 30, tzinfo=timezone.utc),
+    "2030-01-01T10:00:00-05:00": datetime(2030, 1, 1, 15, tzinfo=timezone.utc),
+    "2030-01-01T10:00:00.250Z": datetime(2030, 1, 1, 10, 0, 0, 250000, tzinfo=timezone.utc),
+    "2030-01-01T10:00:00.123456+05:30": datetime(2030, 1, 1, 4, 30, 0, 123456,
+                                                 tzinfo=timezone.utc),
+    "2030-01-01 10:00:00+00:00": datetime(2030, 1, 1, 10, tzinfo=timezone.utc),
+}
+ANTES = "2029-12-31T00:00:00Z"
+DESPUES = "2030-01-02T00:00:00Z"
+
+
+def _fecha_no_admitida(casos=FECHAS_CON_CARACTERES_NO_ADMITIDOS):
+    return pytest.mark.parametrize("fecha", list(casos.values()), ids=list(casos))
+
+
+def _rango_con(campo, fecha, nombres):
+    """Rango válido salvo por `fecha`, en el extremo indicado (`inicio` o `fin`)."""
+    primero, segundo = nombres
+    return {primero: ANTES, segundo: DESPUES, (primero if campo == "inicio" else segundo): fecha}
+
+
+@_fecha_no_admitida()
+def test_convertir_fecha_rechaza_caracteres_de_control_o_no_ascii(fecha):
+    with pytest.raises(DatosInvalidos):
+        convertir_fecha(fecha)
+
+
+@pytest.mark.parametrize("fecha,esperada", list(FECHAS_VALIDAS.items()), ids=list(FECHAS_VALIDAS))
+def test_convertir_fecha_conserva_los_formatos_validos(fecha, esperada):
+    assert convertir_fecha(fecha) == esperada
+
+
+@_fecha_no_admitida()
+@pytest.mark.parametrize("campo", ["inicio", "fin"])
+def test_creacion_con_fecha_con_caracteres_no_admitidos(client, sesion, cabecera, otra_cuenta,
+                                                        nuevo_espacio, campo, fecha):
+    respuesta = client.post("/api/reservas", headers=cabecera(otra_cuenta), json={
+        "espacio_id": nuevo_espacio(), **_rango_con(campo, fecha, ("inicio", "fin")),
+    })
+    _error(respuesta, 400, "datos_invalidos")
+    sesion.rollback()
+    assert sesion.execute(select(Reserva.id)).scalars().all() == []
+
+
+@_fecha_no_admitida()
+@pytest.mark.parametrize("campo", ["inicio", "fin"])
+def test_disponibilidad_con_fecha_con_caracteres_no_admitidos(client, cabecera, otra_cuenta,
+                                                              nuevo_espacio, campo, fecha):
+    respuesta = client.get(f"/api/espacios/{nuevo_espacio()}/disponibilidad",
+                           headers=cabecera(otra_cuenta),
+                           query_string=_rango_con(campo, fecha, ("inicio", "fin")))
+    _error(respuesta, 400, "datos_invalidos")
+
+
+@_fecha_no_admitida()
+@pytest.mark.parametrize("campo", ["inicio", "fin"], ids=["desde", "hasta"])
+def test_historial_con_fecha_con_caracteres_no_admitidos(client, cabecera, otra_cuenta, campo,
+                                                         fecha):
+    respuesta = client.get("/api/historial", headers=cabecera(otra_cuenta),
+                           query_string=_rango_con(campo, fecha, ("desde", "hasta")))
+    _error(respuesta, 400, "datos_invalidos")
+
+
+@pytest.mark.parametrize("fecha", ["2030-01-01T00:00:00\ud800+00:00", "\udc00"],
+                         ids=["sustituto_alto", "sustituto_bajo"])
+def test_creacion_con_fecha_con_sustitutos(client, cabecera, otra_cuenta, nuevo_espacio, fecha):
+    respuesta = client.post("/api/reservas", headers=cabecera(otra_cuenta), json={
+        "espacio_id": nuevo_espacio(), "inicio": fecha, "fin": DESPUES,
+    })
+    _error(respuesta, 400, "datos_invalidos")
+
+
+@pytest.mark.parametrize("inicio,fin", [
+    ("2030-01-01T10:00:00Z", "2030-01-01T11:00:00Z"),
+    ("2030-01-01T10:00:00+05:30", "2030-01-01T11:00:00+05:30"),
+    ("2030-01-01T10:00:00.250Z", "2030-01-01T10:00:00.750Z"),
+], ids=["sufijo_z", "desfase", "fracciones"])
+def test_los_formatos_validos_se_aceptan_en_los_tres_puntos(client, cabecera, otra_cuenta,
+                                                            nuevo_espacio, inicio, fin):
+    espacio, autorizado = nuevo_espacio(), cabecera(otra_cuenta)
+    creada = client.post("/api/reservas", headers=autorizado,
+                         json={"espacio_id": espacio, "inicio": inicio, "fin": fin})
+    assert creada.status_code == 201
+    assert client.get(f"/api/espacios/{espacio}/disponibilidad", headers=autorizado,
+                      query_string={"inicio": inicio, "fin": fin}).status_code == 200
+    assert client.get("/api/historial", headers=autorizado,
+                      query_string={"desde": inicio, "hasta": fin}).status_code == 200
