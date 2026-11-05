@@ -324,14 +324,17 @@ def test_un_nombre_largo_que_cabe_en_el_indice_se_acepta(client, cabecera, admin
 
 
 @pytest.mark.parametrize(
-    "fin",
-    ["9999-12-31T00:00:01Z", "9999-12-31T23:59:59Z", "9999-12-31T22:00:00-01:00"],
+    "inicio,fin",
+    [("9999-12-30T20:00:01Z", "9999-12-31T00:00:01Z"),
+     ("9999-12-31T20:00:00Z", "9999-12-31T23:59:59Z"),
+     ("9999-12-31T20:00:00Z", "9999-12-31T22:00:00-01:00")],
     ids=["un_segundo_despues_del_limite", "ultimo_segundo", "desfase_negativo"],
 )
 def test_solicitud_que_termina_despues_de_la_ultima_fecha_admitida(client, sesion, cabecera,
-                                                                   otra_cuenta, nuevo_espacio, fin):
+                                                                   otra_cuenta, nuevo_espacio,
+                                                                   inicio, fin):
     respuesta = client.post("/api/reservas", headers=cabecera(otra_cuenta), json={
-        "espacio_id": nuevo_espacio(), "inicio": "9999-12-30T00:00:00Z", "fin": fin,
+        "espacio_id": nuevo_espacio(), "inicio": inicio, "fin": fin,
     })
     _error(respuesta, 400, "datos_invalidos")
     sesion.rollback()
@@ -355,7 +358,7 @@ def test_la_ultima_fecha_admitida_se_lee_en_la_zona_con_mayor_desfase(client, se
     assert sesion.execute(text("SHOW TIME ZONE")).scalar_one() == "Pacific/Kiritimati"
     sesion.close()
 
-    inicio, fin = "9999-12-30T00:00:00Z", "9999-12-31T00:00:00Z"
+    inicio, fin = "9999-12-30T20:00:00Z", "9999-12-31T00:00:00Z"
     creada = client.post("/api/reservas", headers=solicitante,
                          json={"espacio_id": espacio, "inicio": inicio, "fin": fin})
     assert creada.status_code == 201

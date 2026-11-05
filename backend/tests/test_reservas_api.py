@@ -102,7 +102,7 @@ def test_creacion_sin_autenticacion(client, sesion, espacio):
         {"inicio": None},
         {"inicio": "2026-11-03T10:00:00"},
         {"fin": _z(10)},
-        {"inicio": "2026-11-02T12:00:00Z", "fin": _z(12)},
+        {"inicio": "2026-11-02T12:00:00Z", "fin": "2026-11-02T14:00:00Z"},
         {"inicio": "2026-11-01T10:00:00Z", "fin": "2026-11-01T12:00:00Z"},
         {"solicitante_id": 1},
         {"estado": "aprobada"},

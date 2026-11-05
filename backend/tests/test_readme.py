@@ -11,7 +11,9 @@ que el catálogo de códigos de error coincide con los códigos y los HTTP
 implementados.
 """
 
+import json
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -177,3 +179,14 @@ def test_el_ejemplo_de_error_usa_el_mensaje_del_catalogo():
 def test_errores_del_framework_documentados(client):
     assert client.get("/api/no-existe").status_code == ERRORES["ruta_no_encontrada"]
     assert client.delete("/api/roles").status_code == ERRORES["metodo_no_permitido"]
+
+
+def test_el_ejemplo_de_creacion_no_supera_la_duracion_maxima():
+    """Tarea 2.1 de `limite-duracion-reserva`: el ejemplo documentado sigue siendo válido."""
+    seccion = README.split("### Crear una solicitud")[1].split("### ")[0]
+    ejemplo = json.loads(re.search(r'^\{"espacio_id".*\}$', seccion, re.M).group())
+
+    duracion = datetime.fromisoformat(ejemplo["fin"]) - datetime.fromisoformat(ejemplo["inicio"])
+
+    assert timedelta(0) < duracion <= timedelta(hours=4)
+    assert "`duracion_excedida`" in seccion

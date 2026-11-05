@@ -179,6 +179,15 @@ class ReservaIniciada(ErrorDeDominio):
     mensaje = "La reserva ya comenzó y no se puede cancelar."
 
 
+# --- Duración máxima (change `limite-duracion-reserva`) -----------------------
+
+
+class DuracionExcedida(ErrorDeDominio):
+    http = 400
+    codigo = "duracion_excedida"
+    mensaje = "La duración máxima de una reserva es de 4 horas."
+
+
 MENSAJE_RUTA_NO_ENCONTRADA ="La ruta solicitada no existe."
 MENSAJE_METODO_NO_PERMITIDO = "El método HTTP no está permitido en esta ruta."
 MENSAJE_ERROR_INTERNO = "Se produjo un error interno."

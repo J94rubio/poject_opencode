@@ -10,15 +10,16 @@ validaciones no dependen de la fecha real en las pruebas.
 
 Orden de validación al crear: cuerpo con forma válida y sin campos ajenos
 (incluidos el solicitante y el estado), campos obligatorios presentes, tipo
-del espacio, fechas (zona horaria, fin posterior al inicio, inicio posterior
-al instante actual), existencia y estado del espacio y, por último,
-solapamiento con reservas aprobadas.
+del espacio, fechas (zona horaria, fin posterior al inicio), duración máxima,
+inicio posterior al instante actual, existencia y estado del espacio y, por
+último, solapamiento con reservas aprobadas.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from ..auth.errors import (
     DatosInvalidos,
+    DuracionExcedida,
     EspacioInactivo,
     PermisoInsuficiente,
     ReservaSolapada,
@@ -41,6 +42,10 @@ CAMPOS = frozenset({"espacio_id", "inicio", "fin"})
 # leer con un desfase positivo. Es un límite técnico, no una regla de negocio; las
 # consultas por rango no lo aplican porque sus fechas no se vuelven a leer.
 FIN_MAXIMO_UTC = datetime(9999, 12, 31, tzinfo=timezone.utc)
+
+# Duración máxima de una solicitud, inclusive. Se aplica solo al crear: la disponibilidad,
+# el historial y las reservas ya existentes no se limitan.
+DURACION_MAXIMA = timedelta(hours=4)
 
 
 # --- Validaciones -----------------------------------------------------------
@@ -103,6 +108,8 @@ def crear_solicitud(datos, solicitante, reloj=ahora_utc):
         raise DatosInvalidos()
 
     inicio_utc, fin_utc = validar_rango(datos["inicio"], datos["fin"])
+    if fin_utc - inicio_utc > DURACION_MAXIMA:
+        raise DuracionExcedida()
     # Una solicitud que empieza en el instante actual ya comenzó.
     if inicio_utc <= reloj() or fin_utc > FIN_MAXIMO_UTC:
         raise DatosInvalidos()
