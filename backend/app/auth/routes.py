@@ -1,7 +1,8 @@
 """Rutas del módulo de autenticación (`/api/auth`)."""
 
-from flask import Blueprint, g, request
+from flask import Blueprint, g
 
+from ..validaciones import objeto_json_de_la_peticion
 from . import services
 from .tokens import TIPO_TOKEN, emitir_token, vigencia_en_segundos
 
@@ -20,9 +21,7 @@ def datos_publicos(usuario):
 
 @bp.post("/login")
 def login():
-    datos = request.get_json(silent=True)
-    if not isinstance(datos, dict):
-        datos = {}
+    datos = objeto_json_de_la_peticion() or {}
     usuario = services.autenticar(datos.get("correo"), datos.get("contrasena"))
     return {
         "token": emitir_token(usuario.id),

@@ -14,10 +14,11 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 import pytest
-from sqlalchemy import event, text
+from sqlalchemy import event, select, text, update
 
 from backend.app.extensions import db
-from backend.app.reservas import repositories
+from backend.app.models import EntradaHistorial, Reserva
+from backend.app.reservas import repositories, services
 
 AHORA = datetime(2026, 11, 2, 12, 0, tzinfo=timezone.utc)
 ROLES = ["solicitante", "aprobador", "admin"]
@@ -358,3 +359,36 @@ def test_las_fechas_se_serializan_en_utc_con_otra_zona_en_la_sesion(
 
     intervalos = _disponibilidad(client, espacio, autorizado, inicio=_z(8), fin=_z(18))
     assert intervalos.get_json() == [{"inicio": _z(14), "fin": _z(15)}]
+
+
+def test_la_respuesta_de_crear_no_es_una_relectura_posterior_a_la_confirmacion(
+    client, sesion, crear_cuenta, cabecera, espacio, monkeypatch
+):
+    """Otra transacción cambia la fila justo después de confirmar: la respuesta no debe verlo."""
+    crear_solicitud = services.crear_solicitud
+
+    def _crear_y_alterar_la_fila(*args, **kwargs):
+        reserva = crear_solicitud(*args, **kwargs)
+        with db.engine.begin() as conexion:
+            conexion.execute(
+                # Sin leer `reserva`: es la única fila, y leerla aquí la recargaría antes de cambiarla.
+                update(Reserva).values(
+                    estado="cancelada", fin_utc=_h(18)
+                )
+            )
+        return reserva
+
+    monkeypatch.setattr(services, "crear_solicitud", _crear_y_alterar_la_fila)
+
+    respuesta = client.post(
+        "/api/reservas", headers=cabecera(crear_cuenta("solicitante")),
+        json={"espacio_id": espacio, "inicio": _z(10), "fin": _z(12)},
+    )
+
+    assert respuesta.status_code == 201
+    cuerpo = respuesta.get_json()
+    assert (cuerpo["estado"], cuerpo["inicio"], cuerpo["fin"]) == ("pendiente", _z(10), _z(12))
+    sesion.rollback()
+    assert sesion.execute(select(Reserva.estado)).scalar_one() == "cancelada"
+    entrada = sesion.execute(select(EntradaHistorial)).scalar_one()
+    assert (entrada.estado_anterior, entrada.estado_nuevo) == (None, "pendiente")

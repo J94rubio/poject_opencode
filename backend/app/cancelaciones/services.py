@@ -22,7 +22,7 @@ from ..extensions import db
 from ..historial import repositories as repositorio_historial
 from ..models.usuario import ahora_utc
 from ..reservas import repositories
-from ..reservas.services import ID_MAXIMO
+from ..validaciones import ID_MAXIMO
 
 ESTADOS_CANCELABLES = ("pendiente", "aprobada")
 

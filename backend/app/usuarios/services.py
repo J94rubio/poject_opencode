@@ -22,6 +22,7 @@ from ..auth.errors import (
 from ..auth.services import generar_hash_password
 from ..extensions import db
 from ..models import ROLES_DEL_CATALOGO
+from ..validaciones import ID_MAXIMO, es_almacenable, es_unicode_valido
 from . import repositories
 
 # Longitudes máximas de las columnas `nombre` y `correo` (models/usuario.py).
@@ -42,6 +43,8 @@ _PATRON_CORREO = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 def _validar_nombre(nombre):
     if not isinstance(nombre, str) or not nombre.strip() or len(nombre.strip()) > NOMBRE_MAX:
         raise DatosInvalidos()
+    if not es_almacenable(nombre):
+        raise DatosInvalidos()
     return nombre.strip()
 
 
@@ -49,14 +52,20 @@ def _validar_correo(correo):
     if not isinstance(correo, str):
         raise DatosInvalidos()
     correo = correo.strip()
-    if len(correo) > CORREO_MAX or not _PATRON_CORREO.match(correo):
+    # La longitud se mide en minúsculas, la forma en que se almacena: puede ser mayor.
+    if len(repositories.normalizar_correo(correo)) > CORREO_MAX:
+        raise DatosInvalidos()
+    if not es_almacenable(correo) or not _PATRON_CORREO.match(correo):
         raise DatosInvalidos()
     return correo
 
 
 def _validar_contrasena(contrasena):
-    """Política de contraseñas (D6): mínimo de caracteres, sin reglas de composición."""
-    if not isinstance(contrasena, str) or contrasena == "":
+    """Política de contraseñas (D6): mínimo de caracteres, sin reglas de composición.
+
+    Un texto que no es UTF-8 válido no se puede hashear. Un NUL sí, y no llega a la base.
+    """
+    if not isinstance(contrasena, str) or contrasena == "" or not es_unicode_valido(contrasena):
         raise DatosInvalidos()
     if len(contrasena) < current_app.config["PASSWORD_MIN_LENGTH"]:
         raise ContrasenaInvalida()
@@ -88,7 +97,7 @@ def _confirmar():
 
 
 def _obtener(usuario_id):
-    usuario = repositories.obtener_usuario_por_id(usuario_id)
+    usuario = repositories.obtener_usuario_por_id(usuario_id) if usuario_id <= ID_MAXIMO else None
     if usuario is None:
         raise UsuarioNoEncontrado()
     return usuario

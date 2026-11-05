@@ -20,7 +20,6 @@ from datetime import datetime, timezone
 from ..auth.errors import (
     DatosInvalidos,
     EspacioInactivo,
-    EspacioNoEncontrado,
     PermisoInsuficiente,
     ReservaSolapada,
     SolicitudNoEncontrada,
@@ -30,16 +29,18 @@ from ..espacios import services as servicio_espacios
 from ..extensions import db
 from ..historial import repositories as repositorio_historial
 from ..models.usuario import ahora_utc
+from ..validaciones import ID_MAXIMO
 from . import repositories
 
 # Campos de una solicitud: todos obligatorios y ningún otro. El solicitante es
 # siempre el usuario autenticado y el estado inicial siempre `pendiente`.
 CAMPOS = frozenset({"espacio_id", "inicio", "fin"})
 
-# Máximo del tipo INTEGER de PostgreSQL (claves `id`). Un identificador fuera
-# de ese rango no puede existir; se responde como inexistente sin consultar la
-# base, que de otro modo fallaría con un error interno.
-ID_MAXIMO = 2_147_483_647
+# Último fin admitido en una solicitud. PostgreSQL devuelve cada fecha en la zona de
+# su sesión y `datetime` no representa el año 10000: el último día de 9999 no se podría
+# leer con un desfase positivo. Es un límite técnico, no una regla de negocio; las
+# consultas por rango no lo aplican porque sus fechas no se vuelven a leer.
+FIN_MAXIMO_UTC = datetime(9999, 12, 31, tzinfo=timezone.utc)
 
 
 # --- Validaciones -----------------------------------------------------------
@@ -81,8 +82,6 @@ def _es_entero(valor):
 
 def _obtener_espacio(espacio_id):
     """Espacio del catálogo de `espacios`, activo o inactivo; 404 si no existe."""
-    if not 0 < espacio_id <= ID_MAXIMO:
-        raise EspacioNoEncontrado()
     return servicio_espacios.obtener_espacio(espacio_id)
 
 
@@ -102,7 +101,7 @@ def crear_solicitud(datos, solicitante, reloj=ahora_utc):
 
     inicio_utc, fin_utc = validar_rango(datos["inicio"], datos["fin"])
     # Una solicitud que empieza en el instante actual ya comenzó.
-    if inicio_utc <= reloj():
+    if inicio_utc <= reloj() or fin_utc > FIN_MAXIMO_UTC:
         raise DatosInvalidos()
 
     espacio = _obtener_espacio(datos["espacio_id"])
@@ -113,12 +112,14 @@ def crear_solicitud(datos, solicitante, reloj=ahora_utc):
     if repositories.listar_aprobadas_por_espacio_y_rango(espacio.id, inicio_utc, fin_utc):
         raise ReservaSolapada()
 
-    # La solicitud y su entrada del historial se confirman juntas o no se aplican.
+    # La solicitud y su entrada del historial se confirman juntas o no se aplican. La
+    # solicitud devuelta describe el resultado de esa transacción, no una relectura posterior.
     try:
         reserva = repositories.crear(espacio.id, solicitante.id, inicio_utc, fin_utc)
         repositorio_historial.registrar(
             db.session, reserva, None, "pendiente", solicitante, reloj=reloj
         )
+        repositories.desvincular(reserva)
         db.session.commit()
     except Exception:
         db.session.rollback()

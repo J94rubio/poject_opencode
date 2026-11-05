@@ -42,7 +42,7 @@ from ..extensions import db
 from ..historial import repositories as repositorio_historial
 from ..models.usuario import ahora_utc
 from ..reservas import repositories
-from ..reservas.services import ID_MAXIMO
+from ..validaciones import ID_MAXIMO, es_almacenable
 
 APROBAR = "aprobar"
 RECHAZAR = "rechazar"
@@ -59,12 +59,8 @@ def _validar_motivo(motivo):
     if not isinstance(motivo, str):
         raise DatosInvalidos()
     recortado = motivo.strip()
-    if not recortado or len(recortado) > MOTIVO_LONGITUD_MAXIMA or "\x00" in recortado:
+    if not recortado or len(recortado) > MOTIVO_LONGITUD_MAXIMA or not es_almacenable(recortado):
         raise DatosInvalidos()
-    try:
-        recortado.encode("utf-8")
-    except UnicodeEncodeError:
-        raise DatosInvalidos() from None
     return recortado
 
 

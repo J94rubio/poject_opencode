@@ -4,6 +4,7 @@ import jwt
 import pytest
 
 from backend.app.auth.services import generar_hash_password
+from backend.app.models import Usuario
 from backend.app.usuarios import repositories
 
 CORREO = "ana.perez@example.com"
@@ -142,3 +143,50 @@ def test_login_sin_cuerpo_json(client, usuario_id):
 
     assert respuesta.status_code == 400
     assert _error(respuesta)["codigo"] == "datos_invalidos"
+
+
+# --- Correo o contraseña con NUL o sustitutos UTF-16 sueltos -------------------
+
+TEXTOS_NO_ALMACENABLES = ["ana\x00@example.com", "\x00", "ana\ud800@example.com", "\udc00"]
+IDS_TEXTOS = ["nul", "solo_nul", "sustituto_alto", "sustituto_bajo"]
+
+
+def _misma_respuesta_que_una_cuenta_inexistente(client, respuesta):
+    inexistente = _login(client, correo="nadie@example.com", contrasena=CONTRASENA)
+    assert inexistente.status_code == 401
+    assert _error(inexistente)["codigo"] == "credenciales_invalidas"
+    assert respuesta.status_code == inexistente.status_code
+    assert respuesta.data == inexistente.data
+    assert respuesta.content_type == inexistente.content_type
+
+
+@pytest.mark.parametrize("correo", TEXTOS_NO_ALMACENABLES, ids=IDS_TEXTOS)
+def test_correo_no_almacenable_responde_como_una_cuenta_inexistente(client, usuario_id, correo):
+    respuesta = _login(client, correo=correo, contrasena=CONTRASENA)
+
+    _misma_respuesta_que_una_cuenta_inexistente(client, respuesta)
+
+
+@pytest.mark.parametrize(
+    "contrasena",
+    ["contrasena\x00correcta", "\x00", "contrasena\ud800correcta", "\udc00"],
+    ids=IDS_TEXTOS,
+)
+@pytest.mark.parametrize("correo", [CORREO, "nadie@example.com"], ids=["existente", "inexistente"])
+def test_contrasena_con_nul_o_sustitutos_responde_como_credenciales_incorrectas(
+    client, usuario_id, correo, contrasena
+):
+    respuesta = _login(client, correo=correo, contrasena=contrasena)
+
+    _misma_respuesta_que_una_cuenta_inexistente(client, respuesta)
+    incorrecta = _login(client, correo=CORREO, contrasena="otra-contrasena")
+    assert respuesta.data == incorrecta.data
+
+
+def test_contrasena_con_sustitutos_no_revela_una_cuenta_desactivada(client, sesion, usuario_id):
+    sesion.get(Usuario, usuario_id).activo = False
+    sesion.commit()
+
+    respuesta = _login(client, correo=CORREO, contrasena="contrasena\ud800correcta")
+
+    _misma_respuesta_que_una_cuenta_inexistente(client, respuesta)

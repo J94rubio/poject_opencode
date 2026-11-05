@@ -11,6 +11,7 @@ from flask import g, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..usuarios import repositories as repositorio_usuarios
+from ..validaciones import es_almacenable, es_unicode_valido
 from .errors import (
     CredencialesInvalidas,
     DatosInvalidos,
@@ -36,10 +37,15 @@ def autenticar(correo, contrasena):
 
     Correo inexistente y contraseña incorrecta producen el mismo error
     (`credenciales_invalidas`); la cuenta desactivada solo se distingue cuando
-    las credenciales son correctas (design.md, D7).
+    las credenciales son correctas (design.md, D7). Un correo que la base no puede
+    almacenar no corresponde a ninguna cuenta, y una contraseña que no es UTF-8 válido
+    no es la de ninguna: ambos son `credenciales_invalidas`, sin consultar la base ni
+    calcular el hash. Un NUL en la contraseña no impide calcularlo.
     """
     if not _texto_no_vacio(correo) or not _texto_no_vacio(contrasena):
         raise DatosInvalidos()
+    if not es_almacenable(correo) or not es_unicode_valido(contrasena):
+        raise CredencialesInvalidas()
     usuario = repositorio_usuarios.obtener_usuario_por_correo(correo)
     if usuario is None or not verificar_password(usuario.password_hash, contrasena):
         raise CredencialesInvalidas()

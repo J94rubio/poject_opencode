@@ -9,7 +9,7 @@ unicidad del nombre. Un campo presente con valor `null` se valida según su
 tipo, no se trata como ausente.
 """
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from ..auth.errors import (
     CapacidadInvalida,
@@ -22,6 +22,7 @@ from ..auth.errors import (
 )
 from ..extensions import db
 from ..models.espacio import TIPOS_DE_ESPACIO
+from ..validaciones import ID_MAXIMO, es_almacenable
 from . import repositories
 
 # Campos que admiten el alta (todos obligatorios) y la edición (todos
@@ -29,6 +30,7 @@ from . import repositories
 CAMPOS = frozenset({"nombre", "tipo", "capacidad"})
 
 INDICE_NOMBRE = "ux_espacios_nombre"
+_SQLSTATE_LIMITE_EXCEDIDO = "54000"
 
 # Máximo del tipo INTEGER de PostgreSQL (columna `capacidad`). Es un límite
 # técnico, no una regla de negocio: evita que la base rechace el valor con un
@@ -50,12 +52,8 @@ def _validar_nombre(nombre):
     if not isinstance(nombre, str):
         raise DatosInvalidos()
     normalizado = repositories.normalizar_nombre(nombre)
-    if not normalizado or "\x00" in normalizado:
+    if not normalizado or not es_almacenable(normalizado):
         raise DatosInvalidos()
-    try:
-        normalizado.encode("utf-8")
-    except UnicodeEncodeError:
-        raise DatosInvalidos() from None
     return normalizado
 
 
@@ -96,11 +94,20 @@ def _escribir(operacion):
         if _es_violacion_del_nombre(error):
             raise EspacioDuplicado() from None
         raise
+    except OperationalError as error:
+        db.session.rollback()
+        # El nombre no tiene un máximo propio: lo fija el tamaño de entrada del índice único,
+        # que depende de cuánto se comprime el texto y solo la base puede evaluar.
+        if getattr(error.orig, "sqlstate", None) == _SQLSTATE_LIMITE_EXCEDIDO:
+            raise DatosInvalidos() from None
+        raise
     return resultado
 
 
 def _obtener(espacio_id):
-    espacio = repositories.obtener_espacio_por_id(espacio_id)
+    espacio = (
+        repositories.obtener_espacio_por_id(espacio_id) if 0 < espacio_id <= ID_MAXIMO else None
+    )
     if espacio is None:
         raise EspacioNoEncontrado()
     return espacio

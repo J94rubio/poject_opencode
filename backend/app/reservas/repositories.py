@@ -67,8 +67,8 @@ def desvincular(reserva):
     """Saca de la sesión la reserva ya escrita, para que confirmar no expire sus atributos.
 
     La reserva conserva los valores de la transacción y leerlos no vuelve a consultar
-    la base: una decisión o una cancelación responde con su propio resultado, aunque
-    otra transacción cambie la fila justo después de confirmar.
+    la base: una creación, una decisión o una cancelación responde con su propio
+    resultado, aunque otra transacción cambie la fila justo después de confirmar.
     """
     db.session.expunge(reserva)
     return reserva

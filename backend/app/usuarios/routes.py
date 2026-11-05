@@ -4,10 +4,11 @@ Cada ruta declara su permiso de la matriz (design.md, D8); el guard
 `requiere_permiso` autentica la petición y lo comprueba antes de la lógica.
 """
 
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, jsonify
 
 from ..auth.errors import DatosInvalidos
 from ..auth.services import requiere_permiso
+from ..validaciones import objeto_json_de_la_peticion
 from . import services
 
 bp = Blueprint("usuarios", __name__, url_prefix="/api")
@@ -26,8 +27,8 @@ def datos_de_cuenta(usuario):
 
 def _cuerpo_json():
     """Cuerpo JSON de la petición; si falta o no es un objeto, `datos_invalidos`."""
-    datos = request.get_json(silent=True)
-    if not isinstance(datos, dict):
+    datos = objeto_json_de_la_peticion()
+    if datos is None:
         raise DatosInvalidos()
     return datos
 
