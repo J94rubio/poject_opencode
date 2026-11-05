@@ -224,6 +224,12 @@ La interfaz SHALL ofrecer a cualquier sesión autenticada un formulario para cre
 - **THEN** la interfaz muestra el mensaje asociado al código devuelto
 - **AND** no muestra ninguna solicitud como creada
 
+#### Scenario: Mensaje de duración excedida
+
+- **WHEN** el usuario envía el formulario con una duración mayor de 4 horas y el servidor responde 400 con el código `duracion_excedida`
+- **THEN** la interfaz ha enviado la petición sin validar la duración en el navegador y muestra el mensaje devuelto por el servidor
+- **AND** no muestra ninguna solicitud como creada
+
 ### Requirement: Consulta de disponibilidad en la interfaz
 
 La interfaz SHALL permitir consultar la disponibilidad de un espacio por rango, SHALL mostrar los intervalos ocupados devueltos por el servidor y SHALL mostrar el mensaje asociado al código de error cuando la consulta falle.
