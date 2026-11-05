@@ -181,3 +181,26 @@ describe('Mensajes de error de la creación', () => {
     expect(screen.queryByRole('region', { name: 'Solicitud creada' })).toBeNull()
   })
 })
+
+describe('Mensaje de duración excedida', () => {
+  it('envía un rango de más de 4 horas sin validarlo y muestra el mensaje del servidor', async () => {
+    const mensaje = 'La duración máxima de una reserva es de 4 horas.'
+    const finExcedido = '2026-11-03T15:00'
+    const fetchFalso = await abrirFormulario('solicitante', {
+      'POST /api/reservas': () => respuestaError(400, 'duracion_excedida', mensaje),
+    })
+
+    rellenar({ fin: finExcedido })
+    enviar()
+
+    expect((await screen.findByRole('alert')).textContent).toBe(mensaje)
+    const [llamada] = llamadasA(fetchFalso, 'POST', '/api/reservas')
+    expect(cuerpoDe(llamada)).toEqual({
+      espacio_id: 3,
+      inicio: isoDe(INICIO_LOCAL),
+      fin: isoDe(finExcedido),
+    })
+    expect(screen.queryByRole('region', { name: 'Solicitud creada' })).toBeNull()
+    expect(screen.queryByText('pendiente')).toBeNull()
+  })
+})

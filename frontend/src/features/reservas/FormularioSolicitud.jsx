@@ -4,8 +4,8 @@
 // Envía POST /api/reservas con espacio, inicio y fin; las fechas se convierten
 // a ISO 8601 con zona horaria explícita. Muestra la solicitud creada tal como
 // la devuelve el servidor (en estado `pendiente`) o el mensaje del código de
-// error (`datos_invalidos`, `espacio_no_encontrado`, `espacio_inactivo`,
-// `reserva_solapada`), sin validar los datos en el navegador.
+// error (`datos_invalidos`, `duracion_excedida`, `espacio_no_encontrado`,
+// `espacio_inactivo`, `reserva_solapada`), sin validar los datos en el navegador.
 
 import { useState } from 'react'
 import { useAuth } from '../auth/AuthContext.jsx'
