@@ -11,6 +11,7 @@ Proyecto individual de Ingeniería de Software (Fundación Universitaria Uninpah
 - Aprobación y rechazo con motivo, cancelación por el solicitante e historial inmutable de cambios de estado.
 - Duración máxima de 4 horas por solicitud (`400 duracion_excedida` si se supera).
 - Consulta de disponibilidad por espacio y de historial con filtros (espacio, estado, rango de fechas).
+- Interfaz con estilos modernos: modo claro y oscuro automático e insignias de estado.
 
 ## Stack
 
@@ -60,7 +61,7 @@ Las instrucciones completas están en `backend/README.md` y `frontend/README.md`
 
 ## Decisiones y limitaciones conocidas
 
-Las decisiones de diseño están en el `design.md` de cada change (archivado en `openspec/changes/archive/`). Limitaciones asumidas y documentadas en el informe final:
+Las decisiones de diseño están en el `design.md` de cada change (archivado en `openspec/changes/archive/`). Limitaciones asumidas; las tres últimas son de `estilos-interfaz` y las demás están documentadas en el informe final:
 
 - El token JWT vive en `sessionStorage` y es legible por un script malicioso (XSS).
 - Cambiar la contraseña no invalida los tokens ya emitidos; caducan a los 60 minutos como máximo.
@@ -69,6 +70,9 @@ Las decisiones de diseño están en el `design.md` de cada change (archivado en 
 - El disparador que hace inmutable `historial_reservas` bloquea UPDATE y DELETE, pero no TRUNCATE ni al propietario de la tabla.
 - No hay límite de tamaño del cuerpo de las peticiones (`MAX_CONTENT_LENGTH`) y la cancelación no pide confirmación en la interfaz.
 - Las horas se muestran en UTC en la interfaz.
+- La tabla de solicitudes necesita scroll horizontal, dentro de su tarjeta, en anchos menores a unos 1200 px.
+- En Safari, las tablas sin botones pueden no desplazarse con el teclado.
+- La navegación no marca el enlace de la página actual.
 
 ## Estado de los changes
 
@@ -80,9 +84,9 @@ Las decisiones de diseño están en el `design.md` de cada change (archivado en 
 | `aprobacion-reservas` | Implementado y archivado |
 | `cancelacion-historial` | Implementado y archivado |
 | `limite-duracion-reserva` | Implementado y archivado (cambio de regla, etapa 8) |
-| `estilos-interfaz` | Pendiente de archivar |
+| `estilos-interfaz` | Implementado y archivado (etapa 9) |
 
-Resultado de la verificación final: 8 specs publicadas en `openspec/specs/` (`openspec validate --all --strict` en verde), 1388 pruebas de backend y 178 de frontend en verde, migraciones 0001 a 0009 y matriz de trazabilidad sin filas pendientes. `estilos-interfaz` añade 122 pruebas de frontend, con lo que el total es de 300, y no modifica el backend.
+Resultado de la verificación final: 9 specs publicadas en `openspec/specs/` (`openspec validate --all --strict` en verde), 1388 pruebas de backend y 300 de frontend en verde, migraciones 0001 a 0009 y matriz de trazabilidad sin filas pendientes.
 
 ## Uso de IA
 

@@ -1,6 +1,6 @@
 # Matriz de trazabilidad
 
-Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`), `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`), `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`), `cancelacion-historial` (tarea 8.2 de `openspec/changes/archive/2026-11-04-cancelacion-historial/tasks.md`) y `limite-duracion-reserva` (tarea 6.2 de `openspec/changes/archive/2026-11-04-limite-duracion-reserva/tasks.md`).
+Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.3 de `PLAN_INGENIERIA.md`. Cubre los changes `usuarios-roles-auth` (tarea 9.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-usuarios-roles-auth/`), `espacios` (tarea 5.2 de su `tasks.md`, archivado en `openspec/changes/archive/2026-10-31-espacios/`), `reservas-disponibilidad` (tarea 6.2 de `openspec/changes/archive/2026-10-31-reservas-disponibilidad/tasks.md`), `aprobacion-reservas` (tarea 7.2 de `openspec/changes/archive/2026-11-04-aprobacion-reservas/tasks.md`), `cancelacion-historial` (tarea 8.2 de `openspec/changes/archive/2026-11-04-cancelacion-historial/tasks.md`), `limite-duracion-reserva` (tarea 6.2 de `openspec/changes/archive/2026-11-04-limite-duracion-reserva/tasks.md`) y `estilos-interfaz` (tarea 7.3 de `openspec/changes/archive/2026-11-05-estilos-interfaz/tasks.md`).
 
 - Specs:
   - `auth`, `usuarios` e `interfaz-web` (requisitos de `usuarios-roles-auth`): specs publicadas en `openspec/specs/{auth,usuarios,interfaz-web}/spec.md`.
@@ -12,7 +12,7 @@ Requisito de OpenSpec → escenario → prueba → commit, según la sección 5.
 - Backend: `pytest` contra la base `reservas_test`. Las rutas son relativas a `backend/tests/`.
 - Frontend: `Vitest`. Las rutas son relativas a `frontend/src/` y la prueba se identifica como `describe › it`.
 - Commit: el commit que introdujo la prueba. Toda prueba cita el commit que la introdujo; en una fila con pruebas de varios changes, el commit de cada una se lista separado por comas.
-- Estilos de la interfaz (change `estilos-interfaz`, sin archivar): spec en `openspec/changes/estilos-interfaz/specs/estilos-interfaz/spec.md`. Es una capacidad nueva; `interfaz-web` no cambia.
+- Estilos de la interfaz (change `estilos-interfaz`): spec publicada en `openspec/specs/estilos-interfaz/spec.md`. Es una capacidad nueva; `interfaz-web` no cambia.
 - Estado: todas las pruebas de Vitest citadas están en verde en la última ejecución: **300 pasadas** (178 anteriores, sin modificar, y 122 de `estilos-interfaz`), sin fallos ni pruebas omitidas. pytest ejecutado el 2026-11-05 con el change completo: 1388 pruebas de backend en verde.
 
 Las pruebas parametrizadas (`pytest.mark.parametrize`, `it.each`) se citan por su nombre base. Cada variante se ejecuta como una prueba independiente.
@@ -702,113 +702,113 @@ Spec delta del change `cancelacion-historial`: `openspec/specs/historial/spec.md
 
 ## Spec `estilos-interfaz`
 
-Spec del change `estilos-interfaz`, sin archivar. Las pruebas están en `estilos/estilos.test.js` (lectura estática del CSS) y `estilos/clases.test.jsx` (clases en el DOM), y el commit está `pendiente` porque los commits los hace el estudiante. «RV-xx» es un punto de la revisión visual manual de `design.md`, que jsdom no puede sustituir porque no calcula el diseño; «Comando» es una comprobación por línea de comandos de la tarea indicada.
+Spec del change `estilos-interfaz` (`openspec/specs/estilos-interfaz/spec.md`). Las pruebas están en `estilos/estilos.test.js` (lectura estática del CSS) y `estilos/clases.test.jsx` (clases en el DOM), y las cita `2e4edcf`, igual que a las comprobaciones por comando. Los escenarios manuales citan `442e4e6`, el commit que registra su revisión. «RV-xx» es un punto de la revisión visual manual de `openspec/changes/archive/2026-11-05-estilos-interfaz/design.md`, que jsdom no puede sustituir porque no calcula el diseño; «Comando» es una comprobación por línea de comandos de la tarea indicada.
 
 ### Requisito: Variables de diseño globales
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Existen las variables de cada familia | `estilos/estilos.test.js` › Variables de diseño globales › «existe al menos una variable de cada familia», «las variables citadas por el contraste existen con valor #rrggbb», «todos los valores de color son #rrggbb en ambos modos» | `pendiente` |
-| Sin colores literales fuera del archivo global | `estilos/estilos.test.js` › Variables de diseño globales › «fuera de variables.css no hay colores literales» | `pendiente` |
-| Sin recursos externos | `estilos/estilos.test.js` › Variables de diseño globales › «no hay recursos externos ni @font-face», «la tipografía es una pila de fuentes del sistema» | `pendiente` |
-| Todos los estilos llegan a la aplicación | `estilos/estilos.test.js` › Variables de diseño globales › «main.jsx importa el punto de entrada y este importa cada archivo» | `pendiente` |
+| Existen las variables de cada familia | `estilos/estilos.test.js` › Variables de diseño globales › «existe al menos una variable de cada familia», «las variables citadas por el contraste existen con valor #rrggbb», «todos los valores de color son #rrggbb en ambos modos» | `2e4edcf` |
+| Sin colores literales fuera del archivo global | `estilos/estilos.test.js` › Variables de diseño globales › «fuera de variables.css no hay colores literales» | `2e4edcf` |
+| Sin recursos externos | `estilos/estilos.test.js` › Variables de diseño globales › «no hay recursos externos ni @font-face», «la tipografía es una pila de fuentes del sistema» | `2e4edcf` |
+| Todos los estilos llegan a la aplicación | `estilos/estilos.test.js` › Variables de diseño globales › «main.jsx importa el punto de entrada y este importa cada archivo» | `2e4edcf` |
 
 ### Requisito: Modo claro y oscuro automático
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| El modo oscuro redefine todos los colores | `estilos/estilos.test.js` › Modo claro y oscuro automático › «el modo oscuro redefine exactamente las mismas variables de color» | `pendiente` |
-| Los controles nativos siguen el modo | `estilos/estilos.test.js` › Modo claro y oscuro automático › «declara color-scheme: light dark» | `pendiente` |
-| El cambio de preferencia se refleja en la interfaz | Revisión manual RV-02: verificado manualmente el 2026-11-05 | `pendiente` |
+| El modo oscuro redefine todos los colores | `estilos/estilos.test.js` › Modo claro y oscuro automático › «el modo oscuro redefine exactamente las mismas variables de color» | `2e4edcf` |
+| Los controles nativos siguen el modo | `estilos/estilos.test.js` › Modo claro y oscuro automático › «declara color-scheme: light dark» | `2e4edcf` |
+| El cambio de preferencia se refleja en la interfaz | Revisión manual RV-02: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Composición de las pantallas
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Existen los estilos de composición | `estilos/estilos.test.js` › Composición de las pantallas › «existe una regla para %s» (5 variantes), «el contenedor principal declara un ancho máximo» | `pendiente` |
-| La pantalla de acceso se identifica | `estilos/clases.test.jsx` › Composición de las pantallas › «el main de la pantalla de acceso tiene la clase pagina-acceso» | `pendiente` |
-| Tablas legibles | `estilos/estilos.test.js` › Composición de las pantallas: tablas › «existen reglas para th y para las filas alternas», «%s no declara display» (2 variantes) | `pendiente` |
-| Fechas en una sola línea | `estilos/clases.test.jsx` › Composición de las pantallas: fechas › «el listado de solicitudes marca inicio y fin», «el historial marca la fecha», «la disponibilidad marca inicio y fin», «la solicitud creada marca inicio y fin»; `estilos/estilos.test.js` › Composición de las pantallas: tablas › «.fecha no parte la línea y usa cifras tabulares» | `pendiente` |
-| Revisión de la composición | Revisiones manuales RV-01, RV-03 y RV-04: verificado manualmente el 2026-11-05 | `pendiente` |
+| Existen los estilos de composición | `estilos/estilos.test.js` › Composición de las pantallas › «existe una regla para %s» (5 variantes), «el contenedor principal declara un ancho máximo» | `2e4edcf` |
+| La pantalla de acceso se identifica | `estilos/clases.test.jsx` › Composición de las pantallas › «el main de la pantalla de acceso tiene la clase pagina-acceso» | `2e4edcf` |
+| Tablas legibles | `estilos/estilos.test.js` › Composición de las pantallas: tablas › «existen reglas para th y para las filas alternas», «%s no declara display» (2 variantes) | `2e4edcf` |
+| Fechas en una sola línea | `estilos/clases.test.jsx` › Composición de las pantallas: fechas › «el listado de solicitudes marca inicio y fin», «el historial marca la fecha», «la disponibilidad marca inicio y fin», «la solicitud creada marca inicio y fin»; `estilos/estilos.test.js` › Composición de las pantallas: tablas › «.fecha no parte la línea y usa cifras tabulares» | `2e4edcf` |
+| Revisión de la composición | Revisiones manuales RV-01, RV-03 y RV-04: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Formularios y botones coherentes
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Existen las cuatro variantes | `estilos/estilos.test.js` › Formularios y botones coherentes › «existe una regla para %s» (4 variantes), «existe la regla del botón por defecto, que es la variante secundaria», «el envío no supera en especificidad a .boton-peligro», «los campos comparten una misma regla» | `pendiente` |
-| Acciones marcadas como peligro | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `pendiente` |
-| Acciones marcadas como primarias | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `pendiente` |
-| El botón deshabilitado no depende solo del color | `estilos/estilos.test.js` › Formularios y botones coherentes › «el botón deshabilitado cambia de cursor y de borde, no solo de color» | `pendiente` |
-| Revisión de formularios y botones | Revisión manual RV-05: verificado manualmente el 2026-11-05 | `pendiente` |
+| Existen las cuatro variantes | `estilos/estilos.test.js` › Formularios y botones coherentes › «existe una regla para %s» (4 variantes), «existe la regla del botón por defecto, que es la variante secundaria», «el envío no supera en especificidad a .boton-peligro», «los campos comparten una misma regla» | `2e4edcf` |
+| Acciones marcadas como peligro | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `2e4edcf` |
+| Acciones marcadas como primarias | `estilos/clases.test.jsx` › Formularios y botones coherentes: acciones de una solicitud, espacios y cuentas | `2e4edcf` |
+| El botón deshabilitado no depende solo del color | `estilos/estilos.test.js` › Formularios y botones coherentes › «el botón deshabilitado cambia de cursor y de borde, no solo de color» | `2e4edcf` |
+| Revisión de formularios y botones | Revisión manual RV-05: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Insignias de estado de una solicitud
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Clase de estado en el listado de solicitudes | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «listado: la celda de %s tiene su clase y su texto intacto» (4 variantes) | `pendiente` |
-| Clase de estado en la solicitud creada | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito» | `pendiente` |
-| Clase de estado en el historial | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › «las dos columnas de estado llevan la clase de %s» (4 variantes) | `pendiente` |
-| Estado anterior vacío sin insignia | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › sin estado anterior, la celda muestra «—» sin insignia | `pendiente` |
-| Cada estado tiene su regla de color | `estilos/estilos.test.js` › Insignias de estado de una solicitud › «.insignia-%s usa la variable de texto de su estado» (4 variantes), «.insignia::before declara un punto decorativo», «las insignias no tienen fondo propio»; Composición de las pantallas: tablas › «%s no declara display» | `pendiente` |
-| Revisión de las insignias | Revisión manual RV-06: verificado manualmente el 2026-11-05 | `pendiente` |
+| Clase de estado en el listado de solicitudes | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «listado: la celda de %s tiene su clase y su texto intacto» (4 variantes) | `2e4edcf` |
+| Clase de estado en la solicitud creada | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito» | `2e4edcf` |
+| Clase de estado en el historial | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › «las dos columnas de estado llevan la clase de %s» (4 variantes) | `2e4edcf` |
+| Estado anterior vacío sin insignia | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › historial › sin estado anterior, la celda muestra «—» sin insignia | `2e4edcf` |
+| Cada estado tiene su regla de color | `estilos/estilos.test.js` › Insignias de estado de una solicitud › «.insignia-%s usa la variable de texto de su estado» (4 variantes), «.insignia::before declara un punto decorativo», «las insignias no tienen fondo propio»; Composición de las pantallas: tablas › «%s no declara display» | `2e4edcf` |
+| Revisión de las insignias | Revisión manual RV-06: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Mensajes de error y de éxito distinguibles
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Estilos por rol | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «cada rol usa sus propias variables» | `pendiente` |
-| Símbolos distintos y decorativos | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «los símbolos son distintos», «toda declaración content con símbolo tiene un texto alternativo vacío» | `pendiente` |
-| La solicitud creada se presenta como éxito | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito»; `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «la sección de éxito usa el borde de éxito» | `pendiente` |
-| Revisión de los mensajes | Revisión manual RV-07: verificado manualmente el 2026-11-05 | `pendiente` |
+| Estilos por rol | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «cada rol usa sus propias variables» | `2e4edcf` |
+| Símbolos distintos y decorativos | `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «los símbolos son distintos», «toda declaración content con símbolo tiene un texto alternativo vacío» | `2e4edcf` |
+| La solicitud creada se presenta como éxito | `estilos/clases.test.jsx` › Insignias de estado de una solicitud › «la solicitud creada lleva la insignia en el dd y su sección es de éxito»; `estilos/estilos.test.js` › Mensajes de error y de éxito distinguibles › «la sección de éxito usa el borde de éxito» | `2e4edcf` |
+| Revisión de los mensajes | Revisión manual RV-07: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Adaptación a móvil
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Existen reglas para ancho móvil | `estilos/estilos.test.js` › Adaptación a móvil › «el bloque móvil da a botones y campos una altura mínima de 44 px», «el bloque móvil reorganiza la navegación», «la tarjeta se desplaza dentro de sí misma» | `pendiente` |
-| Revisión en ancho móvil | Revisiones manuales RV-08 y RV-09: verificado manualmente el 2026-11-05 | `pendiente` |
+| Existen reglas para ancho móvil | `estilos/estilos.test.js` › Adaptación a móvil › «el bloque móvil da a botones y campos una altura mínima de 44 px», «el bloque móvil reorganiza la navegación», «la tarjeta se desplaza dentro de sí misma» | `2e4edcf` |
+| Revisión en ancho móvil | Revisiones manuales RV-08 y RV-09: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Contraste suficiente
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Contraste de texto | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «texto %s sobre %s alcanza 4,5:1» (25 variantes por modo) | `pendiente` |
-| Contraste de indicadores no textuales | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «indicador %s sobre %s alcanza 3:1» (5 variantes por modo) | `pendiente` |
+| Contraste de texto | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «texto %s sobre %s alcanza 4,5:1» (25 variantes por modo) | `2e4edcf` |
+| Contraste de indicadores no textuales | `estilos/estilos.test.js` › Contraste suficiente › modo %s › «indicador %s sobre %s alcanza 3:1» (5 variantes por modo) | `2e4edcf` |
 
 ### Requisito: Foco visible y movimiento reducido
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Indicador de foco global | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «la regla :focus-visible declara outline con --color-foco», «ninguna regla suprime el contorno de foco» | `pendiente` |
-| Movimiento reducido | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «con movimiento reducido se desactivan las transiciones» | `pendiente` |
-| Revisión del foco | Revisión manual RV-10: verificado manualmente el 2026-11-05 | `pendiente` |
+| Indicador de foco global | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «la regla :focus-visible declara outline con --color-foco», «ninguna regla suprime el contorno de foco» | `2e4edcf` |
+| Movimiento reducido | `estilos/estilos.test.js` › Foco visible y movimiento reducido › «con movimiento reducido se desactivan las transiciones» | `2e4edcf` |
+| Revisión del foco | Revisión manual RV-10: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Información no dependiente solo del color
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Revisión en escala de grises | Revisión manual RV-11: verificado manualmente el 2026-11-05 | `pendiente` |
+| Revisión en escala de grises | Revisión manual RV-11: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ### Requisito: Invariancia del DOM y de las pruebas existentes
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Las pruebas existentes pasan sin modificarlas | Comando (tareas 7.1 y 7.2): `npm test` y `git diff` respecto de `7b017bb` | `pendiente` |
-| En los componentes solo se añaden clases | Comando (tarea 7.2): `git diff --word-diff=porcelain --word-diff-regex='[A-Za-z0-9_]+\|[^[:space:]]'` respecto de `7b017bb`; ver la observación 8 | `pendiente` |
+| Las pruebas existentes pasan sin modificarlas | Comando (tareas 7.1 y 7.2): `npm test` y `git diff` respecto de `7b017bb` | `2e4edcf` |
+| En los componentes solo se añaden clases | Comando (tarea 7.2): `git diff --word-diff=porcelain --word-diff-regex='[A-Za-z0-9_]+\|[^[:space:]]'` respecto de `7b017bb`; ver la observación 8 | `2e4edcf` |
 
 ### Requisito: Alcance limitado a la presentación
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Sin cambios en el backend ni en las dependencias | Comando (tarea 7.2): `git diff --stat` respecto de `7b017bb` | `pendiente` |
-| La compilación es correcta | Comando (tarea 7.1): `npm run build` y lectura del CSS de `dist/` | `pendiente` |
+| Sin cambios en el backend ni en las dependencias | Comando (tarea 7.2): `git diff --stat` respecto de `7b017bb` | `2e4edcf` |
+| La compilación es correcta | Comando (tarea 7.1): `npm run build` y lectura del CSS de `dist/` | `2e4edcf` |
 
 ### Requisito: Lista de revisión visual manual
 
 | Escenario | Prueba | Commit |
 |---|---|---|
-| Revisión de cabecera, navegación y acceso | Revisiones manuales RV-01 y RV-12: verificado manualmente el 2026-11-05 | `pendiente` |
-| Revisión completa registrada | Tarea 7.4, a cargo del estudiante: verificado manualmente el 2026-11-05 | `pendiente` |
+| Revisión de cabecera, navegación y acceso | Revisiones manuales RV-01 y RV-12: verificado manualmente el 2026-11-05 | `442e4e6` |
+| Revisión completa registrada | Tarea 7.4, a cargo del estudiante: verificado manualmente el 2026-11-05 | `442e4e6` |
 
 ---
 
