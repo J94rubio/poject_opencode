@@ -84,9 +84,9 @@ export function ListadoSolicitudes() {
                   <td>{solicitud.id}</td>
                   <td>{solicitud.espacio_id}</td>
                   <td>{solicitud.solicitante_id}</td>
-                  <td>{solicitud.inicio}</td>
-                  <td>{solicitud.fin}</td>
-                  <td>{solicitud.estado}</td>
+                  <td className="fecha">{solicitud.inicio}</td>
+                  <td className="fecha">{solicitud.fin}</td>
+                  <td className={`insignia insignia-${solicitud.estado}`}>{solicitud.estado}</td>
                   <td>{solicitud.motivo_rechazo}</td>
                   <td>
                     {(puedeDecidir || puedeCancelar) && (

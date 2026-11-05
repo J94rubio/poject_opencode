@@ -37,7 +37,7 @@ export function AccionesSolicitud({ solicitud, puedeDecidir, puedeCancelar, ocup
         <label htmlFor={campo}>Motivo del rechazo</label>
         <textarea id={campo} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
         {motivoFaltante && <p role="alert">El motivo es obligatorio.</p>}
-        <button type="submit" disabled={ocupado}>
+        <button type="submit" className="boton-peligro" disabled={ocupado}>
           Confirmar rechazo
         </button>
         <button type="button" disabled={ocupado} onClick={abandonarRechazo}>
@@ -53,12 +53,13 @@ export function AccionesSolicitud({ solicitud, puedeDecidir, puedeCancelar, ocup
         <>
           <button
             type="button"
+            className="boton-primario"
             disabled={ocupado}
             onClick={() => alDecidir(solicitud.id, 'aprobar')}
           >
             Aprobar
           </button>
-          <button type="button" disabled={ocupado} onClick={() => setRechazando(true)}>
+          <button type="button" className="boton-peligro" disabled={ocupado} onClick={() => setRechazando(true)}>
             Rechazar
           </button>
         </>
@@ -66,6 +67,7 @@ export function AccionesSolicitud({ solicitud, puedeDecidir, puedeCancelar, ocup
       {puedeCancelar && (
         <button
           type="button"
+          className="boton-peligro"
           disabled={ocupado}
           onClick={() => alDecidir(solicitud.id, 'cancelar')}
         >

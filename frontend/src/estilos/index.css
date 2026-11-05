@@ -1,0 +1,9 @@
+/* Punto de entrada de los estilos (design.md de estilos-interfaz, D1). */
+@import './variables.css';
+@import './base.css';
+@import './composicion.css';
+@import './formularios.css';
+@import './botones.css';
+@import './tablas.css';
+@import './insignias.css';
+@import './mensajes.css';

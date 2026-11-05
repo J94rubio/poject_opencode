@@ -1,0 +1,60 @@
+/* Etiquetas, campos y grupos de formulario. */
+
+/* Los campos y los mensajes ocupan una línea; los botones comparten la última. */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3);
+  max-width: 34rem;
+  margin-bottom: var(--espacio-4);
+}
+
+label {
+  display: grid;
+  flex: 1 1 100%;
+  gap: var(--espacio-1);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: var(--espacio-2) var(--espacio-3);
+  font: inherit;
+  font-weight: 400;
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-m);
+}
+
+textarea {
+  flex: 1 1 100%;
+  min-height: 5rem;
+  resize: vertical;
+}
+
+form > [role="alert"] {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+/* Formulario de rechazo, dentro de una celda de la tabla. */
+td form {
+  min-width: 15rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  /* 16 px evita que el navegador móvil amplíe la página al enfocar un campo. */
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+}

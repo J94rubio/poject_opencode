@@ -79,7 +79,7 @@ export function FormularioSolicitud() {
         </button>
       </form>
       {creada && (
-        <section aria-labelledby="titulo-solicitud-creada">
+        <section className="tarjeta-exito" aria-labelledby="titulo-solicitud-creada">
           <h3 id="titulo-solicitud-creada">Solicitud creada</h3>
           <dl>
             <dt>Identificador</dt>
@@ -87,11 +87,11 @@ export function FormularioSolicitud() {
             <dt>Espacio</dt>
             <dd>{creada.espacio_id}</dd>
             <dt>Inicio (UTC)</dt>
-            <dd>{creada.inicio}</dd>
+            <dd className="fecha">{creada.inicio}</dd>
             <dt>Fin (UTC)</dt>
-            <dd>{creada.fin}</dd>
+            <dd className="fecha">{creada.fin}</dd>
             <dt>Estado</dt>
-            <dd>{creada.estado}</dd>
+            <dd className={`insignia insignia-${creada.estado}`}>{creada.estado}</dd>
           </dl>
         </section>
       )}

@@ -52,7 +52,7 @@ export function ListadoEspacios({
   return (
     <>
       {gestiona && (
-        <button type="button" onClick={alCrear}>
+        <button type="button" className="boton-primario" onClick={alCrear}>
           Nuevo espacio
         </button>
       )}
@@ -86,6 +86,7 @@ export function ListadoEspacios({
                 {gestiona && espacio.estado === 'activo' && (
                   <button
                     type="button"
+                    className="boton-peligro"
                     disabled={enProceso === espacio.id}
                     onClick={() => cambiarEstado(espacio, 'desactivar')}
                   >

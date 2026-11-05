@@ -1,0 +1,46 @@
+/* Mensajes de error y de éxito, seleccionados por su rol (design.md, D7). Además
+   del color, llevan un símbolo propio, decorativo, y un borde lateral. */
+
+[role="alert"],
+[role="status"] {
+  margin: 0 0 var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  font-weight: 500;
+  border: 1px solid;
+  border-inline-start-width: 4px;
+  border-radius: var(--radio-m);
+}
+
+[role="alert"]::before,
+[role="status"]::before {
+  margin-inline-end: var(--espacio-2);
+  font-weight: 700;
+}
+
+[role="alert"] {
+  color: var(--color-error-texto);
+  background-color: var(--color-error-fondo);
+  border-color: var(--color-error-borde);
+}
+
+[role="alert"]::before {
+  content: "✕" / "";
+}
+
+[role="status"] {
+  color: var(--color-exito-texto);
+  background-color: var(--color-exito-fondo);
+  border-color: var(--color-exito-borde);
+}
+
+[role="status"]::before {
+  content: "✓" / "";
+}
+
+/* «Solicitud creada»: mismo lenguaje que el éxito, sin alterar el texto. */
+.tarjeta-exito {
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-exito-borde);
+  border-inline-start-width: 4px;
+  border-radius: var(--radio-m);
+}

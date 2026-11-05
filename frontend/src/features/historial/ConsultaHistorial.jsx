@@ -137,10 +137,10 @@ export function ConsultaHistorial() {
             {entradas.map((entrada) => (
               <tr key={entrada.id}>
                 <td>{entrada.reserva_id}</td>
-                <td>{entrada.estado_anterior ?? '—'}</td>
-                <td>{entrada.estado_nuevo}</td>
+                <td className={entrada.estado_anterior ? `insignia insignia-${entrada.estado_anterior}` : undefined}>{entrada.estado_anterior ?? '—'}</td>
+                <td className={`insignia insignia-${entrada.estado_nuevo}`}>{entrada.estado_nuevo}</td>
                 <td>{entrada.actor_id}</td>
-                <td>{entrada.fecha_utc}</td>
+                <td className="fecha">{entrada.fecha_utc}</td>
               </tr>
             ))}
           </tbody>

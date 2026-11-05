@@ -30,7 +30,7 @@ export function ListadoUsuarios({ usuarios, alCambiarCuenta, alEditar, alRestabl
 
   return (
     <>
-      <button type="button" onClick={alCrear}>
+      <button type="button" className="boton-primario" onClick={alCrear}>
         Nueva cuenta
       </button>
       {error && <p role="alert">{error}</p>}
@@ -58,6 +58,7 @@ export function ListadoUsuarios({ usuarios, alCambiarCuenta, alEditar, alRestabl
                 {usuario.activo ? (
                   <button
                     type="button"
+                    className="boton-peligro"
                     disabled={enProceso === usuario.id}
                     onClick={() => cambiarEstado(usuario, 'desactivar')}
                   >

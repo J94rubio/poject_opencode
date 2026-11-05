@@ -1,0 +1,102 @@
+/* Variables de diseño (requisito «Variables de diseño globales» de la spec
+   estilos-interfaz). Es el único archivo con colores literales. Los colores se
+   escriben como #rrggbb para que estilos.test.js calcule su contraste. */
+
+:root {
+  color-scheme: light dark;
+
+  --color-fondo: #f4f6fb;
+  --color-superficie: #ffffff;
+  --color-fila-alterna: #f3f5fa;
+  --color-texto: #1a2233;
+  --color-texto-suave: #4f5b70;
+  --color-borde: #dde2ec;
+  --color-borde-control: #7a8599;
+  --color-foco: #2f5fd0;
+  --color-enlace: #2450b8;
+
+  --color-primario: #2f55c7;
+  --color-primario-hover: #25459f;
+  --color-primario-texto: #ffffff;
+  --color-secundario: #eef1f7;
+  --color-secundario-hover: #e0e5ef;
+  --color-secundario-texto: #1a2233;
+  --color-peligro: #b3261e;
+  --color-peligro-hover: #8f1d17;
+  --color-peligro-texto: #ffffff;
+  --color-deshabilitado: #e6e8ee;
+  --color-deshabilitado-texto: #5a6376;
+
+  --color-error-fondo: #fdecea;
+  --color-error-texto: #8c1d18;
+  --color-error-borde: #b3261e;
+  --color-exito-fondo: #e8f5ec;
+  --color-exito-texto: #14592f;
+  --color-exito-borde: #1e7a43;
+
+  --color-pendiente-texto: #8a5300;
+  --color-aprobada-texto: #14693a;
+  --color-rechazada-texto: #b3261e;
+  --color-cancelada-texto: #5a6376;
+
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-4: 1rem;
+  --espacio-5: 1.5rem;
+  --espacio-6: 2rem;
+
+  --radio-s: 0.375rem;
+  --radio-m: 0.5rem;
+  --radio-l: 0.875rem;
+  --radio-pleno: 999px;
+
+  --sombra-s: 0 1px 2px rgb(16 24 40 / 0.08);
+  --sombra-m: 0 1px 3px rgb(16 24 40 / 0.08), 0 8px 24px rgb(16 24 40 / 0.06);
+
+  --fuente-sistema: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+
+  --ancho-contenido: 75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fondo: #10141c;
+    --color-superficie: #1a202c;
+    --color-fila-alterna: #212937;
+    --color-texto: #e7ebf3;
+    --color-texto-suave: #aeb7c7;
+    --color-borde: #323b4c;
+    --color-borde-control: #7d889c;
+    --color-foco: #8fb0ff;
+    --color-enlace: #9dbaff;
+
+    --color-primario: #8fb0ff;
+    --color-primario-hover: #a9c3ff;
+    --color-primario-texto: #10141c;
+    --color-secundario: #2a3342;
+    --color-secundario-hover: #354052;
+    --color-secundario-texto: #e7ebf3;
+    --color-peligro: #ff9d94;
+    --color-peligro-hover: #ffb4ad;
+    --color-peligro-texto: #2b0a07;
+    --color-deshabilitado: #2a303c;
+    --color-deshabilitado-texto: #aeb7c7;
+
+    --color-error-fondo: #3a1714;
+    --color-error-texto: #ffc9c3;
+    --color-error-borde: #ff8a80;
+    --color-exito-fondo: #12301f;
+    --color-exito-texto: #b4ecc6;
+    --color-exito-borde: #5fcf8a;
+
+    --color-pendiente-texto: #f0bd6a;
+    --color-aprobada-texto: #7fdca0;
+    --color-rechazada-texto: #ff9d94;
+    --color-cancelada-texto: #b4bccb;
+
+    --sombra-s: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-m: 0 1px 3px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+}

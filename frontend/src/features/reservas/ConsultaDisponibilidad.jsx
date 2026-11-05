@@ -98,8 +98,8 @@ export function ConsultaDisponibilidad() {
           <tbody>
             {intervalos.map((intervalo) => (
               <tr key={`${intervalo.inicio}/${intervalo.fin}`}>
-                <td>{intervalo.inicio}</td>
-                <td>{intervalo.fin}</td>
+                <td className="fecha">{intervalo.inicio}</td>
+                <td className="fecha">{intervalo.fin}</td>
               </tr>
             ))}
           </tbody>

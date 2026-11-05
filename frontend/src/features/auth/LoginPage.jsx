@@ -38,7 +38,7 @@ export function LoginPage() {
   }
 
   return (
-    <main>
+    <main className="pagina-acceso">
       <h1>Reservas de espacios académicos</h1>
       <h2>Iniciar sesión</h2>
       <form noValidate onSubmit={alEnviar}>

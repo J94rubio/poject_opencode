@@ -1,0 +1,30 @@
+/* Estado de una solicitud: texto de color con un punto delante, sobre el mismo
+   elemento que contiene el texto (design.md, D5). El punto hereda el color, y su
+   texto alternativo vacío evita que los lectores de pantalla lo lean. */
+
+.insignia {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.insignia::before {
+  content: "●" / "";
+  margin-inline-end: var(--espacio-2);
+  font-size: 1em;
+}
+
+.insignia-pendiente {
+  color: var(--color-pendiente-texto);
+}
+
+.insignia-aprobada {
+  color: var(--color-aprobada-texto);
+}
+
+.insignia-rechazada {
+  color: var(--color-rechazada-texto);
+}
+
+.insignia-cancelada {
+  color: var(--color-cancelada-texto);
+}
